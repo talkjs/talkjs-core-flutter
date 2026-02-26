@@ -1,0 +1,3 @@
+# To generate the files from pigeon
+
+dart run pigeon --input pigeons/core_api.dart

@@ -71,6 +71,7 @@ android {
 }
 
 dependencies {
+    implementation("com.talkjs:core:0.1.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")
 }

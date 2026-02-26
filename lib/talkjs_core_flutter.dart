@@ -1,8 +1,2 @@
-
-import 'talkjs_core_flutter_platform_interface.dart';
-
-class TalkjsCoreFlutter {
-  Future<String?> getPlatformVersion() {
-    return TalkjsCoreFlutterPlatform.instance.getPlatformVersion();
-  }
-}
+export 'src/talk_session.dart';
+export 'src/user_ref.dart';
