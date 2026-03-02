@@ -25,6 +25,7 @@ import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
 import com.talkjs.core.MessageRef
 import com.talkjs.core.ParticipantRef
+import com.talkjs.core.ReactionRef
 import com.talkjs.core.TalkSession
 import com.talkjs.core.UserOnlineSubscription
 import com.talkjs.core.UserRef
@@ -161,6 +162,7 @@ private class PigeonApiImplementation : CoreHostApi {
         mutableMapOf()
     private val participants: MutableMap<Long, ParticipantRef> = mutableMapOf()
     private val messages: MutableMap<Long, MessageRef> = mutableMapOf()
+    private val reactions: MutableMap<Long, ReactionRef> = mutableMapOf()
 
     // Session
     override fun getTalkSession(options: TalkSessionOptions): Long {
@@ -898,6 +900,75 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.delete()
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun messageReaction(handle: Long, emoji: String): Long {
+        val message = messages[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid message handle $handle",
+            "",
+        )
+
+        val ref = message.reaction(emoji)
+
+        val reactionHandle = nextId
+        nextId += 1
+
+        reactions[reactionHandle] = ref
+
+        return reactionHandle
+    }
+
+    override fun reactionDeleteHandle(handle: Long) {
+        println("Kotlin: reactionDeleteHandle $handle")
+
+        reactions.remove(handle)
+    }
+
+    override fun reactionAdd(
+        handle: Long, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = reactions[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid reaction handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.add()
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun reactionRemove(
+        handle: Long, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = reactions[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid reaction handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.remove()
             callback(Result.success(Unit))
         }
     }

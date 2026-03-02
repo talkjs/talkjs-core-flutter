@@ -1,5 +1,6 @@
 import 'core.g.dart';
 import 'api.dart';
+import 'reaction_ref.dart';
 
 export 'core.g.dart' show MessageSnapshot;
 
@@ -28,6 +29,18 @@ class MessageRef {
 
   Future<void> delete() {
     return _api.messageDelete(_handle);
+  }
+
+  Future<ReactionRef> reaction(String emoji) async {
+    final handle = await _api.messageReaction(_handle, emoji);
+
+    return makeReactionRef(
+      api: _api,
+      handle: handle,
+      emoji: emoji,
+      messageId: id,
+      conversationId: conversationId,
+    );
   }
 
   MessageRef._({

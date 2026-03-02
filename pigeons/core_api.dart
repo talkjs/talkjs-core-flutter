@@ -708,6 +708,17 @@ abstract class CoreHostApi {
 
   @async
   void messageDelete(int handle);
+
+  int messageReaction(int handle, String emoji);
+
+  // Reaction
+  void reactionDeleteHandle(int handle);
+
+  @async
+  void reactionAdd(int handle);
+
+  @async
+  void reactionRemove(int handle);
 }
 
 @FlutterApi()
