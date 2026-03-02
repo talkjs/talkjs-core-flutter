@@ -564,16 +564,67 @@ class ConversationSnapshot {
   });
 }
 
+class SetParticipantParams {
+  /// The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  ConversationAccess? access;
+
+  /// When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  NotificationSettings? notify;
+
+  SetParticipantParams({this.access, this.notify});
+}
+
+class CreateParticipantParams {
+  /// The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  ConversationAccess? access;
+
+  /// When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  NotificationSettings? notify;
+
+  CreateParticipantParams({this.access, this.notify});
+}
+
+class ParticipantSnapshot {
+  /// The user who this Participant Snapshot is referring to
+  UserSnapshot user;
+
+  /// The level of access this participant has in the conversation.
+  ConversationAccess access;
+
+  /// When the participant will be notified about new messages in this conversation.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  NotificationSettings notify;
+
+  /// The date that this user joined the conversation, as a unix timestamp in milliseconds.
+  int joinedAt;
+
+  ParticipantSnapshot({
+    required this.user,
+    required this.access,
+    required this.notify,
+    required this.joinedAt,
+  });
+}
+
 @HostApi()
 abstract class CoreHostApi {
   // Session
   int getTalkSession(TalkSessionOptions options);
-  void sessionDelete(int handle);
+  void sessionDeleteHandle(int handle);
   int sessionUser(int handle, String id);
   int sessionConversation(int handle, String id);
 
   // User
-  void userDelete(int handle);
+  void userDeleteHandle(int handle);
 
   @async
   UserSnapshot? userGet(int handle);
@@ -591,15 +642,15 @@ abstract class CoreHostApi {
   int userSubscribeOnline(int handle);
 
   // UserSubscription
-  void userSubscriptionDelete(int handle);
+  void userSubscriptionDeleteHandle(int handle);
   void userSubscriptionUnsubscribe(int handle);
 
   // UserOnlineSubscription
-  void userOnlineSubscriptionDelete(int handle);
+  void userOnlineSubscriptionDeleteHandle(int handle);
   void userOnlineSubscriptionUnsubscribe(int handle);
 
   // Conversation
-  void conversationDelete(int handle);
+  void conversationDeleteHandle(int handle);
 
   @async
   ConversationSnapshot? conversationGet(int handle);
@@ -613,11 +664,34 @@ abstract class CoreHostApi {
   @async
   void conversationDeleteFields(int handle, List<String> fields);
 
+  int conversationParticipant(int handle, String user);
+
   int conversationSubscribe(int handle);
 
   // ConversationSubscription
-  void conversationSubscriptionDelete(int handle);
+  void conversationSubscriptionDeleteHandle(int handle);
   void conversationSubscriptionUnsubscribe(int handle);
+
+  // Participant
+  void participantDeleteHandle(int handle);
+
+  @async
+  ParticipantSnapshot? participantGet(int handle);
+
+  @async
+  void participantSet(int handle, SetParticipantParams data);
+
+  @async
+  void participantEdit(int handle, SetParticipantParams data);
+
+  @async
+  void participantCreateIfNotExists(int handle, CreateParticipantParams data);
+
+  @async
+  void participantDeleteFields(int handle, List<String> fields);
+
+  @async
+  void participantDelete(int handle);
 }
 
 @FlutterApi()

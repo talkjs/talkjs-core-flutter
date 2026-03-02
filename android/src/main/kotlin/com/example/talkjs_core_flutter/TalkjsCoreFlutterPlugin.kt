@@ -5,21 +5,25 @@ import ConversationSnapshot
 import CoreFlutterApi
 import CoreHostApi
 import CreateConversationParams
+import CreateParticipantParams
 import CreateUserParams
 import FlutterError
 import MessageOrigin
 import MessageSnapshot
 import MessageType
 import NotificationSettings
+import ParticipantSnapshot
 import ReactionSnapshot
 import ReferencedMessageSnapshot
 import SetConversationParams
+import SetParticipantParams
 import SetUserParams
 import TalkSessionOptions
 import UserOnlineSnapshot
 import UserSnapshot
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
+import com.talkjs.core.ParticipantRef
 import com.talkjs.core.TalkSession
 import com.talkjs.core.UserOnlineSubscription
 import com.talkjs.core.UserRef
@@ -133,6 +137,14 @@ private fun makeConversationSnapshot(snapshot: com.talkjs.core.ConversationSnaps
         lastMessageAt = snapshot.lastMessageAt,
     )
 
+private fun makeParticipantSnapshot(snapshot: com.talkjs.core.ParticipantSnapshot): ParticipantSnapshot =
+    ParticipantSnapshot(
+        user = makeUserSnapshot(snapshot.user),
+        access = makeConversationAccess(snapshot.access),
+        notify = makeNotificationSettings(snapshot.notify),
+        joinedAt = snapshot.joinedAt,
+    )
+
 private var flutterApi: CoreFlutterApi? = null
 
 private class PigeonApiImplementation : CoreHostApi {
@@ -146,6 +158,7 @@ private class PigeonApiImplementation : CoreHostApi {
     private val conversations: MutableMap<Long, ConversationRef> = mutableMapOf()
     private val conversationSubscriptions: MutableMap<Long, ConversationSubscription> =
         mutableMapOf()
+    private val participants: MutableMap<Long, ParticipantRef> = mutableMapOf()
 
     // Session
     override fun getTalkSession(options: TalkSessionOptions): Long {
@@ -177,8 +190,8 @@ private class PigeonApiImplementation : CoreHostApi {
         return handle
     }
 
-    override fun sessionDelete(handle: Long) {
-        println("Kotlin: sessionDelete $handle")
+    override fun sessionDeleteHandle(handle: Long) {
+        println("Kotlin: sessionDeleteHandle $handle")
 
         users.remove(handle)
         sessions.remove(handle)
@@ -219,8 +232,8 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     // User
-    override fun userDelete(handle: Long) {
-        println("Kotlin: userDelete $handle")
+    override fun userDeleteHandle(handle: Long) {
+        println("Kotlin: userDeleteHandle $handle")
 
         users.remove(handle)
     }
@@ -246,7 +259,6 @@ private class PigeonApiImplementation : CoreHostApi {
             val snapshot = ref.get()
             callback(Result.success(snapshot?.let { makeUserSnapshot(it) }))
         }
-
     }
 
     override fun userSet(
@@ -282,7 +294,6 @@ private class PigeonApiImplementation : CoreHostApi {
             )
             callback(Result.success(Unit))
         }
-
     }
 
     override fun userCreateIfNotExists(
@@ -396,12 +407,11 @@ private class PigeonApiImplementation : CoreHostApi {
         userOnlineSubscriptions[subscriptionHandle] = subscription
 
         return subscriptionHandle
-
     }
 
     // UserSubscription
-    override fun userSubscriptionDelete(handle: Long) {
-        println("Kotlin: userSubscriptionDelete $handle")
+    override fun userSubscriptionDeleteHandle(handle: Long) {
+        println("Kotlin: userSubscriptionDeleteHandle $handle")
 
         userSubscriptions.remove(handle)
     }
@@ -417,8 +427,8 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     // UserOnlineSubscription
-    override fun userOnlineSubscriptionDelete(handle: Long) {
-        println("Kotlin: userOnlineSubscriptionDelete $handle")
+    override fun userOnlineSubscriptionDeleteHandle(handle: Long) {
+        println("Kotlin: userOnlineSubscriptionDeleteHandle $handle")
 
         userOnlineSubscriptions.remove(handle)
     }
@@ -434,8 +444,8 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     // Conversation
-    override fun conversationDelete(handle: Long) {
-        println("Kotlin: conversationDelete $handle")
+    override fun conversationDeleteHandle(handle: Long) {
+        println("Kotlin: conversationDeleteHandle $handle")
 
         conversations.remove(handle)
     }
@@ -463,8 +473,6 @@ private class PigeonApiImplementation : CoreHostApi {
                 Result.success(snapshot?.let { makeConversationSnapshot(it) })
             )
         }
-
-
     }
 
     override fun conversationSet(
@@ -497,8 +505,6 @@ private class PigeonApiImplementation : CoreHostApi {
             )
             callback(Result.success(Unit))
         }
-
-
     }
 
     override fun conversationCreateIfNotExists(
@@ -531,7 +537,6 @@ private class PigeonApiImplementation : CoreHostApi {
             )
             callback(Result.success(Unit))
         }
-
     }
 
     override fun conversationDeleteFields(
@@ -555,7 +560,23 @@ private class PigeonApiImplementation : CoreHostApi {
             ref.deleteFields(*fields.toTypedArray())
             callback(Result.success(Unit))
         }
+    }
 
+    override fun conversationParticipant(handle: Long, user: String): Long {
+        val conversation = conversations[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation handle $handle",
+            "",
+        )
+
+        val ref = conversation.participant(user)
+
+        val participantHandle = nextId
+        nextId += 1
+
+        participants[participantHandle] = ref
+
+        return participantHandle
     }
 
     override fun conversationSubscribe(handle: Long): Long {
@@ -580,12 +601,11 @@ private class PigeonApiImplementation : CoreHostApi {
         conversationSubscriptions[subscriptionHandle] = subscription
 
         return subscriptionHandle
-
     }
 
     // ConversationSubscription
-    override fun conversationSubscriptionDelete(handle: Long) {
-        println("Kotlin: conversationSubscriptionDelete $handle")
+    override fun conversationSubscriptionDeleteHandle(handle: Long) {
+        println("Kotlin: conversationSubscriptionDeleteHandle $handle")
 
         conversationSubscriptions.remove(handle)
     }
@@ -598,6 +618,169 @@ private class PigeonApiImplementation : CoreHostApi {
         )
 
         subscription.unsubscribe()
+    }
+
+    // Participant
+    override fun participantDeleteHandle(handle: Long) {
+        println("Kotlin: participantDeleteHandle $handle")
+
+        participants.remove(handle)
+    }
+
+    override fun participantGet(
+        handle: Long, callback: (Result<ParticipantSnapshot?>) -> Unit
+    ) {
+        val ref = participants[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid participant handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val snapshot = ref.get()
+            callback(
+                Result.success(snapshot?.let { makeParticipantSnapshot(it) })
+            )
+        }
+
+    }
+
+    override fun participantSet(
+        handle: Long, data: SetParticipantParams, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = participants[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid participant handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.set(
+                com.talkjs.core.SetParticipantParams(
+                    access = data.access?.let { makeConversationAccess(it) },
+                    notify = data.notify?.let { makeNotificationSettings(it) },
+                )
+            )
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun participantEdit(
+        handle: Long, data: SetParticipantParams, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = participants[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid participant handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.edit(
+                com.talkjs.core.SetParticipantParams(
+                    access = data.access?.let { makeConversationAccess(it) },
+                    notify = data.notify?.let { makeNotificationSettings(it) },
+                )
+            )
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun participantCreateIfNotExists(
+        handle: Long, data: CreateParticipantParams, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = participants[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid participant handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.createIfNotExists(
+                com.talkjs.core.CreateParticipantParams(
+                    access = data.access?.let { makeConversationAccess(it) },
+                    notify = data.notify?.let { makeNotificationSettings(it) },
+                )
+            )
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun participantDeleteFields(
+        handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = participants[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid participant handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.deleteFields(*fields.toTypedArray())
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun participantDelete(
+        handle: Long, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = participants[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid participant handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.delete()
+            callback(Result.success(Unit))
+        }
     }
 }
 

@@ -1,12 +1,13 @@
 import 'core.g.dart';
 import 'api.dart';
+import 'participant_ref.dart';
 
 export 'core.g.dart' show CreateConversationParams, ConversationSnapshot;
 
 final Finalizer<int> _conversationSubscriptionFinalizer = Finalizer((
   handle,
 ) async {
-  await hostApi?.conversationSubscriptionDelete(handle);
+  await hostApi?.conversationSubscriptionDeleteHandle(handle);
 });
 
 class ConversationSubscription {
@@ -32,7 +33,7 @@ class ConversationSubscription {
 }
 
 final Finalizer<int> _conversationFinalizer = Finalizer((handle) async {
-  await hostApi?.conversationDelete(handle);
+  await hostApi?.conversationDeleteHandle(handle);
 });
 
 class ConversationRef {
@@ -55,6 +56,17 @@ class ConversationRef {
 
   Future<void> deleteFields(List<String> fields) {
     return _api.conversationDeleteFields(_handle, fields);
+  }
+
+  Future<ParticipantRef> participant(String user) async {
+    final handle = await _api.conversationParticipant(_handle, user);
+
+    return makeParticipantRef(
+      api: _api,
+      handle: handle,
+      userId: user,
+      conversationId: id,
+    );
   }
 
   Future<ConversationSubscription> subscribe(

@@ -38,7 +38,7 @@ class TalkSession {
 }
 
 final Finalizer<int> _sessionFinalizer = Finalizer((handle) async {
-  await hostApi?.sessionDelete(handle);
+  await hostApi?.sessionDeleteHandle(handle);
 });
 
 Future<TalkSession> getTalkSession(TalkSessionOptions options) async {

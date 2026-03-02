@@ -1128,6 +1128,155 @@ class ConversationSnapshot {
   int get hashCode => Object.hashAll(_toList());
 }
 
+class SetParticipantParams {
+  SetParticipantParams({this.access, this.notify});
+
+  /// The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  ConversationAccess? access;
+
+  /// When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  NotificationSettings? notify;
+
+  List<Object?> _toList() {
+    return <Object?>[access, notify];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static SetParticipantParams decode(Object result) {
+    result as List<Object?>;
+    return SetParticipantParams(
+      access: result[0] as ConversationAccess?,
+      notify: result[1] as NotificationSettings?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SetParticipantParams || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class CreateParticipantParams {
+  CreateParticipantParams({this.access, this.notify});
+
+  /// The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  ConversationAccess? access;
+
+  /// When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  NotificationSettings? notify;
+
+  List<Object?> _toList() {
+    return <Object?>[access, notify];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static CreateParticipantParams decode(Object result) {
+    result as List<Object?>;
+    return CreateParticipantParams(
+      access: result[0] as ConversationAccess?,
+      notify: result[1] as NotificationSettings?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CreateParticipantParams || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class ParticipantSnapshot {
+  ParticipantSnapshot({
+    required this.user,
+    required this.access,
+    required this.notify,
+    required this.joinedAt,
+  });
+
+  /// The user who this Participant Snapshot is referring to
+  UserSnapshot user;
+
+  /// The level of access this participant has in the conversation.
+  ConversationAccess access;
+
+  /// When the participant will be notified about new messages in this conversation.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  NotificationSettings notify;
+
+  /// The date that this user joined the conversation, as a unix timestamp in milliseconds.
+  int joinedAt;
+
+  List<Object?> _toList() {
+    return <Object?>[user, access, notify, joinedAt];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static ParticipantSnapshot decode(Object result) {
+    result as List<Object?>;
+    return ParticipantSnapshot(
+      user: result[0]! as UserSnapshot,
+      access: result[1]! as ConversationAccess,
+      notify: result[2]! as NotificationSettings,
+      joinedAt: result[3]! as int,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ParticipantSnapshot || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -1183,6 +1332,15 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is ConversationSnapshot) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
+    } else if (value is SetParticipantParams) {
+      buffer.putUint8(145);
+      writeValue(buffer, value.encode());
+    } else if (value is CreateParticipantParams) {
+      buffer.putUint8(146);
+      writeValue(buffer, value.encode());
+    } else if (value is ParticipantSnapshot) {
+      buffer.putUint8(147);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -1227,6 +1385,12 @@ class _PigeonCodec extends StandardMessageCodec {
         return MessageSnapshot.decode(readValue(buffer)!);
       case 144:
         return ConversationSnapshot.decode(readValue(buffer)!);
+      case 145:
+        return SetParticipantParams.decode(readValue(buffer)!);
+      case 146:
+        return CreateParticipantParams.decode(readValue(buffer)!);
+      case 147:
+        return ParticipantSnapshot.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -1280,9 +1444,9 @@ class CoreHostApi {
     }
   }
 
-  Future<void> sessionDelete(int handle) async {
+  Future<void> sessionDeleteHandle(int handle) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionDelete$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionDeleteHandle$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1365,9 +1529,9 @@ class CoreHostApi {
     }
   }
 
-  Future<void> userDelete(int handle) async {
+  Future<void> userDeleteHandle(int handle) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.userDelete$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.userDeleteHandle$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1550,9 +1714,9 @@ class CoreHostApi {
     }
   }
 
-  Future<void> userSubscriptionDelete(int handle) async {
+  Future<void> userSubscriptionDeleteHandle(int handle) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.userSubscriptionDelete$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.userSubscriptionDeleteHandle$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1600,9 +1764,9 @@ class CoreHostApi {
     }
   }
 
-  Future<void> userOnlineSubscriptionDelete(int handle) async {
+  Future<void> userOnlineSubscriptionDeleteHandle(int handle) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.userOnlineSubscriptionDelete$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.userOnlineSubscriptionDeleteHandle$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1650,9 +1814,9 @@ class CoreHostApi {
     }
   }
 
-  Future<void> conversationDelete(int handle) async {
+  Future<void> conversationDeleteHandle(int handle) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationDelete$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationDeleteHandle$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1778,6 +1942,36 @@ class CoreHostApi {
     }
   }
 
+  Future<int> conversationParticipant(int handle, String user) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationParticipant$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, user],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
   Future<int> conversationSubscribe(int handle) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$pigeonVar_messageChannelSuffix';
@@ -1808,9 +2002,9 @@ class CoreHostApi {
     }
   }
 
-  Future<void> conversationSubscriptionDelete(int handle) async {
+  Future<void> conversationSubscriptionDeleteHandle(int handle) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionDelete$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionDeleteHandle$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1836,6 +2030,184 @@ class CoreHostApi {
   Future<void> conversationSubscriptionUnsubscribe(int handle) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionUnsubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantDeleteHandle(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantDeleteHandle$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<ParticipantSnapshot?> participantGet(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantGet$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return (pigeonVar_replyList[0] as ParticipantSnapshot?);
+    }
+  }
+
+  Future<void> participantSet(int handle, SetParticipantParams data) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantSet$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantEdit(int handle, SetParticipantParams data) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantEdit$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantCreateIfNotExists(
+    int handle,
+    CreateParticipantParams data,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantCreateIfNotExists$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantDeleteFields(int handle, List<String> fields) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantDeleteFields$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, fields],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantDelete(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantDelete$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

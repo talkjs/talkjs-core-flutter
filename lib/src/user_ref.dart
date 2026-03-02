@@ -4,7 +4,7 @@ import 'api.dart';
 export 'core.g.dart' show CreateUserParams, UserSnapshot;
 
 final Finalizer<int> _userSubscriptionFinalizer = Finalizer((handle) async {
-  await hostApi?.userSubscriptionDelete(handle);
+  await hostApi?.userSubscriptionDeleteHandle(handle);
 });
 
 class UserSubscription {
@@ -32,7 +32,7 @@ class UserSubscription {
 final Finalizer<int> _userOnlineSubscriptionFinalizer = Finalizer((
   handle,
 ) async {
-  await hostApi?.userOnlineSubscriptionDelete(handle);
+  await hostApi?.userOnlineSubscriptionDeleteHandle(handle);
 });
 
 class UserOnlineSubscription {
@@ -58,7 +58,7 @@ class UserOnlineSubscription {
 }
 
 final Finalizer<int> _userFinalizer = Finalizer((handle) async {
-  await hostApi?.userDelete(handle);
+  await hostApi?.userDeleteHandle(handle);
 });
 
 class UserRef {
