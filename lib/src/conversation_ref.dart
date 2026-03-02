@@ -1,8 +1,10 @@
 import 'core.g.dart';
 import 'api.dart';
 import 'participant_ref.dart';
+import 'message_ref.dart';
 
-export 'core.g.dart' show CreateConversationParams, ConversationSnapshot;
+export 'core.g.dart'
+    show CreateConversationParams, SetConversationParams, ConversationSnapshot;
 
 final Finalizer<int> _conversationSubscriptionFinalizer = Finalizer((
   handle,
@@ -65,6 +67,17 @@ class ConversationRef {
       api: _api,
       handle: handle,
       userId: user,
+      conversationId: id,
+    );
+  }
+
+  Future<MessageRef> message(String messageId) async {
+    final handle = await _api.conversationMessage(_handle, messageId);
+
+    return makeMessageRef(
+      api: _api,
+      handle: handle,
+      id: messageId,
       conversationId: id,
     );
   }

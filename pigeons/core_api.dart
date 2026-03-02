@@ -665,6 +665,7 @@ abstract class CoreHostApi {
   void conversationDeleteFields(int handle, List<String> fields);
 
   int conversationParticipant(int handle, String user);
+  int conversationMessage(int handle, String messageId);
 
   int conversationSubscribe(int handle);
 
@@ -692,6 +693,21 @@ abstract class CoreHostApi {
 
   @async
   void participantDelete(int handle);
+
+  // Message
+  void messageDeleteHandle(int handle);
+
+  @async
+  MessageSnapshot? messageGet(int handle);
+
+  @async
+  void messageEdit(int handle, String params);
+
+  @async
+  void messageDeleteFields(int handle, List<String> fields);
+
+  @async
+  void messageDelete(int handle);
 }
 
 @FlutterApi()

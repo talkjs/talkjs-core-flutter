@@ -23,6 +23,7 @@ import UserOnlineSnapshot
 import UserSnapshot
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
+import com.talkjs.core.MessageRef
 import com.talkjs.core.ParticipantRef
 import com.talkjs.core.TalkSession
 import com.talkjs.core.UserOnlineSubscription
@@ -159,6 +160,7 @@ private class PigeonApiImplementation : CoreHostApi {
     private val conversationSubscriptions: MutableMap<Long, ConversationSubscription> =
         mutableMapOf()
     private val participants: MutableMap<Long, ParticipantRef> = mutableMapOf()
+    private val messages: MutableMap<Long, MessageRef> = mutableMapOf()
 
     // Session
     override fun getTalkSession(options: TalkSessionOptions): Long {
@@ -579,6 +581,24 @@ private class PigeonApiImplementation : CoreHostApi {
         return participantHandle
     }
 
+    override fun conversationMessage(handle: Long, messageId: String): Long {
+        val conversation = conversations[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation handle $handle",
+            "",
+        )
+
+        val ref = conversation.message(messageId)
+
+        val messageHandle = nextId
+        nextId += 1
+
+        messages[messageHandle] = ref
+
+        return messageHandle
+
+    }
+
     override fun conversationSubscribe(handle: Long): Long {
         val ref = conversations[handle] ?: throw FlutterError(
             "null-error",
@@ -650,7 +670,6 @@ private class PigeonApiImplementation : CoreHostApi {
                 Result.success(snapshot?.let { makeParticipantSnapshot(it) })
             )
         }
-
     }
 
     override fun participantSet(
@@ -770,6 +789,106 @@ private class PigeonApiImplementation : CoreHostApi {
                     FlutterError(
                         "null-error",
                         "Invalid participant handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.delete()
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun messageDeleteHandle(handle: Long) {
+        println("Kotlin: messageDeleteHandle $handle")
+
+        messages.remove(handle)
+    }
+
+    override fun messageGet(
+        handle: Long, callback: (Result<MessageSnapshot?>) -> Unit
+    ) {
+        val ref = messages[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid message handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val snapshot = ref.get()
+            callback(
+                Result.success(snapshot?.let { makeMessageSnapshot(it) })
+            )
+        }
+    }
+
+    override fun messageEdit(
+        handle: Long, params: String, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = messages[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid message handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.edit(params)
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun messageDeleteFields(
+        handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = messages[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid message handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.deleteFields(*fields.toTypedArray())
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun messageDelete(
+        handle: Long, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = messages[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid message handle $handle",
                         "",
                     )
                 )

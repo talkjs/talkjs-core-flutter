@@ -1350,6 +1350,7 @@ interface CoreHostApi {
   fun conversationCreateIfNotExists(handle: Long, data: CreateConversationParams, callback: (Result<Unit>) -> Unit)
   fun conversationDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun conversationParticipant(handle: Long, user: String): Long
+  fun conversationMessage(handle: Long, messageId: String): Long
   fun conversationSubscribe(handle: Long): Long
   fun conversationSubscriptionDeleteHandle(handle: Long)
   fun conversationSubscriptionUnsubscribe(handle: Long)
@@ -1360,6 +1361,11 @@ interface CoreHostApi {
   fun participantCreateIfNotExists(handle: Long, data: CreateParticipantParams, callback: (Result<Unit>) -> Unit)
   fun participantDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun participantDelete(handle: Long, callback: (Result<Unit>) -> Unit)
+  fun messageDeleteHandle(handle: Long)
+  fun messageGet(handle: Long, callback: (Result<MessageSnapshot?>) -> Unit)
+  fun messageEdit(handle: Long, params: String, callback: (Result<Unit>) -> Unit)
+  fun messageDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
+  fun messageDelete(handle: Long, callback: (Result<Unit>) -> Unit)
 
   companion object {
     /** The codec used by CoreHostApi. */
@@ -1762,6 +1768,24 @@ interface CoreHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationMessage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val messageIdArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.conversationMessage(handleArg, messageIdArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -1939,6 +1963,103 @@ interface CoreHostApi {
             val args = message as List<Any?>
             val handleArg = args[0] as Long
             api.participantDelete(handleArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageDeleteHandle$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.messageDeleteHandle(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageGet$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            api.messageGet(handleArg) { result: Result<MessageSnapshot?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEdit$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val paramsArg = args[1] as String
+            api.messageEdit(handleArg, paramsArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageDeleteFields$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val fieldsArg = args[1] as List<String>
+            api.messageDeleteFields(handleArg, fieldsArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageDelete$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            api.messageDelete(handleArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

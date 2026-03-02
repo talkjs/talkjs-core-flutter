@@ -1,7 +1,7 @@
 import 'core.g.dart';
 import 'api.dart';
 
-export 'core.g.dart' show CreateUserParams, UserSnapshot;
+export 'core.g.dart' show CreateUserParams, SetUserParams, UserSnapshot;
 
 final Finalizer<int> _userSubscriptionFinalizer = Finalizer((handle) async {
   await hostApi?.userSubscriptionDeleteHandle(handle);

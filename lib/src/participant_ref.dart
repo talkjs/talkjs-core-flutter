@@ -1,7 +1,8 @@
 import 'core.g.dart';
 import 'api.dart';
 
-export 'core.g.dart' show CreateParticipantParams;
+export 'core.g.dart'
+    show CreateParticipantParams, SetParticipantParams, ParticipantSnapshot;
 
 final Finalizer<int> _participantFinalizer = Finalizer((handle) async {
   await hostApi?.participantDeleteHandle(handle);
