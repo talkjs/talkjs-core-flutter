@@ -67,6 +67,14 @@ class UserRef {
 
   final String id;
 
+  Future<UserSnapshot?> get() {
+    return _api.userGet(_handle);
+  }
+
+  Future<void> set(SetUserParams data) {
+    return _api.userSet(_handle, data);
+  }
+
   Future<void> createIfNotExists(CreateUserParams data) {
     return _api.userCreateIfNotExists(_handle, data);
   }

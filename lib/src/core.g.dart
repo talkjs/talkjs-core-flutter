@@ -47,6 +47,14 @@ bool _deepEquals(Object? a, Object? b) {
   return a == b;
 }
 
+enum ConversationAccess { read, readWrite }
+
+enum NotificationSettings { yes, no, mentionsOnly }
+
+enum MessageType { userMessage, systemMessage }
+
+enum MessageOrigin { web, rest, import, email }
+
 class ApiUrlOptions {
   ApiUrlOptions({
     required this.realtimeWsApiUrl,
@@ -532,6 +540,594 @@ class UserOnlineSnapshot {
   int get hashCode => Object.hashAll(_toList());
 }
 
+class CreateConversationParams {
+  CreateConversationParams({
+    this.subject,
+    this.photoUrl,
+    this.welcomeMessages,
+    this.custom,
+    this.access,
+    this.notify,
+  });
+
+  /// The conversation subject to display in the chat header.
+  /// Default = no subject, list participant names instead
+  String? subject;
+
+  /// The URL for the conversation photo to display in the chat header.
+  /// Default = no photo, show a placeholder image.
+  String? photoUrl;
+
+  /// System messages which are sent at the beginning of a conversation.
+  /// Default = no messages.
+  List<String>? welcomeMessages;
+
+  /// Custom metadata you have set on the conversation.
+  /// Default = no custom metadata
+  Map<String, String>? custom;
+
+  /// Your access to the conversation.
+  /// Default = `READ_WRITE` access.
+  ConversationAccess? access;
+
+  /// Your notification settings.
+  /// Default = `TRUE`
+  NotificationSettings? notify;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access,
+      notify,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static CreateConversationParams decode(Object result) {
+    result as List<Object?>;
+    return CreateConversationParams(
+      subject: result[0] as String?,
+      photoUrl: result[1] as String?,
+      welcomeMessages: (result[2] as List<Object?>?)?.cast<String>(),
+      custom: (result[3] as Map<Object?, Object?>?)?.cast<String, String>(),
+      access: result[4] as ConversationAccess?,
+      notify: result[5] as NotificationSettings?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! CreateConversationParams ||
+        other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class SetConversationParams {
+  SetConversationParams({
+    this.subject,
+    this.photoUrl,
+    this.welcomeMessages,
+    this.custom,
+    this.access,
+    this.notify,
+  });
+
+  /// The conversation subject to display in the chat header.
+  /// Default = no subject, list participant names instead.
+  String? subject;
+
+  /// The URL for the conversation photo to display in the chat header.
+  /// Default = no photo, show a placeholder image.
+  String? photoUrl;
+
+  /// System messages which are sent at the beginning of a conversation.
+  /// Default = no messages.
+  List<String>? welcomeMessages;
+
+  /// Custom metadata you have set on the conversation.
+  /// This value acts as a patch. Remove specific properties by calling [ConversationRef.deleteFields]
+  /// Default = no custom metadata
+  Map<String, String?>? custom;
+
+  /// Your access to the conversation.
+  /// Default = `READ_WRITE` access.
+  ConversationAccess? access;
+
+  /// Your notification settings.
+  /// Default = `TRUE`
+  NotificationSettings? notify;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access,
+      notify,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static SetConversationParams decode(Object result) {
+    result as List<Object?>;
+    return SetConversationParams(
+      subject: result[0] as String?,
+      photoUrl: result[1] as String?,
+      welcomeMessages: (result[2] as List<Object?>?)?.cast<String>(),
+      custom: (result[3] as Map<Object?, Object?>?)?.cast<String, String?>(),
+      access: result[4] as ConversationAccess?,
+      notify: result[5] as NotificationSettings?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SetConversationParams || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class ReactionSnapshot {
+  ReactionSnapshot({
+    required this.emoji,
+    required this.count,
+    required this.currentUserReacted,
+  });
+
+  /// Which emoji the users reacted with.
+  String emoji;
+
+  /// The number of times this emoji has been added to the message.
+  int count;
+
+  /// Whether the current user has reacted to the message with this emoji.
+  bool currentUserReacted;
+
+  List<Object?> _toList() {
+    return <Object?>[emoji, count, currentUserReacted];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static ReactionSnapshot decode(Object result) {
+    result as List<Object?>;
+    return ReactionSnapshot(
+      emoji: result[0]! as String,
+      count: result[1]! as int,
+      currentUserReacted: result[2]! as bool,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ReactionSnapshot || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class ReferencedMessageSnapshot {
+  ReferencedMessageSnapshot({
+    required this.id,
+    required this.type,
+    this.sender,
+    required this.custom,
+    required this.createdAt,
+    this.editedAt,
+    this.referencedMessageId,
+    required this.origin,
+    required this.plaintext,
+    required this.reactions,
+  });
+
+  /// The unique ID that is used to identify the message in TalkJS
+  String id;
+
+  /// Referenced messages are always `USER_MESSAGE` because you cannot reply to a system message.
+  MessageType type;
+
+  /// A snapshot of the user who sent the message.
+  /// The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
+  /// It is not a historical snapshot.
+  ///
+  /// @remarks
+  /// Guaranteed to be set, unlike in MessageSnapshot, because you cannot reference a SystemMessage
+  UserSnapshot? sender;
+
+  /// Custom metadata you have set on the message
+  Map<String, String> custom;
+
+  /// Time at which the message was sent, as a unix timestamp in milliseconds
+  int createdAt;
+
+  /// Time at which the message was last edited, as a unix timestamp in milliseconds.
+  /// `null` if the message has never been edited.
+  int? editedAt;
+
+  /// The ID of the message that this message is a reply to, or null if this message is not a reply.
+  ///
+  /// @remarks
+  /// Since this is a snapshot of a referenced message, we do not automatically expand its referenced message.
+  /// The ID of its referenced message is provided here instead.
+  String? referencedMessageId;
+
+  /// Where this message originated from:
+  ///
+  /// - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
+  ///
+  /// - `REST` = Message sent via the REST API's "send message" endpoint
+  ///
+  /// - `IMPORT` = Message sent via the REST API's "import messages" endpoint
+  ///
+  /// - `EMAIL` = Message sent by replying to an email notification
+  MessageOrigin origin;
+
+  /// The contents of the message, as a plain text string without any formatting or attachments.
+  /// Useful for showing in a conversation list or in notifications.
+  String plaintext;
+
+  /// The main body of the message, as a list of blocks that are rendered top-to-bottom.
+  /// All the emoji reactions that have been added to this message.
+  List<ReactionSnapshot> reactions;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      id,
+      type,
+      sender,
+      custom,
+      createdAt,
+      editedAt,
+      referencedMessageId,
+      origin,
+      plaintext,
+      reactions,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static ReferencedMessageSnapshot decode(Object result) {
+    result as List<Object?>;
+    return ReferencedMessageSnapshot(
+      id: result[0]! as String,
+      type: result[1]! as MessageType,
+      sender: result[2] as UserSnapshot?,
+      custom: (result[3] as Map<Object?, Object?>?)!.cast<String, String>(),
+      createdAt: result[4]! as int,
+      editedAt: result[5] as int?,
+      referencedMessageId: result[6] as String?,
+      origin: result[7]! as MessageOrigin,
+      plaintext: result[8]! as String,
+      reactions: (result[9] as List<Object?>?)!.cast<ReactionSnapshot>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ReferencedMessageSnapshot ||
+        other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class MessageSnapshot {
+  MessageSnapshot({
+    required this.id,
+    required this.type,
+    this.sender,
+    required this.custom,
+    required this.createdAt,
+    this.editedAt,
+    this.referencedMessage,
+    required this.origin,
+    required this.plaintext,
+    required this.reactions,
+  });
+
+  /// The unique ID that is used to identify the message in TalkJS
+  String id;
+
+  /// Whether this message was "from a user" or a general system message without a specific sender.
+  ///
+  /// The `sender` property is always present for `USER_MESSAGE` messages and never present for `SYSTEM_MESSAGE` messages.
+  MessageType type;
+
+  /// A snapshot of the user who sent the message, or null if it is a system message.
+  /// The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
+  /// It is not a historical snapshot.
+  UserSnapshot? sender;
+
+  /// Custom metadata you have set on the message
+  Map<String, String> custom;
+
+  /// Time at which the message was sent, as a unix timestamp in milliseconds.
+  int createdAt;
+
+  /// Time at which the message was last edited, as a unix timestamp in milliseconds.
+  /// `null` if the message has never been edited.
+  int? editedAt;
+
+  /// A snapshot of the message that this message is aa reply to, or `null` if this message is not a reply.
+  ///
+  /// Only UserMessages can reference other messages.
+  /// The referenced message snapshot does not have a `referencedMessage` field.
+  /// Instead, it has `referencedMessageId`.
+  /// This prevents TalkJS fetching an unlimited number of messages in a long chain of replies.
+  ReferencedMessageSnapshot? referencedMessage;
+
+  /// Where this message origiranted from:
+  ///
+  /// - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
+  /// - `REST` = Message sent via the REST API's "send message" endpoint
+  /// - `IMPORT` = Message sent via the REST API's "import messages" endpoint
+  /// - `EMAIL` = Message sent by replying to an email notification
+  MessageOrigin origin;
+
+  /// The contents of the message, as a plain text string without any formatting or attachments.
+  /// Useful for showing in a conversation list or in notifications.
+  String plaintext;
+
+  /// The main body of the message, as a list of blocks that are rendered top-to-bottom.
+  /// All the emoji reactions that have been added to this message.
+  ///
+  /// @remarks
+  /// There can be up to 50 different reactions on each message.
+  List<ReactionSnapshot> reactions;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      id,
+      type,
+      sender,
+      custom,
+      createdAt,
+      editedAt,
+      referencedMessage,
+      origin,
+      plaintext,
+      reactions,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static MessageSnapshot decode(Object result) {
+    result as List<Object?>;
+    return MessageSnapshot(
+      id: result[0]! as String,
+      type: result[1]! as MessageType,
+      sender: result[2] as UserSnapshot?,
+      custom: (result[3] as Map<Object?, Object?>?)!.cast<String, String>(),
+      createdAt: result[4]! as int,
+      editedAt: result[5] as int?,
+      referencedMessage: result[6] as ReferencedMessageSnapshot?,
+      origin: result[7]! as MessageOrigin,
+      plaintext: result[8]! as String,
+      reactions: (result[9] as List<Object?>?)!.cast<ReactionSnapshot>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! MessageSnapshot || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class ConversationSnapshot {
+  ConversationSnapshot({
+    required this.id,
+    this.subject,
+    this.photoUrl,
+    required this.welcomeMessages,
+    required this.custom,
+    required this.createdAt,
+    required this.joinedAt,
+    this.lastMessage,
+    required this.unreadMessageCount,
+    required this.readUntil,
+    required this.everyoneReadUntil,
+    required this.isUnread,
+    required this.access,
+    required this.notify,
+    this.lastMessageAt,
+  });
+
+  /// The ID of the conversation
+  String id;
+
+  /// Contains the conversation subject, or `null` if the conversation does not have a subject specified.
+  String? subject;
+
+  /// Contains the URL of a photo to represent the topic of the conversation or `null` if the conversation does not have a photo specified.
+  String? photoUrl;
+
+  /// One or more welcome messages that will be rendered at the start of this conversation as system messages.
+  ///
+  /// @remarks
+  /// Welcome messages are rendered in the UI as messages, but they are not real messages.
+  /// This means they do not appear when you list messages using the REST API or JS/Kotlin Data API, and you cannot reply or react to them.
+  List<String> welcomeMessages;
+
+  /// Custom metadata you have set on the conversation
+  Map<String, String> custom;
+
+  /// The date that the conversation was created, as a unix timestamp in milliseconds.
+  int createdAt;
+
+  /// The date that the current user joined the conversation, as a unix timestamp in milliseconds.
+  int joinedAt;
+
+  /// The last message sent in this conversation, or `null` if not messages have been sent.
+  MessageSnapshot? lastMessage;
+
+  /// The number of messages in this conversation that the current user hasn't read.
+  int unreadMessageCount;
+
+  /// The most recent date that the current user read the conversation.
+  ///
+  /// @remarks
+  /// This value is updated whenever you read a message in a chat UI, open an email notification, or mark the conversation as read using an API like [ConversationRef.markAsRead].
+  ///
+  /// Any messages sent after this timestamp are unread messages.
+  int readUntil;
+
+  /// Everyone in the conversation has read any messages sent on or before this date.
+  ///
+  /// @remarks
+  /// This is the minimum of all the participants' `readUntil` values.
+  /// Any messages sent on or before this timestamp should show a "read" indicator in the UI.
+  ///
+  /// This value will rarely change in very large conversations.
+  /// If just one person stops checking their messages, `everyoneReadUntil` will never update.
+  int everyoneReadUntil;
+
+  /// Whether the conversation should be considered unread.
+  ///
+  /// This can be true even when `unreadMessageCount` is zero, if the user has manually marked the conversation as unread.
+  bool isUnread;
+
+  /// The current user's permission level in this conversation.
+  ConversationAccess access;
+
+  /// The current user's notification settings for this conversation.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  NotificationSettings notify;
+
+  /// @suppress
+  /// For back-compat
+  int? lastMessageAt;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      id,
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      createdAt,
+      joinedAt,
+      lastMessage,
+      unreadMessageCount,
+      readUntil,
+      everyoneReadUntil,
+      isUnread,
+      access,
+      notify,
+      lastMessageAt,
+    ];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static ConversationSnapshot decode(Object result) {
+    result as List<Object?>;
+    return ConversationSnapshot(
+      id: result[0]! as String,
+      subject: result[1] as String?,
+      photoUrl: result[2] as String?,
+      welcomeMessages: (result[3] as List<Object?>?)!.cast<String>(),
+      custom: (result[4] as Map<Object?, Object?>?)!.cast<String, String>(),
+      createdAt: result[5]! as int,
+      joinedAt: result[6]! as int,
+      lastMessage: result[7] as MessageSnapshot?,
+      unreadMessageCount: result[8]! as int,
+      readUntil: result[9]! as int,
+      everyoneReadUntil: result[10]! as int,
+      isUnread: result[11]! as bool,
+      access: result[12]! as ConversationAccess,
+      notify: result[13]! as NotificationSettings,
+      lastMessageAt: result[14] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ConversationSnapshot || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -539,23 +1135,53 @@ class _PigeonCodec extends StandardMessageCodec {
     if (value is int) {
       buffer.putUint8(4);
       buffer.putInt64(value);
-    } else if (value is ApiUrlOptions) {
+    } else if (value is ConversationAccess) {
       buffer.putUint8(129);
-      writeValue(buffer, value.encode());
-    } else if (value is TalkSessionOptions) {
+      writeValue(buffer, value.index);
+    } else if (value is NotificationSettings) {
       buffer.putUint8(130);
-      writeValue(buffer, value.encode());
-    } else if (value is CreateUserParams) {
+      writeValue(buffer, value.index);
+    } else if (value is MessageType) {
       buffer.putUint8(131);
-      writeValue(buffer, value.encode());
-    } else if (value is SetUserParams) {
+      writeValue(buffer, value.index);
+    } else if (value is MessageOrigin) {
       buffer.putUint8(132);
-      writeValue(buffer, value.encode());
-    } else if (value is UserSnapshot) {
+      writeValue(buffer, value.index);
+    } else if (value is ApiUrlOptions) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is UserOnlineSnapshot) {
+    } else if (value is TalkSessionOptions) {
       buffer.putUint8(134);
+      writeValue(buffer, value.encode());
+    } else if (value is CreateUserParams) {
+      buffer.putUint8(135);
+      writeValue(buffer, value.encode());
+    } else if (value is SetUserParams) {
+      buffer.putUint8(136);
+      writeValue(buffer, value.encode());
+    } else if (value is UserSnapshot) {
+      buffer.putUint8(137);
+      writeValue(buffer, value.encode());
+    } else if (value is UserOnlineSnapshot) {
+      buffer.putUint8(138);
+      writeValue(buffer, value.encode());
+    } else if (value is CreateConversationParams) {
+      buffer.putUint8(139);
+      writeValue(buffer, value.encode());
+    } else if (value is SetConversationParams) {
+      buffer.putUint8(140);
+      writeValue(buffer, value.encode());
+    } else if (value is ReactionSnapshot) {
+      buffer.putUint8(141);
+      writeValue(buffer, value.encode());
+    } else if (value is ReferencedMessageSnapshot) {
+      buffer.putUint8(142);
+      writeValue(buffer, value.encode());
+    } else if (value is MessageSnapshot) {
+      buffer.putUint8(143);
+      writeValue(buffer, value.encode());
+    } else if (value is ConversationSnapshot) {
+      buffer.putUint8(144);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -566,17 +1192,41 @@ class _PigeonCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 129:
-        return ApiUrlOptions.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : ConversationAccess.values[value];
       case 130:
-        return TalkSessionOptions.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : NotificationSettings.values[value];
       case 131:
-        return CreateUserParams.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : MessageType.values[value];
       case 132:
-        return SetUserParams.decode(readValue(buffer)!);
+        final value = readValue(buffer) as int?;
+        return value == null ? null : MessageOrigin.values[value];
       case 133:
-        return UserSnapshot.decode(readValue(buffer)!);
+        return ApiUrlOptions.decode(readValue(buffer)!);
       case 134:
+        return TalkSessionOptions.decode(readValue(buffer)!);
+      case 135:
+        return CreateUserParams.decode(readValue(buffer)!);
+      case 136:
+        return SetUserParams.decode(readValue(buffer)!);
+      case 137:
+        return UserSnapshot.decode(readValue(buffer)!);
+      case 138:
         return UserOnlineSnapshot.decode(readValue(buffer)!);
+      case 139:
+        return CreateConversationParams.decode(readValue(buffer)!);
+      case 140:
+        return SetConversationParams.decode(readValue(buffer)!);
+      case 141:
+        return ReactionSnapshot.decode(readValue(buffer)!);
+      case 142:
+        return ReferencedMessageSnapshot.decode(readValue(buffer)!);
+      case 143:
+        return MessageSnapshot.decode(readValue(buffer)!);
+      case 144:
+        return ConversationSnapshot.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -658,6 +1308,36 @@ class CoreHostApi {
   Future<int> sessionUser(int handle, String id) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUser$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, id],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<int> sessionConversation(int handle, String id) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionConversation$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -969,6 +1649,214 @@ class CoreHostApi {
       return;
     }
   }
+
+  Future<void> conversationDelete(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationDelete$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<ConversationSnapshot?> conversationGet(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationGet$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return (pigeonVar_replyList[0] as ConversationSnapshot?);
+    }
+  }
+
+  Future<void> conversationSet(int handle, SetConversationParams data) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSet$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> conversationCreateIfNotExists(
+    int handle,
+    CreateConversationParams data,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationCreateIfNotExists$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> conversationDeleteFields(int handle, List<String> fields) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationDeleteFields$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, fields],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<int> conversationSubscribe(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<void> conversationSubscriptionDelete(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionDelete$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> conversationSubscriptionUnsubscribe(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionUnsubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
 }
 
 abstract class CoreFlutterApi {
@@ -977,6 +1865,8 @@ abstract class CoreFlutterApi {
   void newUserSnapshot(int handle, UserSnapshot? snapshot);
 
   void newUserOnlineSnapshot(int handle, UserOnlineSnapshot? snapshot);
+
+  void newConversationSnapshot(int handle, ConversationSnapshot? snapshot);
 
   static void setUp(
     CoreFlutterApi? api, {
@@ -1044,6 +1934,41 @@ abstract class CoreFlutterApi {
               (args[1] as UserOnlineSnapshot?);
           try {
             api.newUserOnlineSnapshot(arg_handle!, arg_snapshot);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationSnapshot$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationSnapshot was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationSnapshot was null, expected non-null int.',
+          );
+          final ConversationSnapshot? arg_snapshot =
+              (args[1] as ConversationSnapshot?);
+          try {
+            api.newConversationSnapshot(arg_handle!, arg_snapshot);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

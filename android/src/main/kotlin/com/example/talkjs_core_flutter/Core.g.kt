@@ -80,6 +80,53 @@ class FlutterError (
   val details: Any? = null
 ) : Throwable()
 
+enum class ConversationAccess(val raw: Int) {
+  READ(0),
+  READ_WRITE(1);
+
+  companion object {
+    fun ofRaw(raw: Int): ConversationAccess? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class NotificationSettings(val raw: Int) {
+  YES(0),
+  NO(1),
+  MENTIONS_ONLY(2);
+
+  companion object {
+    fun ofRaw(raw: Int): NotificationSettings? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class MessageType(val raw: Int) {
+  USER_MESSAGE(0),
+  SYSTEM_MESSAGE(1);
+
+  companion object {
+    fun ofRaw(raw: Int): MessageType? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
+enum class MessageOrigin(val raw: Int) {
+  WEB(0),
+  REST(1),
+  IMPORT(2),
+  EMAIL(3);
+
+  companion object {
+    fun ofRaw(raw: Int): MessageOrigin? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class ApiUrlOptions (
   val realtimeWsApiUrl: String,
@@ -482,37 +529,573 @@ data class UserOnlineSnapshot (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class CreateConversationParams (
+  /**
+   * The conversation subject to display in the chat header.
+   * Default = no subject, list participant names instead
+   */
+  val subject: String? = null,
+  /**
+   * The URL for the conversation photo to display in the chat header.
+   * Default = no photo, show a placeholder image.
+   */
+  val photoUrl: String? = null,
+  /**
+   * System messages which are sent at the beginning of a conversation.
+   * Default = no messages.
+   */
+  val welcomeMessages: List<String>? = null,
+  /**
+   * Custom metadata you have set on the conversation.
+   * Default = no custom metadata
+   */
+  val custom: Map<String, String>? = null,
+  /**
+   * Your access to the conversation.
+   * Default = `READ_WRITE` access.
+   */
+  val access: ConversationAccess? = null,
+  /**
+   * Your notification settings.
+   * Default = `TRUE`
+   */
+  val notify: NotificationSettings? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): CreateConversationParams {
+      val subject = pigeonVar_list[0] as String?
+      val photoUrl = pigeonVar_list[1] as String?
+      val welcomeMessages = pigeonVar_list[2] as List<String>?
+      val custom = pigeonVar_list[3] as Map<String, String>?
+      val access = pigeonVar_list[4] as ConversationAccess?
+      val notify = pigeonVar_list[5] as NotificationSettings?
+      return CreateConversationParams(subject, photoUrl, welcomeMessages, custom, access, notify)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access,
+      notify,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is CreateConversationParams) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class SetConversationParams (
+  /**
+   * The conversation subject to display in the chat header.
+   * Default = no subject, list participant names instead.
+   */
+  val subject: String? = null,
+  /**
+   * The URL for the conversation photo to display in the chat header.
+   * Default = no photo, show a placeholder image.
+   */
+  val photoUrl: String? = null,
+  /**
+   * System messages which are sent at the beginning of a conversation.
+   * Default = no messages.
+   */
+  val welcomeMessages: List<String>? = null,
+  /**
+   * Custom metadata you have set on the conversation.
+   * This value acts as a patch. Remove specific properties by calling [ConversationRef.deleteFields]
+   * Default = no custom metadata
+   */
+  val custom: Map<String, String?>? = null,
+  /**
+   * Your access to the conversation.
+   * Default = `READ_WRITE` access.
+   */
+  val access: ConversationAccess? = null,
+  /**
+   * Your notification settings.
+   * Default = `TRUE`
+   */
+  val notify: NotificationSettings? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SetConversationParams {
+      val subject = pigeonVar_list[0] as String?
+      val photoUrl = pigeonVar_list[1] as String?
+      val welcomeMessages = pigeonVar_list[2] as List<String>?
+      val custom = pigeonVar_list[3] as Map<String, String?>?
+      val access = pigeonVar_list[4] as ConversationAccess?
+      val notify = pigeonVar_list[5] as NotificationSettings?
+      return SetConversationParams(subject, photoUrl, welcomeMessages, custom, access, notify)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access,
+      notify,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SetConversationParams) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ReactionSnapshot (
+  /** Which emoji the users reacted with. */
+  val emoji: String,
+  /** The number of times this emoji has been added to the message. */
+  val count: Long,
+  /** Whether the current user has reacted to the message with this emoji. */
+  val currentUserReacted: Boolean
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ReactionSnapshot {
+      val emoji = pigeonVar_list[0] as String
+      val count = pigeonVar_list[1] as Long
+      val currentUserReacted = pigeonVar_list[2] as Boolean
+      return ReactionSnapshot(emoji, count, currentUserReacted)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      emoji,
+      count,
+      currentUserReacted,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ReactionSnapshot) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ReferencedMessageSnapshot (
+  /** The unique ID that is used to identify the message in TalkJS */
+  val id: String,
+  /** Referenced messages are always `USER_MESSAGE` because you cannot reply to a system message. */
+  val type: MessageType,
+  /**
+   * A snapshot of the user who sent the message.
+   * The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
+   * It is not a historical snapshot.
+   *
+   * @remarks
+   * Guaranteed to be set, unlike in MessageSnapshot, because you cannot reference a SystemMessage
+   */
+  val sender: UserSnapshot? = null,
+  /** Custom metadata you have set on the message */
+  val custom: Map<String, String>,
+  /** Time at which the message was sent, as a unix timestamp in milliseconds */
+  val createdAt: Long,
+  /**
+   * Time at which the message was last edited, as a unix timestamp in milliseconds.
+   * `null` if the message has never been edited.
+   */
+  val editedAt: Long? = null,
+  /**
+   * The ID of the message that this message is a reply to, or null if this message is not a reply.
+   *
+   * @remarks
+   * Since this is a snapshot of a referenced message, we do not automatically expand its referenced message.
+   * The ID of its referenced message is provided here instead.
+   */
+  val referencedMessageId: String? = null,
+  /**
+   * Where this message originated from:
+   *
+   * - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
+   *
+   * - `REST` = Message sent via the REST API's "send message" endpoint
+   *
+   * - `IMPORT` = Message sent via the REST API's "import messages" endpoint
+   *
+   * - `EMAIL` = Message sent by replying to an email notification
+   */
+  val origin: MessageOrigin,
+  /**
+   * The contents of the message, as a plain text string without any formatting or attachments.
+   * Useful for showing in a conversation list or in notifications.
+   */
+  val plaintext: String,
+  /**
+   * The main body of the message, as a list of blocks that are rendered top-to-bottom.
+   * All the emoji reactions that have been added to this message.
+   */
+  val reactions: List<ReactionSnapshot>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ReferencedMessageSnapshot {
+      val id = pigeonVar_list[0] as String
+      val type = pigeonVar_list[1] as MessageType
+      val sender = pigeonVar_list[2] as UserSnapshot?
+      val custom = pigeonVar_list[3] as Map<String, String>
+      val createdAt = pigeonVar_list[4] as Long
+      val editedAt = pigeonVar_list[5] as Long?
+      val referencedMessageId = pigeonVar_list[6] as String?
+      val origin = pigeonVar_list[7] as MessageOrigin
+      val plaintext = pigeonVar_list[8] as String
+      val reactions = pigeonVar_list[9] as List<ReactionSnapshot>
+      return ReferencedMessageSnapshot(id, type, sender, custom, createdAt, editedAt, referencedMessageId, origin, plaintext, reactions)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      type,
+      sender,
+      custom,
+      createdAt,
+      editedAt,
+      referencedMessageId,
+      origin,
+      plaintext,
+      reactions,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ReferencedMessageSnapshot) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class MessageSnapshot (
+  /** The unique ID that is used to identify the message in TalkJS */
+  val id: String,
+  /**
+   * Whether this message was "from a user" or a general system message without a specific sender.
+   *
+   * The `sender` property is always present for `USER_MESSAGE` messages and never present for `SYSTEM_MESSAGE` messages.
+   */
+  val type: MessageType,
+  /**
+   * A snapshot of the user who sent the message, or null if it is a system message.
+   * The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
+   * It is not a historical snapshot.
+   */
+  val sender: UserSnapshot? = null,
+  /** Custom metadata you have set on the message */
+  val custom: Map<String, String>,
+  /** Time at which the message was sent, as a unix timestamp in milliseconds. */
+  val createdAt: Long,
+  /**
+   * Time at which the message was last edited, as a unix timestamp in milliseconds.
+   * `null` if the message has never been edited.
+   */
+  val editedAt: Long? = null,
+  /**
+   * A snapshot of the message that this message is aa reply to, or `null` if this message is not a reply.
+   *
+   * Only UserMessages can reference other messages.
+   * The referenced message snapshot does not have a `referencedMessage` field.
+   * Instead, it has `referencedMessageId`.
+   * This prevents TalkJS fetching an unlimited number of messages in a long chain of replies.
+   */
+  val referencedMessage: ReferencedMessageSnapshot? = null,
+  /**
+   * Where this message origiranted from:
+   *
+   * - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
+   * - `REST` = Message sent via the REST API's "send message" endpoint
+   * - `IMPORT` = Message sent via the REST API's "import messages" endpoint
+   * - `EMAIL` = Message sent by replying to an email notification
+   */
+  val origin: MessageOrigin,
+  /**
+   * The contents of the message, as a plain text string without any formatting or attachments.
+   * Useful for showing in a conversation list or in notifications.
+   */
+  val plaintext: String,
+  /**
+   * The main body of the message, as a list of blocks that are rendered top-to-bottom.
+   * All the emoji reactions that have been added to this message.
+   *
+   * @remarks
+   * There can be up to 50 different reactions on each message.
+   */
+  val reactions: List<ReactionSnapshot>
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MessageSnapshot {
+      val id = pigeonVar_list[0] as String
+      val type = pigeonVar_list[1] as MessageType
+      val sender = pigeonVar_list[2] as UserSnapshot?
+      val custom = pigeonVar_list[3] as Map<String, String>
+      val createdAt = pigeonVar_list[4] as Long
+      val editedAt = pigeonVar_list[5] as Long?
+      val referencedMessage = pigeonVar_list[6] as ReferencedMessageSnapshot?
+      val origin = pigeonVar_list[7] as MessageOrigin
+      val plaintext = pigeonVar_list[8] as String
+      val reactions = pigeonVar_list[9] as List<ReactionSnapshot>
+      return MessageSnapshot(id, type, sender, custom, createdAt, editedAt, referencedMessage, origin, plaintext, reactions)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      type,
+      sender,
+      custom,
+      createdAt,
+      editedAt,
+      referencedMessage,
+      origin,
+      plaintext,
+      reactions,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is MessageSnapshot) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ConversationSnapshot (
+  /** The ID of the conversation */
+  val id: String,
+  /** Contains the conversation subject, or `null` if the conversation does not have a subject specified. */
+  val subject: String? = null,
+  /** Contains the URL of a photo to represent the topic of the conversation or `null` if the conversation does not have a photo specified. */
+  val photoUrl: String? = null,
+  /**
+   * One or more welcome messages that will be rendered at the start of this conversation as system messages.
+   *
+   * @remarks
+   * Welcome messages are rendered in the UI as messages, but they are not real messages.
+   * This means they do not appear when you list messages using the REST API or JS/Kotlin Data API, and you cannot reply or react to them.
+   */
+  val welcomeMessages: List<String>,
+  /** Custom metadata you have set on the conversation */
+  val custom: Map<String, String>,
+  /** The date that the conversation was created, as a unix timestamp in milliseconds. */
+  val createdAt: Long,
+  /** The date that the current user joined the conversation, as a unix timestamp in milliseconds. */
+  val joinedAt: Long,
+  /** The last message sent in this conversation, or `null` if not messages have been sent. */
+  val lastMessage: MessageSnapshot? = null,
+  /** The number of messages in this conversation that the current user hasn't read. */
+  val unreadMessageCount: Long,
+  /**
+   * The most recent date that the current user read the conversation.
+   *
+   * @remarks
+   * This value is updated whenever you read a message in a chat UI, open an email notification, or mark the conversation as read using an API like [ConversationRef.markAsRead].
+   *
+   * Any messages sent after this timestamp are unread messages.
+   */
+  val readUntil: Long,
+  /**
+   * Everyone in the conversation has read any messages sent on or before this date.
+   *
+   * @remarks
+   * This is the minimum of all the participants' `readUntil` values.
+   * Any messages sent on or before this timestamp should show a "read" indicator in the UI.
+   *
+   * This value will rarely change in very large conversations.
+   * If just one person stops checking their messages, `everyoneReadUntil` will never update.
+   */
+  val everyoneReadUntil: Long,
+  /**
+   * Whether the conversation should be considered unread.
+   *
+   * This can be true even when `unreadMessageCount` is zero, if the user has manually marked the conversation as unread.
+   */
+  val isUnread: Boolean,
+  /** The current user's permission level in this conversation. */
+  val access: ConversationAccess,
+  /**
+   * The current user's notification settings for this conversation.
+   *
+   * `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+   */
+  val notify: NotificationSettings,
+  /**
+   * @suppress
+   * For back-compat
+   */
+  val lastMessageAt: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ConversationSnapshot {
+      val id = pigeonVar_list[0] as String
+      val subject = pigeonVar_list[1] as String?
+      val photoUrl = pigeonVar_list[2] as String?
+      val welcomeMessages = pigeonVar_list[3] as List<String>
+      val custom = pigeonVar_list[4] as Map<String, String>
+      val createdAt = pigeonVar_list[5] as Long
+      val joinedAt = pigeonVar_list[6] as Long
+      val lastMessage = pigeonVar_list[7] as MessageSnapshot?
+      val unreadMessageCount = pigeonVar_list[8] as Long
+      val readUntil = pigeonVar_list[9] as Long
+      val everyoneReadUntil = pigeonVar_list[10] as Long
+      val isUnread = pigeonVar_list[11] as Boolean
+      val access = pigeonVar_list[12] as ConversationAccess
+      val notify = pigeonVar_list[13] as NotificationSettings
+      val lastMessageAt = pigeonVar_list[14] as Long?
+      return ConversationSnapshot(id, subject, photoUrl, welcomeMessages, custom, createdAt, joinedAt, lastMessage, unreadMessageCount, readUntil, everyoneReadUntil, isUnread, access, notify, lastMessageAt)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      id,
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      createdAt,
+      joinedAt,
+      lastMessage,
+      unreadMessageCount,
+      readUntil,
+      everyoneReadUntil,
+      isUnread,
+      access,
+      notify,
+      lastMessageAt,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ConversationSnapshot) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class CorePigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
       129.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          ApiUrlOptions.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          ConversationAccess.ofRaw(it.toInt())
         }
       }
       130.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          TalkSessionOptions.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          NotificationSettings.ofRaw(it.toInt())
         }
       }
       131.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          CreateUserParams.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          MessageType.ofRaw(it.toInt())
         }
       }
       132.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          SetUserParams.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          MessageOrigin.ofRaw(it.toInt())
         }
       }
       133.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          UserSnapshot.fromList(it)
+          ApiUrlOptions.fromList(it)
         }
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
+          TalkSessionOptions.fromList(it)
+        }
+      }
+      135.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CreateUserParams.fromList(it)
+        }
+      }
+      136.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SetUserParams.fromList(it)
+        }
+      }
+      137.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          UserSnapshot.fromList(it)
+        }
+      }
+      138.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
           UserOnlineSnapshot.fromList(it)
+        }
+      }
+      139.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          CreateConversationParams.fromList(it)
+        }
+      }
+      140.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          SetConversationParams.fromList(it)
+        }
+      }
+      141.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ReactionSnapshot.fromList(it)
+        }
+      }
+      142.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ReferencedMessageSnapshot.fromList(it)
+        }
+      }
+      143.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          MessageSnapshot.fromList(it)
+        }
+      }
+      144.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ConversationSnapshot.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -520,28 +1103,68 @@ private open class CorePigeonCodec : StandardMessageCodec() {
   }
   override fun writeValue(stream: ByteArrayOutputStream, value: Any?)   {
     when (value) {
-      is ApiUrlOptions -> {
+      is ConversationAccess -> {
         stream.write(129)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is TalkSessionOptions -> {
+      is NotificationSettings -> {
         stream.write(130)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is CreateUserParams -> {
+      is MessageType -> {
         stream.write(131)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is SetUserParams -> {
+      is MessageOrigin -> {
         stream.write(132)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw.toLong())
       }
-      is UserSnapshot -> {
+      is ApiUrlOptions -> {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is UserOnlineSnapshot -> {
+      is TalkSessionOptions -> {
         stream.write(134)
+        writeValue(stream, value.toList())
+      }
+      is CreateUserParams -> {
+        stream.write(135)
+        writeValue(stream, value.toList())
+      }
+      is SetUserParams -> {
+        stream.write(136)
+        writeValue(stream, value.toList())
+      }
+      is UserSnapshot -> {
+        stream.write(137)
+        writeValue(stream, value.toList())
+      }
+      is UserOnlineSnapshot -> {
+        stream.write(138)
+        writeValue(stream, value.toList())
+      }
+      is CreateConversationParams -> {
+        stream.write(139)
+        writeValue(stream, value.toList())
+      }
+      is SetConversationParams -> {
+        stream.write(140)
+        writeValue(stream, value.toList())
+      }
+      is ReactionSnapshot -> {
+        stream.write(141)
+        writeValue(stream, value.toList())
+      }
+      is ReferencedMessageSnapshot -> {
+        stream.write(142)
+        writeValue(stream, value.toList())
+      }
+      is MessageSnapshot -> {
+        stream.write(143)
+        writeValue(stream, value.toList())
+      }
+      is ConversationSnapshot -> {
+        stream.write(144)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -555,6 +1178,7 @@ interface CoreHostApi {
   fun getTalkSession(options: TalkSessionOptions): Long
   fun sessionDelete(handle: Long)
   fun sessionUser(handle: Long, id: String): Long
+  fun sessionConversation(handle: Long, id: String): Long
   fun userDelete(handle: Long)
   fun userGet(handle: Long, callback: (Result<UserSnapshot?>) -> Unit)
   fun userSet(handle: Long, data: SetUserParams, callback: (Result<Unit>) -> Unit)
@@ -566,6 +1190,14 @@ interface CoreHostApi {
   fun userSubscriptionUnsubscribe(handle: Long)
   fun userOnlineSubscriptionDelete(handle: Long)
   fun userOnlineSubscriptionUnsubscribe(handle: Long)
+  fun conversationDelete(handle: Long)
+  fun conversationGet(handle: Long, callback: (Result<ConversationSnapshot?>) -> Unit)
+  fun conversationSet(handle: Long, data: SetConversationParams, callback: (Result<Unit>) -> Unit)
+  fun conversationCreateIfNotExists(handle: Long, data: CreateConversationParams, callback: (Result<Unit>) -> Unit)
+  fun conversationDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
+  fun conversationSubscribe(handle: Long): Long
+  fun conversationSubscriptionDelete(handle: Long)
+  fun conversationSubscriptionUnsubscribe(handle: Long)
 
   companion object {
     /** The codec used by CoreHostApi. */
@@ -620,6 +1252,24 @@ interface CoreHostApi {
             val idArg = args[1] as String
             val wrapped: List<Any?> = try {
               listOf(api.sessionUser(handleArg, idArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionConversation$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val idArg = args[1] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.sessionConversation(handleArg, idArg))
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -833,6 +1483,157 @@ interface CoreHostApi {
           channel.setMessageHandler(null)
         }
       }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationDelete$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.conversationDelete(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationGet$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            api.conversationGet(handleArg) { result: Result<ConversationSnapshot?> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSet$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val dataArg = args[1] as SetConversationParams
+            api.conversationSet(handleArg, dataArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationCreateIfNotExists$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val dataArg = args[1] as CreateConversationParams
+            api.conversationCreateIfNotExists(handleArg, dataArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationDeleteFields$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val fieldsArg = args[1] as List<String>
+            api.conversationDeleteFields(handleArg, fieldsArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.conversationSubscribe(handleArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionDelete$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.conversationSubscriptionDelete(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionUnsubscribe$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.conversationSubscriptionUnsubscribe(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
     }
   }
 }
@@ -865,6 +1666,23 @@ class CoreFlutterApi(private val binaryMessenger: BinaryMessenger, private val m
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newUserOnlineSnapshot$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(handleArg, snapshotArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CorePigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun newConversationSnapshot(handleArg: Long, snapshotArg: ConversationSnapshot?, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationSnapshot$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(handleArg, snapshotArg)) {
       if (it is List<*>) {

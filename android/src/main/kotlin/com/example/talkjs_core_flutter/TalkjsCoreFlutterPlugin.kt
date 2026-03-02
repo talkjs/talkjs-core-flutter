@@ -1,13 +1,25 @@
 package com.example.talkjs_core_flutter
 
+import ConversationAccess
+import ConversationSnapshot
 import CoreFlutterApi
 import CoreHostApi
+import CreateConversationParams
 import CreateUserParams
 import FlutterError
+import MessageOrigin
+import MessageSnapshot
+import MessageType
+import NotificationSettings
+import ReactionSnapshot
+import ReferencedMessageSnapshot
+import SetConversationParams
 import SetUserParams
 import TalkSessionOptions
 import UserOnlineSnapshot
 import UserSnapshot
+import com.talkjs.core.ConversationRef
+import com.talkjs.core.ConversationSubscription
 import com.talkjs.core.TalkSession
 import com.talkjs.core.UserOnlineSubscription
 import com.talkjs.core.UserRef
@@ -17,6 +29,109 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+private fun makeUserSnapshot(snapshot: com.talkjs.core.UserSnapshot): UserSnapshot = UserSnapshot(
+    id = snapshot.id,
+    name = snapshot.name,
+    custom = snapshot.custom,
+    role = snapshot.role,
+    locale = snapshot.locale,
+    photoUrl = snapshot.photoUrl,
+    welcomeMessage = snapshot.welcomeMessage,
+)
+
+private fun makeMessageType(type: com.talkjs.core.MessageType): MessageType = when (type) {
+    com.talkjs.core.MessageType.USER_MESSAGE -> MessageType.USER_MESSAGE
+    com.talkjs.core.MessageType.SYSTEM_MESSAGE -> MessageType.SYSTEM_MESSAGE
+}
+
+private fun makeMessageOrigin(origin: com.talkjs.core.MessageOrigin): MessageOrigin =
+    when (origin) {
+        com.talkjs.core.MessageOrigin.WEB -> MessageOrigin.WEB
+        com.talkjs.core.MessageOrigin.REST -> MessageOrigin.REST
+        com.talkjs.core.MessageOrigin.IMPORT -> MessageOrigin.IMPORT
+        com.talkjs.core.MessageOrigin.EMAIL -> MessageOrigin.EMAIL
+    }
+
+private fun makeReactionSnapshot(snapshot: com.talkjs.core.ReactionSnapshot): ReactionSnapshot =
+    ReactionSnapshot(
+        emoji = snapshot.emoji,
+        count = snapshot.count.toLong(),
+        currentUserReacted = snapshot.currentUserReacted,
+    )
+
+private fun makeReferencedMessageSnapshot(snapshot: com.talkjs.core.ReferencedMessageSnapshot): ReferencedMessageSnapshot =
+    ReferencedMessageSnapshot(
+        id = snapshot.id,
+        type = makeMessageType(snapshot.type),
+        sender = snapshot.sender?.let { makeUserSnapshot(it) },
+        custom = snapshot.custom,
+        createdAt = snapshot.createdAt,
+        editedAt = snapshot.editedAt,
+        referencedMessageId = snapshot.referencedMessageId,
+        origin = makeMessageOrigin(snapshot.origin),
+        plaintext = snapshot.plaintext,
+        reactions = snapshot.reactions.map { makeReactionSnapshot(it) },
+    )
+
+private fun makeMessageSnapshot(snapshot: com.talkjs.core.MessageSnapshot): MessageSnapshot =
+    MessageSnapshot(
+        id = snapshot.id,
+        type = makeMessageType(snapshot.type),
+        sender = snapshot.sender?.let { makeUserSnapshot(it) },
+        custom = snapshot.custom,
+        createdAt = snapshot.createdAt,
+        editedAt = snapshot.editedAt,
+        referencedMessage = snapshot.referencedMessage?.let { makeReferencedMessageSnapshot(it) },
+        origin = makeMessageOrigin(snapshot.origin),
+        plaintext = snapshot.plaintext,
+        reactions = snapshot.reactions.map { makeReactionSnapshot(it) },
+    )
+
+private fun makeConversationAccess(access: com.talkjs.core.ConversationAccess): ConversationAccess =
+    when (access) {
+        com.talkjs.core.ConversationAccess.READ -> ConversationAccess.READ
+        com.talkjs.core.ConversationAccess.READ_WRITE -> ConversationAccess.READ_WRITE
+    }
+
+private fun makeConversationAccess(access: ConversationAccess): com.talkjs.core.ConversationAccess =
+    when (access) {
+        ConversationAccess.READ -> com.talkjs.core.ConversationAccess.READ
+        ConversationAccess.READ_WRITE -> com.talkjs.core.ConversationAccess.READ_WRITE
+    }
+
+private fun makeNotificationSettings(notify: com.talkjs.core.NotificationSettings): NotificationSettings =
+    when (notify) {
+        com.talkjs.core.NotificationSettings.TRUE -> NotificationSettings.YES
+        com.talkjs.core.NotificationSettings.FALSE -> NotificationSettings.NO
+        com.talkjs.core.NotificationSettings.MENTIONS_ONLY -> NotificationSettings.MENTIONS_ONLY
+    }
+
+private fun makeNotificationSettings(notify: NotificationSettings): com.talkjs.core.NotificationSettings =
+    when (notify) {
+        NotificationSettings.YES -> com.talkjs.core.NotificationSettings.TRUE
+        NotificationSettings.NO -> com.talkjs.core.NotificationSettings.FALSE
+        NotificationSettings.MENTIONS_ONLY -> com.talkjs.core.NotificationSettings.MENTIONS_ONLY
+    }
+
+private fun makeConversationSnapshot(snapshot: com.talkjs.core.ConversationSnapshot): ConversationSnapshot =
+    ConversationSnapshot(
+        id = snapshot.id,
+        subject = snapshot.subject,
+        photoUrl = snapshot.photoUrl,
+        welcomeMessages = snapshot.welcomeMessages,
+        custom = snapshot.custom,
+        createdAt = snapshot.createdAt,
+        joinedAt = snapshot.joinedAt,
+        lastMessage = snapshot.lastMessage?.let { makeMessageSnapshot(it) },
+        unreadMessageCount = snapshot.unreadMessageCount.toLong(),
+        readUntil = snapshot.readUntil,
+        everyoneReadUntil = snapshot.everyoneReadUntil,
+        isUnread = snapshot.isUnread,
+        access = makeConversationAccess(snapshot.access),
+        notify = makeNotificationSettings(snapshot.notify),
+        lastMessageAt = snapshot.lastMessageAt,
+    )
 
 private var flutterApi: CoreFlutterApi? = null
 
@@ -28,6 +143,9 @@ private class PigeonApiImplementation : CoreHostApi {
     private val users: MutableMap<Long, UserRef> = mutableMapOf()
     private val userSubscriptions: MutableMap<Long, UserSubscription> = mutableMapOf()
     private val userOnlineSubscriptions: MutableMap<Long, UserOnlineSubscription> = mutableMapOf()
+    private val conversations: MutableMap<Long, ConversationRef> = mutableMapOf()
+    private val conversationSubscriptions: MutableMap<Long, ConversationSubscription> =
+        mutableMapOf()
 
     // Session
     override fun getTalkSession(options: TalkSessionOptions): Long {
@@ -83,6 +201,23 @@ private class PigeonApiImplementation : CoreHostApi {
         return userHandle
     }
 
+    override fun sessionConversation(handle: Long, id: String): Long {
+        val session = sessions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid session handle $handle",
+            "",
+        )
+
+        val ref = session.conversation(id)
+
+        val conversationHandle = nextId
+        nextId += 1
+
+        conversations[conversationHandle] = ref
+
+        return conversationHandle
+    }
+
     // User
     override fun userDelete(handle: Long) {
         println("Kotlin: userDelete $handle")
@@ -109,21 +244,7 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val snapshot = ref.get()
-            callback(
-                Result.success(
-                    snapshot?.let {
-                        UserSnapshot(
-                            id = it.id,
-                            name = it.name,
-                            custom = it.custom,
-                            role = it.role,
-                            locale = it.locale,
-                            photoUrl = it.photoUrl,
-                            welcomeMessage = it.welcomeMessage,
-                        )
-                    },
-                )
-            )
+            callback(Result.success(snapshot?.let { makeUserSnapshot(it) }))
         }
 
     }
@@ -238,17 +359,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newUserSnapshot(
                     subscriptionHandle,
-                    snapshot?.let {
-                        UserSnapshot(
-                            id = it.id,
-                            name = it.name,
-                            custom = it.custom,
-                            role = it.role,
-                            locale = it.locale,
-                            photoUrl = it.photoUrl,
-                            welcomeMessage = it.welcomeMessage,
-                        )
-                    },
+                    snapshot?.let { makeUserSnapshot(it) },
                 ) {}
             }
         }
@@ -274,15 +385,7 @@ private class PigeonApiImplementation : CoreHostApi {
                     subscriptionHandle,
                     snapshot?.let {
                         UserOnlineSnapshot(
-                            user = UserSnapshot(
-                                id = it.user.id,
-                                name = it.user.name,
-                                custom = it.user.custom,
-                                role = it.user.role,
-                                locale = it.user.locale,
-                                photoUrl = it.user.photoUrl,
-                                welcomeMessage = it.user.welcomeMessage,
-                            ),
+                            user = makeUserSnapshot(it.user),
                             isConnected = it.isConnected,
                         )
                     },
@@ -324,6 +427,173 @@ private class PigeonApiImplementation : CoreHostApi {
         val subscription = userOnlineSubscriptions[handle] ?: throw FlutterError(
             "null-error",
             "Invalid user subscription handle $handle",
+            "",
+        )
+
+        subscription.unsubscribe()
+    }
+
+    // Conversation
+    override fun conversationDelete(handle: Long) {
+        println("Kotlin: conversationDelete $handle")
+
+        conversations.remove(handle)
+    }
+
+    override fun conversationGet(
+        handle: Long, callback: (Result<ConversationSnapshot?>) -> Unit
+    ) {
+        val ref = conversations[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val snapshot = ref.get()
+            callback(
+                Result.success(snapshot?.let { makeConversationSnapshot(it) })
+            )
+        }
+
+
+    }
+
+    override fun conversationSet(
+        handle: Long, data: SetConversationParams, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = conversations[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.set(
+                com.talkjs.core.SetConversationParams(
+                    subject = data.subject,
+                    photoUrl = data.photoUrl,
+                    welcomeMessages = data.welcomeMessages,
+                    custom = data.custom,
+                    access = data.access?.let { makeConversationAccess(it) },
+                    notify = data.notify?.let { makeNotificationSettings(it) },
+                )
+            )
+            callback(Result.success(Unit))
+        }
+
+
+    }
+
+    override fun conversationCreateIfNotExists(
+        handle: Long, data: CreateConversationParams, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = conversations[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.createIfNotExists(
+                com.talkjs.core.CreateConversationParams(
+                    subject = data.subject,
+                    photoUrl = data.photoUrl,
+                    welcomeMessages = data.welcomeMessages,
+                    custom = data.custom,
+                    access = data.access?.let { makeConversationAccess(it) },
+                    notify = data.notify?.let { makeNotificationSettings(it) },
+                )
+            )
+            callback(Result.success(Unit))
+        }
+
+    }
+
+    override fun conversationDeleteFields(
+        handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = conversations[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.deleteFields(*fields.toTypedArray())
+            callback(Result.success(Unit))
+        }
+
+    }
+
+    override fun conversationSubscribe(handle: Long): Long {
+        val ref = conversations[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation handle $handle",
+            "",
+        )
+
+        val subscriptionHandle = nextId
+        nextId += 1
+
+        val subscription = ref.subscribe { snapshot ->
+            scope.launch(Dispatchers.Main) {
+                flutterApi?.newConversationSnapshot(
+                    subscriptionHandle,
+                    snapshot?.let { makeConversationSnapshot(it) },
+                ) {}
+            }
+        }
+
+        conversationSubscriptions[subscriptionHandle] = subscription
+
+        return subscriptionHandle
+
+    }
+
+    // ConversationSubscription
+    override fun conversationSubscriptionDelete(handle: Long) {
+        println("Kotlin: conversationSubscriptionDelete $handle")
+
+        conversationSubscriptions.remove(handle)
+    }
+
+    override fun conversationSubscriptionUnsubscribe(handle: Long) {
+        val subscription = conversationSubscriptions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation subscription handle $handle",
             "",
         )
 

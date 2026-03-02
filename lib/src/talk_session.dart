@@ -1,6 +1,7 @@
 import 'core.g.dart';
 import 'api.dart';
 import 'user_ref.dart';
+import 'conversation_ref.dart';
 
 export 'core.g.dart' show ApiUrlOptions, TalkSessionOptions;
 
@@ -14,6 +15,12 @@ class TalkSession {
     final handle = await _api.sessionUser(_handle, id);
 
     return makeUserRef(api: _api, handle: handle, id: id);
+  }
+
+  Future<ConversationRef> conversation(String id) async {
+    final handle = await _api.sessionConversation(_handle, id);
+
+    return makeConversationRef(api: _api, handle: handle, id: id);
   }
 
   TalkSession._({
