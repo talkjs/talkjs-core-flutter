@@ -100,7 +100,7 @@ class UserRef {
   Future<UserOnlineSubscription> subscribeOnline(
     void Function(UserOnlineSnapshot? snapshot)? onSnapshot,
   ) async {
-    final handle = await _api.userSubscribe(_handle);
+    final handle = await _api.userSubscribeOnline(_handle);
 
     userOnlineSubscriptionOnSnapshots[handle] = onSnapshot;
 
