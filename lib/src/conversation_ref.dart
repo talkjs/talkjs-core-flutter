@@ -34,9 +34,97 @@ class ConversationSubscription {
       _handle = handle;
 }
 
+final Finalizer<int> _messageSubscriptionFinalizer = Finalizer((handle) async {
+  await hostApi?.messageSubscriptionDeleteHandle(handle);
+});
+
+class MessageSubscription {
+  final CoreHostApi _api;
+  final int _handle;
+
+  // I have no idea on how to port state
+  //SubscriptionState state;
+
+  //Completer<SubscriptionState> connected;
+
+  //Completer<SubscriptionState> terminated;
+
+  Future<void> loadMore([int? count]) {
+    return _api.messageSubscriptionLoadMore(_handle, count);
+  }
+
+  Future<void> unsubscribe() {
+    messageSubscriptionOnSnapshots.remove(_handle);
+
+    return _api.messageSubscriptionUnsubscribe(_handle);
+  }
+
+  MessageSubscription._({required CoreHostApi api, required int handle})
+    : _api = api,
+      _handle = handle;
+}
+
+final Finalizer<int> _participantSubscriptionFinalizer = Finalizer((
+  handle,
+) async {
+  await hostApi?.participantSubscriptionDeleteHandle(handle);
+});
+
+class ParticipantSubscription {
+  final CoreHostApi _api;
+  final int _handle;
+
+  // I have no idea on how to port state
+  //SubscriptionState state;
+
+  //Completer<SubscriptionState> connected;
+
+  //Completer<SubscriptionState> terminated;
+
+  Future<void> loadMore([int? count]) {
+    return _api.participantSubscriptionLoadMore(_handle, count);
+  }
+
+  Future<void> unsubscribe() {
+    participantSubscriptionOnSnapshots.remove(_handle);
+
+    return _api.participantSubscriptionUnsubscribe(_handle);
+  }
+
+  ParticipantSubscription._({required CoreHostApi api, required int handle})
+    : _api = api,
+      _handle = handle;
+}
+
 final Finalizer<int> _conversationFinalizer = Finalizer((handle) async {
   await hostApi?.conversationDeleteHandle(handle);
 });
+
+final Finalizer<int> _typingSubscriptionFinalizer = Finalizer((handle) async {
+  await hostApi?.typingSubscriptionDeleteHandle(handle);
+});
+
+class TypingSubscription {
+  final CoreHostApi _api;
+  final int _handle;
+
+  // I have no idea on how to port state
+  //SubscriptionState state;
+
+  //Completer<SubscriptionState> connected;
+
+  //Completer<SubscriptionState> terminated;
+
+  Future<void> unsubscribe() {
+    typingSubscriptionOnSnapshots.remove(_handle);
+
+    return _api.typingSubscriptionUnsubscribe(_handle);
+  }
+
+  TypingSubscription._({required CoreHostApi api, required int handle})
+    : _api = api,
+      _handle = handle;
+}
 
 class ConversationRef {
   final CoreHostApi _api;
@@ -58,6 +146,18 @@ class ConversationRef {
 
   Future<void> deleteFields(List<String> fields) {
     return _api.conversationDeleteFields(_handle, fields);
+  }
+
+  Future<void> markAsRead() {
+    return _api.conversationMarkAsRead(_handle);
+  }
+
+  Future<void> markAsUnread() {
+    return _api.conversationMarkAsUnread(_handle);
+  }
+
+  Future<void> markAsTyping() {
+    return _api.conversationMarkAsTyping(_handle);
   }
 
   Future<ParticipantRef> participant(String user) async {
@@ -82,9 +182,20 @@ class ConversationRef {
     );
   }
 
-  Future<ConversationSubscription> subscribe(
+  Future<MessageRef> send(String params) async {
+    final refParams = await _api.conversationSend(_handle, params);
+
+    return makeMessageRef(
+      api: _api,
+      handle: refParams.handle,
+      id: refParams.id,
+      conversationId: refParams.conversationId,
+    );
+  }
+
+  Future<ConversationSubscription> subscribe([
     void Function(ConversationSnapshot? snapshot)? onSnapshot,
-  ) async {
+  ]) async {
     final handle = await _api.conversationSubscribe(_handle);
 
     conversationSubscriptionOnSnapshots[handle] = onSnapshot;
@@ -92,6 +203,49 @@ class ConversationRef {
     final subscription = ConversationSubscription._(api: _api, handle: handle);
 
     _conversationSubscriptionFinalizer.attach(subscription, handle);
+
+    return subscription;
+  }
+
+  Future<MessageSubscription> subscribeMessages([
+    void Function(List<MessageSnapshot>? snapshot, bool loadedAll)? onSnapshot,
+  ]) async {
+    final handle = await _api.conversationSubscribeMessages(_handle);
+
+    messageSubscriptionOnSnapshots[handle] = onSnapshot;
+
+    final subscription = MessageSubscription._(api: _api, handle: handle);
+
+    _messageSubscriptionFinalizer.attach(subscription, handle);
+
+    return subscription;
+  }
+
+  Future<ParticipantSubscription> subscribeParticipants([
+    void Function(List<ParticipantSnapshot>? snapshot, bool loadedAll)?
+    onSnapshot,
+  ]) async {
+    final handle = await _api.conversationSubscribeParticipants(_handle);
+
+    participantSubscriptionOnSnapshots[handle] = onSnapshot;
+
+    final subscription = ParticipantSubscription._(api: _api, handle: handle);
+
+    _participantSubscriptionFinalizer.attach(subscription, handle);
+
+    return subscription;
+  }
+
+  Future<TypingSubscription> subscribeTyping([
+    void Function(TypingSnapshot? snapshot)? onSnapshot,
+  ]) async {
+    final handle = await _api.conversationSubscribeTyping(_handle);
+
+    typingSubscriptionOnSnapshots[handle] = onSnapshot;
+
+    final subscription = TypingSubscription._(api: _api, handle: handle);
+
+    _typingSubscriptionFinalizer.attach(subscription, handle);
 
     return subscription;
   }

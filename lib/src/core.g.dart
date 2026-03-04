@@ -981,6 +981,53 @@ class MessageSnapshot {
   int get hashCode => Object.hashAll(_toList());
 }
 
+class MessageRefParams {
+  MessageRefParams({
+    required this.handle,
+    required this.id,
+    required this.conversationId,
+  });
+
+  int handle;
+
+  String id;
+
+  String conversationId;
+
+  List<Object?> _toList() {
+    return <Object?>[handle, id, conversationId];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static MessageRefParams decode(Object result) {
+    result as List<Object?>;
+    return MessageRefParams(
+      handle: result[0]! as int,
+      id: result[1]! as String,
+      conversationId: result[2]! as String,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! MessageRefParams || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
 class ConversationSnapshot {
   ConversationSnapshot({
     required this.id,
@@ -1277,6 +1324,56 @@ class ParticipantSnapshot {
   int get hashCode => Object.hashAll(_toList());
 }
 
+class TypingSnapshot {
+  TypingSnapshot({required this.many, this.users});
+
+  /// Check this to differentiate between few people are typing (`false`) and many people are typing (`true`).
+  ///
+  /// @remarks
+  /// When `false`, you can see the list of users who are typing in the `users` property.
+  bool many;
+
+  /// The users who are currently typing in this conversation.
+  ///
+  /// @remarks
+  /// The list is in chronological order, starting with the users who have been typing the longest.
+  /// The current user is never contained in the list, only other users.
+  /// When the `many` property is `true`, this property is `null`.
+  List<UserSnapshot>? users;
+
+  List<Object?> _toList() {
+    return <Object?>[many, users];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static TypingSnapshot decode(Object result) {
+    result as List<Object?>;
+    return TypingSnapshot(
+      many: result[0]! as bool,
+      users: (result[1] as List<Object?>?)?.cast<UserSnapshot>(),
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! TypingSnapshot || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -1329,17 +1426,23 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is MessageSnapshot) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
-    } else if (value is ConversationSnapshot) {
+    } else if (value is MessageRefParams) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    } else if (value is SetParticipantParams) {
+    } else if (value is ConversationSnapshot) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    } else if (value is CreateParticipantParams) {
+    } else if (value is SetParticipantParams) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
-    } else if (value is ParticipantSnapshot) {
+    } else if (value is CreateParticipantParams) {
       buffer.putUint8(147);
+      writeValue(buffer, value.encode());
+    } else if (value is ParticipantSnapshot) {
+      buffer.putUint8(148);
+      writeValue(buffer, value.encode());
+    } else if (value is TypingSnapshot) {
+      buffer.putUint8(149);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1384,13 +1487,17 @@ class _PigeonCodec extends StandardMessageCodec {
       case 143:
         return MessageSnapshot.decode(readValue(buffer)!);
       case 144:
-        return ConversationSnapshot.decode(readValue(buffer)!);
+        return MessageRefParams.decode(readValue(buffer)!);
       case 145:
-        return SetParticipantParams.decode(readValue(buffer)!);
+        return ConversationSnapshot.decode(readValue(buffer)!);
       case 146:
-        return CreateParticipantParams.decode(readValue(buffer)!);
+        return SetParticipantParams.decode(readValue(buffer)!);
       case 147:
+        return CreateParticipantParams.decode(readValue(buffer)!);
+      case 148:
         return ParticipantSnapshot.decode(readValue(buffer)!);
+      case 149:
+        return TypingSnapshot.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -1526,6 +1633,114 @@ class CoreHostApi {
       );
     } else {
       return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<int> sessionSubscribeConversations(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionSubscribeConversations$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<void> conversationListSubscriptionDeleteHandle(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationListSubscriptionDeleteHandle$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> conversationListSubscriptionLoadMore(
+    int handle,
+    int? count,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationListSubscriptionLoadMore$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, count],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> conversationListSubscriptionUnsubscribe(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationListSubscriptionUnsubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
     }
   }
 
@@ -1942,6 +2157,81 @@ class CoreHostApi {
     }
   }
 
+  Future<void> conversationMarkAsRead(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationMarkAsRead$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> conversationMarkAsUnread(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationMarkAsUnread$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> conversationMarkAsTyping(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationMarkAsTyping$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
   Future<int> conversationParticipant(int handle, String user) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationParticipant$pigeonVar_messageChannelSuffix';
@@ -2002,9 +2292,129 @@ class CoreHostApi {
     }
   }
 
+  Future<MessageRefParams> conversationSend(int handle, String params) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSend$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, params],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as MessageRefParams?)!;
+    }
+  }
+
   Future<int> conversationSubscribe(int handle) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<int> conversationSubscribeMessages(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribeMessages$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<int> conversationSubscribeParticipants(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribeParticipants$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<int> conversationSubscribeTyping(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribeTyping$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -2060,6 +2470,206 @@ class CoreHostApi {
   Future<void> conversationSubscriptionUnsubscribe(int handle) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscriptionUnsubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> messageSubscriptionDeleteHandle(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageSubscriptionDeleteHandle$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> messageSubscriptionLoadMore(int handle, int? count) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageSubscriptionLoadMore$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, count],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> messageSubscriptionUnsubscribe(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageSubscriptionUnsubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantSubscriptionDeleteHandle(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantSubscriptionDeleteHandle$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantSubscriptionLoadMore(int handle, int? count) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantSubscriptionLoadMore$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, count],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> participantSubscriptionUnsubscribe(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantSubscriptionUnsubscribe$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> typingSubscriptionDeleteHandle(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.typingSubscriptionDeleteHandle$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> typingSubscriptionUnsubscribe(int handle) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.typingSubscriptionUnsubscribe$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -2500,6 +3110,26 @@ abstract class CoreFlutterApi {
 
   void newConversationSnapshot(int handle, ConversationSnapshot? snapshot);
 
+  void newConversationListSnapshot(
+    int handle,
+    List<ConversationSnapshot> snapshot,
+    bool loadedAll,
+  );
+
+  void newMessageSnapshot(
+    int handle,
+    List<MessageSnapshot>? snapshot,
+    bool loadedAll,
+  );
+
+  void newParticipantSnapshot(
+    int handle,
+    List<ParticipantSnapshot>? snapshot,
+    bool loadedAll,
+  );
+
+  void newTypingSnapshot(int handle, TypingSnapshot? snapshot);
+
   static void setUp(
     CoreFlutterApi? api, {
     BinaryMessenger? binaryMessenger,
@@ -2601,6 +3231,172 @@ abstract class CoreFlutterApi {
               (args[1] as ConversationSnapshot?);
           try {
             api.newConversationSnapshot(arg_handle!, arg_snapshot);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot was null, expected non-null int.',
+          );
+          final List<ConversationSnapshot>? arg_snapshot =
+              (args[1] as List<Object?>?)?.cast<ConversationSnapshot>();
+          assert(
+            arg_snapshot != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot was null, expected non-null List<ConversationSnapshot>.',
+          );
+          final bool? arg_loadedAll = (args[2] as bool?);
+          assert(
+            arg_loadedAll != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot was null, expected non-null bool.',
+          );
+          try {
+            api.newConversationListSnapshot(
+              arg_handle!,
+              arg_snapshot!,
+              arg_loadedAll!,
+            );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newMessageSnapshot$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newMessageSnapshot was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newMessageSnapshot was null, expected non-null int.',
+          );
+          final List<MessageSnapshot>? arg_snapshot =
+              (args[1] as List<Object?>?)?.cast<MessageSnapshot>();
+          final bool? arg_loadedAll = (args[2] as bool?);
+          assert(
+            arg_loadedAll != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newMessageSnapshot was null, expected non-null bool.',
+          );
+          try {
+            api.newMessageSnapshot(arg_handle!, arg_snapshot, arg_loadedAll!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newParticipantSnapshot$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newParticipantSnapshot was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newParticipantSnapshot was null, expected non-null int.',
+          );
+          final List<ParticipantSnapshot>? arg_snapshot =
+              (args[1] as List<Object?>?)?.cast<ParticipantSnapshot>();
+          final bool? arg_loadedAll = (args[2] as bool?);
+          assert(
+            arg_loadedAll != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newParticipantSnapshot was null, expected non-null bool.',
+          );
+          try {
+            api.newParticipantSnapshot(
+              arg_handle!,
+              arg_snapshot,
+              arg_loadedAll!,
+            );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newTypingSnapshot$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newTypingSnapshot was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newTypingSnapshot was null, expected non-null int.',
+          );
+          final TypingSnapshot? arg_snapshot = (args[1] as TypingSnapshot?);
+          try {
+            api.newTypingSnapshot(arg_handle!, arg_snapshot);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

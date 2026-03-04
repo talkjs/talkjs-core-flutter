@@ -9,6 +9,7 @@ import CreateParticipantParams
 import CreateUserParams
 import FlutterError
 import MessageOrigin
+import MessageRefParams
 import MessageSnapshot
 import MessageType
 import NotificationSettings
@@ -19,14 +20,19 @@ import SetConversationParams
 import SetParticipantParams
 import SetUserParams
 import TalkSessionOptions
+import TypingSnapshot
 import UserOnlineSnapshot
 import UserSnapshot
+import com.talkjs.core.ConversationListSubscription
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
 import com.talkjs.core.MessageRef
+import com.talkjs.core.MessageSubscription
 import com.talkjs.core.ParticipantRef
+import com.talkjs.core.ParticipantSubscription
 import com.talkjs.core.ReactionRef
 import com.talkjs.core.TalkSession
+import com.talkjs.core.TypingSubscription
 import com.talkjs.core.UserOnlineSubscription
 import com.talkjs.core.UserRef
 import com.talkjs.core.UserSubscription
@@ -147,6 +153,12 @@ private fun makeParticipantSnapshot(snapshot: com.talkjs.core.ParticipantSnapsho
         joinedAt = snapshot.joinedAt,
     )
 
+private fun makeTypingSnapshot(snapshot: com.talkjs.core.TypingSnapshot): TypingSnapshot =
+    TypingSnapshot(
+        many = snapshot.many,
+        users = snapshot.users?.map { makeUserSnapshot(it) },
+    )
+
 private var flutterApi: CoreFlutterApi? = null
 
 private class PigeonApiImplementation : CoreHostApi {
@@ -160,6 +172,11 @@ private class PigeonApiImplementation : CoreHostApi {
     private val conversations: MutableMap<Long, ConversationRef> = mutableMapOf()
     private val conversationSubscriptions: MutableMap<Long, ConversationSubscription> =
         mutableMapOf()
+    private val conversationListSubscriptions: MutableMap<Long, ConversationListSubscription> =
+        mutableMapOf()
+    private val messageSubscriptions: MutableMap<Long, MessageSubscription> = mutableMapOf()
+    private val participantSubscriptions: MutableMap<Long, ParticipantSubscription> = mutableMapOf()
+    private val typingSubscriptions: MutableMap<Long, TypingSubscription> = mutableMapOf()
     private val participants: MutableMap<Long, ParticipantRef> = mutableMapOf()
     private val messages: MutableMap<Long, MessageRef> = mutableMapOf()
     private val reactions: MutableMap<Long, ReactionRef> = mutableMapOf()
@@ -233,6 +250,71 @@ private class PigeonApiImplementation : CoreHostApi {
         conversations[conversationHandle] = ref
 
         return conversationHandle
+    }
+
+    override fun sessionSubscribeConversations(handle: Long): Long {
+        val ref = sessions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid session handle $handle",
+            "",
+        )
+
+        val subscriptionHandle = nextId
+        nextId += 1
+
+        val subscription = ref.subscribeConversations { snapshot, loadedAll ->
+            scope.launch(Dispatchers.Main) {
+                flutterApi?.newConversationListSnapshot(
+                    subscriptionHandle,
+                    snapshot.map { makeConversationSnapshot(it) },
+                    loadedAll,
+                ) {}
+            }
+        }
+
+        conversationListSubscriptions[subscriptionHandle] = subscription
+
+        return subscriptionHandle
+    }
+
+    // ConversationListSubscription
+    override fun conversationListSubscriptionDeleteHandle(handle: Long) {
+        println("Kotlin: conversationListSubscriptionDeleteHandle $handle")
+
+        conversationListSubscriptions.remove(handle)
+    }
+
+    override fun conversationListSubscriptionLoadMore(
+        handle: Long, count: Long?, callback: (Result<Unit>) -> Unit
+    ) {
+        val subscription = conversationListSubscriptions[handle]
+        if (subscription == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation list subscription handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            subscription.loadMore(count?.toInt())
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun conversationListSubscriptionUnsubscribe(handle: Long) {
+        val subscription = conversationListSubscriptions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation list subscription handle $handle",
+            "",
+        )
+
+        subscription.unsubscribe()
     }
 
     // User
@@ -566,6 +648,75 @@ private class PigeonApiImplementation : CoreHostApi {
         }
     }
 
+    override fun conversationMarkAsRead(
+        handle: Long, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = conversations[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.markAsRead()
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun conversationMarkAsUnread(
+        handle: Long, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = conversations[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.markAsUnread()
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun conversationMarkAsTyping(
+        handle: Long, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = conversations[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.markAsTyping()
+            callback(Result.success(Unit))
+        }
+    }
+
     override fun conversationParticipant(handle: Long, user: String): Long {
         val conversation = conversations[handle] ?: throw FlutterError(
             "null-error",
@@ -598,7 +749,43 @@ private class PigeonApiImplementation : CoreHostApi {
         messages[messageHandle] = ref
 
         return messageHandle
+    }
 
+    override fun conversationSend(
+        handle: Long, params: String, callback: (Result<MessageRefParams>) -> Unit
+    ) {
+        val conversation = conversations[handle]
+        if (conversation == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        val messageHandle = nextId
+        nextId += 1
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val ref = conversation.send(params)
+
+            messages[messageHandle] = ref
+
+            callback(
+                Result.success(
+                    MessageRefParams(
+                        handle = messageHandle,
+                        id = ref.id,
+                        conversationId = ref.conversationId,
+                    )
+                )
+            )
+        }
     }
 
     override fun conversationSubscribe(handle: Long): Long {
@@ -625,6 +812,80 @@ private class PigeonApiImplementation : CoreHostApi {
         return subscriptionHandle
     }
 
+    override fun conversationSubscribeMessages(handle: Long): Long {
+        val ref = conversations[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation handle $handle",
+            "",
+        )
+
+        val subscriptionHandle = nextId
+        nextId += 1
+
+        val subscription = ref.subscribeMessages { snapshot, loadedAll ->
+            scope.launch(Dispatchers.Main) {
+                flutterApi?.newMessageSnapshot(
+                    subscriptionHandle,
+                    snapshot?.map { makeMessageSnapshot(it) },
+                    loadedAll,
+                ) {}
+            }
+        }
+
+        messageSubscriptions[subscriptionHandle] = subscription
+
+        return subscriptionHandle
+    }
+
+    override fun conversationSubscribeParticipants(handle: Long): Long {
+        val ref = conversations[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation handle $handle",
+            "",
+        )
+
+        val subscriptionHandle = nextId
+        nextId += 1
+
+        val subscription = ref.subscribeParticipants { snapshot, loadedAll ->
+            scope.launch(Dispatchers.Main) {
+                flutterApi?.newParticipantSnapshot(
+                    subscriptionHandle,
+                    snapshot?.map { makeParticipantSnapshot(it) },
+                    loadedAll,
+                ) {}
+            }
+        }
+
+        participantSubscriptions[subscriptionHandle] = subscription
+
+        return subscriptionHandle
+    }
+
+    override fun conversationSubscribeTyping(handle: Long): Long {
+        val ref = conversations[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid conversation handle $handle",
+            "",
+        )
+
+        val subscriptionHandle = nextId
+        nextId += 1
+
+        val subscription = ref.subscribeTyping { snapshot ->
+            scope.launch(Dispatchers.Main) {
+                flutterApi?.newTypingSnapshot(
+                    subscriptionHandle,
+                    snapshot?.let { makeTypingSnapshot(it) },
+                ) {}
+            }
+        }
+
+        typingSubscriptions[subscriptionHandle] = subscription
+
+        return subscriptionHandle
+    }
+
     // ConversationSubscription
     override fun conversationSubscriptionDeleteHandle(handle: Long) {
         println("Kotlin: conversationSubscriptionDeleteHandle $handle")
@@ -636,6 +897,103 @@ private class PigeonApiImplementation : CoreHostApi {
         val subscription = conversationSubscriptions[handle] ?: throw FlutterError(
             "null-error",
             "Invalid conversation subscription handle $handle",
+            "",
+        )
+
+        subscription.unsubscribe()
+    }
+
+    // MessageSubscription
+    override fun messageSubscriptionDeleteHandle(handle: Long) {
+        println("Kotlin: messageSubscriptionDeleteHandle $handle")
+
+        messageSubscriptions.remove(handle)
+    }
+
+    override fun messageSubscriptionLoadMore(
+        handle: Long, count: Long?, callback: (Result<Unit>) -> Unit
+    ) {
+        val subscription = messageSubscriptions[handle]
+        if (subscription == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid message subscription handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            subscription.loadMore(count?.toInt())
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun messageSubscriptionUnsubscribe(handle: Long) {
+        val subscription = messageSubscriptions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid message subscription handle $handle",
+            "",
+        )
+
+        subscription.unsubscribe()
+    }
+
+    // ParticipantSubscription
+    override fun participantSubscriptionDeleteHandle(handle: Long) {
+        println("Kotlin: participantSubscriptionDeleteHandle $handle")
+
+        participantSubscriptions.remove(handle)
+    }
+
+    override fun participantSubscriptionLoadMore(
+        handle: Long, count: Long?, callback: (Result<Unit>) -> Unit
+    ) {
+        val subscription = participantSubscriptions[handle]
+        if (subscription == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid participant subscription handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            subscription.loadMore(count?.toInt())
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun participantSubscriptionUnsubscribe(handle: Long) {
+        val subscription = participantSubscriptions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid participant subscription handle $handle",
+            "",
+        )
+
+        subscription.unsubscribe()
+    }
+
+    // TypingSubscription
+    override fun typingSubscriptionDeleteHandle(handle: Long) {
+        println("Kotlin: typingSubscriptionDeleteHandle $handle")
+
+        typingSubscriptions.remove(handle)
+    }
+
+    override fun typingSubscriptionUnsubscribe(handle: Long) {
+        val subscription = typingSubscriptions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid typing subscription handle $handle",
             "",
         )
 

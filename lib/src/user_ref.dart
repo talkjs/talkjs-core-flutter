@@ -83,9 +83,9 @@ class UserRef {
     return _api.userDeleteFields(_handle, fields);
   }
 
-  Future<UserSubscription> subscribe(
+  Future<UserSubscription> subscribe([
     void Function(UserSnapshot? snapshot)? onSnapshot,
-  ) async {
+  ]) async {
     final handle = await _api.userSubscribe(_handle);
 
     userSubscriptionOnSnapshots[handle] = onSnapshot;
@@ -97,9 +97,9 @@ class UserRef {
     return subscription;
   }
 
-  Future<UserOnlineSubscription> subscribeOnline(
+  Future<UserOnlineSubscription> subscribeOnline([
     void Function(UserOnlineSnapshot? snapshot)? onSnapshot,
-  ) async {
+  ]) async {
     final handle = await _api.userSubscribeOnline(_handle);
 
     userOnlineSubscriptionOnSnapshots[handle] = onSnapshot;

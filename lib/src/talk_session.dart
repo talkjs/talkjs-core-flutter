@@ -5,6 +5,44 @@ import 'conversation_ref.dart';
 
 export 'core.g.dart' show ApiUrlOptions, TalkSessionOptions;
 
+final Finalizer<int> _conversationListSubscriptionFinalizer = Finalizer((
+  handle,
+) async {
+  await hostApi?.conversationListSubscriptionDeleteHandle(handle);
+});
+
+class ConversationListSubscription {
+  final CoreHostApi _api;
+  final int _handle;
+
+  // I have no idea on how to port state
+  //SubscriptionState state;
+
+  //Completer<SubscriptionState> connected;
+
+  //Completer<SubscriptionState> terminated;
+
+  Future<void> loadMore([int? count]) {
+    return _api.conversationListSubscriptionLoadMore(_handle, count);
+  }
+
+  Future<void> unsubscribe() {
+    conversationListSubscriptionOnSnapshots.remove(_handle);
+
+    return _api.conversationListSubscriptionUnsubscribe(_handle);
+  }
+
+  ConversationListSubscription._({
+    required CoreHostApi api,
+    required int handle,
+  }) : _api = api,
+       _handle = handle;
+}
+
+final Finalizer<int> _sessionFinalizer = Finalizer((handle) async {
+  await hostApi?.sessionDeleteHandle(handle);
+});
+
 class TalkSession {
   final CoreHostApi _api;
   final int _handle;
@@ -23,6 +61,24 @@ class TalkSession {
     return makeConversationRef(api: _api, handle: handle, id: id);
   }
 
+  Future<ConversationListSubscription> subscribeConversations([
+    void Function(List<ConversationSnapshot> snapshot, bool loadedAll)?
+    onSnapshot,
+  ]) async {
+    final handle = await _api.sessionSubscribeConversations(_handle);
+
+    conversationListSubscriptionOnSnapshots[handle] = onSnapshot;
+
+    final subscription = ConversationListSubscription._(
+      api: _api,
+      handle: handle,
+    );
+
+    _conversationListSubscriptionFinalizer.attach(subscription, handle);
+
+    return subscription;
+  }
+
   TalkSession._({
     required CoreHostApi api,
     required int handle,
@@ -36,10 +92,6 @@ class TalkSession {
          attachFinalizer: false,
        );
 }
-
-final Finalizer<int> _sessionFinalizer = Finalizer((handle) async {
-  await hostApi?.sessionDeleteHandle(handle);
-});
 
 Future<TalkSession> getTalkSession(TalkSessionOptions options) async {
   if (hostApi == null) {

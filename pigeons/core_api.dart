@@ -478,6 +478,18 @@ class MessageSnapshot {
   });
 }
 
+class MessageRefParams {
+  int handle;
+  String id;
+  String conversationId;
+
+  MessageRefParams({
+    required this.handle,
+    required this.id,
+    required this.conversationId,
+  });
+}
+
 class ConversationSnapshot {
   /// The ID of the conversation
   String id;
@@ -615,6 +627,24 @@ class ParticipantSnapshot {
   });
 }
 
+class TypingSnapshot {
+  /// Check this to differentiate between few people are typing (`false`) and many people are typing (`true`).
+  ///
+  /// @remarks
+  /// When `false`, you can see the list of users who are typing in the `users` property.
+  bool many;
+
+  /// The users who are currently typing in this conversation.
+  ///
+  /// @remarks
+  /// The list is in chronological order, starting with the users who have been typing the longest.
+  /// The current user is never contained in the list, only other users.
+  /// When the `many` property is `true`, this property is `null`.
+  List<UserSnapshot>? users;
+
+  TypingSnapshot({required this.many, this.users});
+}
+
 @HostApi()
 abstract class CoreHostApi {
   // Session
@@ -622,6 +652,15 @@ abstract class CoreHostApi {
   void sessionDeleteHandle(int handle);
   int sessionUser(int handle, String id);
   int sessionConversation(int handle, String id);
+  int sessionSubscribeConversations(int handle);
+
+  // ConversationListSubscription
+  void conversationListSubscriptionDeleteHandle(int handle);
+
+  @async
+  void conversationListSubscriptionLoadMore(int handle, int? count);
+
+  void conversationListSubscriptionUnsubscribe(int handle);
 
   // User
   void userDeleteHandle(int handle);
@@ -664,14 +703,49 @@ abstract class CoreHostApi {
   @async
   void conversationDeleteFields(int handle, List<String> fields);
 
+  @async
+  void conversationMarkAsRead(int handle);
+
+  @async
+  void conversationMarkAsUnread(int handle);
+
+  @async
+  void conversationMarkAsTyping(int handle);
+
   int conversationParticipant(int handle, String user);
   int conversationMessage(int handle, String messageId);
 
+  @async
+  MessageRefParams conversationSend(int handle, String params);
+
   int conversationSubscribe(int handle);
+  int conversationSubscribeMessages(int handle);
+  int conversationSubscribeParticipants(int handle);
+  int conversationSubscribeTyping(int handle);
 
   // ConversationSubscription
   void conversationSubscriptionDeleteHandle(int handle);
   void conversationSubscriptionUnsubscribe(int handle);
+
+  // MessageSubscription
+  void messageSubscriptionDeleteHandle(int handle);
+
+  @async
+  void messageSubscriptionLoadMore(int handle, int? count);
+
+  void messageSubscriptionUnsubscribe(int handle);
+
+  // ParticipantSubscription
+  void participantSubscriptionDeleteHandle(int handle);
+
+  @async
+  void participantSubscriptionLoadMore(int handle, int? count);
+
+  void participantSubscriptionUnsubscribe(int handle);
+
+  // TypingSubscription
+  void typingSubscriptionDeleteHandle(int handle);
+  void typingSubscriptionUnsubscribe(int handle);
 
   // Participant
   void participantDeleteHandle(int handle);
@@ -726,4 +800,20 @@ abstract class CoreFlutterApi {
   void newUserSnapshot(int handle, UserSnapshot? snapshot);
   void newUserOnlineSnapshot(int handle, UserOnlineSnapshot? snapshot);
   void newConversationSnapshot(int handle, ConversationSnapshot? snapshot);
+  void newConversationListSnapshot(
+    int handle,
+    List<ConversationSnapshot> snapshot,
+    bool loadedAll,
+  );
+  void newMessageSnapshot(
+    int handle,
+    List<MessageSnapshot>? snapshot,
+    bool loadedAll,
+  );
+  void newParticipantSnapshot(
+    int handle,
+    List<ParticipantSnapshot>? snapshot,
+    bool loadedAll,
+  );
+  void newTypingSnapshot(int handle, TypingSnapshot? snapshot);
 }

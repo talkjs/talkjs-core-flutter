@@ -899,6 +899,40 @@ data class MessageSnapshot (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
+data class MessageRefParams (
+  val handle: Long,
+  val id: String,
+  val conversationId: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): MessageRefParams {
+      val handle = pigeonVar_list[0] as Long
+      val id = pigeonVar_list[1] as String
+      val conversationId = pigeonVar_list[2] as String
+      return MessageRefParams(handle, id, conversationId)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      handle,
+      id,
+      conversationId,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is MessageRefParams) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
 data class ConversationSnapshot (
   /** The ID of the conversation */
   val id: String,
@@ -1142,6 +1176,51 @@ data class ParticipantSnapshot (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class TypingSnapshot (
+  /**
+   * Check this to differentiate between few people are typing (`false`) and many people are typing (`true`).
+   *
+   * @remarks
+   * When `false`, you can see the list of users who are typing in the `users` property.
+   */
+  val many: Boolean,
+  /**
+   * The users who are currently typing in this conversation.
+   *
+   * @remarks
+   * The list is in chronological order, starting with the users who have been typing the longest.
+   * The current user is never contained in the list, only other users.
+   * When the `many` property is `true`, this property is `null`.
+   */
+  val users: List<UserSnapshot>? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): TypingSnapshot {
+      val many = pigeonVar_list[0] as Boolean
+      val users = pigeonVar_list[1] as List<UserSnapshot>?
+      return TypingSnapshot(many, users)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      many,
+      users,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is TypingSnapshot) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class CorePigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -1222,22 +1301,32 @@ private open class CorePigeonCodec : StandardMessageCodec() {
       }
       144.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ConversationSnapshot.fromList(it)
+          MessageRefParams.fromList(it)
         }
       }
       145.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SetParticipantParams.fromList(it)
+          ConversationSnapshot.fromList(it)
         }
       }
       146.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CreateParticipantParams.fromList(it)
+          SetParticipantParams.fromList(it)
         }
       }
       147.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
+          CreateParticipantParams.fromList(it)
+        }
+      }
+      148.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
           ParticipantSnapshot.fromList(it)
+        }
+      }
+      149.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          TypingSnapshot.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -1305,20 +1394,28 @@ private open class CorePigeonCodec : StandardMessageCodec() {
         stream.write(143)
         writeValue(stream, value.toList())
       }
-      is ConversationSnapshot -> {
+      is MessageRefParams -> {
         stream.write(144)
         writeValue(stream, value.toList())
       }
-      is SetParticipantParams -> {
+      is ConversationSnapshot -> {
         stream.write(145)
         writeValue(stream, value.toList())
       }
-      is CreateParticipantParams -> {
+      is SetParticipantParams -> {
         stream.write(146)
         writeValue(stream, value.toList())
       }
-      is ParticipantSnapshot -> {
+      is CreateParticipantParams -> {
         stream.write(147)
+        writeValue(stream, value.toList())
+      }
+      is ParticipantSnapshot -> {
+        stream.write(148)
+        writeValue(stream, value.toList())
+      }
+      is TypingSnapshot -> {
+        stream.write(149)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -1333,6 +1430,10 @@ interface CoreHostApi {
   fun sessionDeleteHandle(handle: Long)
   fun sessionUser(handle: Long, id: String): Long
   fun sessionConversation(handle: Long, id: String): Long
+  fun sessionSubscribeConversations(handle: Long): Long
+  fun conversationListSubscriptionDeleteHandle(handle: Long)
+  fun conversationListSubscriptionLoadMore(handle: Long, count: Long?, callback: (Result<Unit>) -> Unit)
+  fun conversationListSubscriptionUnsubscribe(handle: Long)
   fun userDeleteHandle(handle: Long)
   fun userGet(handle: Long, callback: (Result<UserSnapshot?>) -> Unit)
   fun userSet(handle: Long, data: SetUserParams, callback: (Result<Unit>) -> Unit)
@@ -1349,11 +1450,26 @@ interface CoreHostApi {
   fun conversationSet(handle: Long, data: SetConversationParams, callback: (Result<Unit>) -> Unit)
   fun conversationCreateIfNotExists(handle: Long, data: CreateConversationParams, callback: (Result<Unit>) -> Unit)
   fun conversationDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
+  fun conversationMarkAsRead(handle: Long, callback: (Result<Unit>) -> Unit)
+  fun conversationMarkAsUnread(handle: Long, callback: (Result<Unit>) -> Unit)
+  fun conversationMarkAsTyping(handle: Long, callback: (Result<Unit>) -> Unit)
   fun conversationParticipant(handle: Long, user: String): Long
   fun conversationMessage(handle: Long, messageId: String): Long
+  fun conversationSend(handle: Long, params: String, callback: (Result<MessageRefParams>) -> Unit)
   fun conversationSubscribe(handle: Long): Long
+  fun conversationSubscribeMessages(handle: Long): Long
+  fun conversationSubscribeParticipants(handle: Long): Long
+  fun conversationSubscribeTyping(handle: Long): Long
   fun conversationSubscriptionDeleteHandle(handle: Long)
   fun conversationSubscriptionUnsubscribe(handle: Long)
+  fun messageSubscriptionDeleteHandle(handle: Long)
+  fun messageSubscriptionLoadMore(handle: Long, count: Long?, callback: (Result<Unit>) -> Unit)
+  fun messageSubscriptionUnsubscribe(handle: Long)
+  fun participantSubscriptionDeleteHandle(handle: Long)
+  fun participantSubscriptionLoadMore(handle: Long, count: Long?, callback: (Result<Unit>) -> Unit)
+  fun participantSubscriptionUnsubscribe(handle: Long)
+  fun typingSubscriptionDeleteHandle(handle: Long)
+  fun typingSubscriptionUnsubscribe(handle: Long)
   fun participantDeleteHandle(handle: Long)
   fun participantGet(handle: Long, callback: (Result<ParticipantSnapshot?>) -> Unit)
   fun participantSet(handle: Long, data: SetParticipantParams, callback: (Result<Unit>) -> Unit)
@@ -1442,6 +1558,79 @@ interface CoreHostApi {
             val idArg = args[1] as String
             val wrapped: List<Any?> = try {
               listOf(api.sessionConversation(handleArg, idArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionSubscribeConversations$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.sessionSubscribeConversations(handleArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationListSubscriptionDeleteHandle$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.conversationListSubscriptionDeleteHandle(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationListSubscriptionLoadMore$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val countArg = args[1] as Long?
+            api.conversationListSubscriptionLoadMore(handleArg, countArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationListSubscriptionUnsubscribe$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.conversationListSubscriptionUnsubscribe(handleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1754,6 +1943,63 @@ interface CoreHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationMarkAsRead$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            api.conversationMarkAsRead(handleArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationMarkAsUnread$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            api.conversationMarkAsUnread(handleArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationMarkAsTyping$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            api.conversationMarkAsTyping(handleArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationParticipant$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -1790,6 +2036,27 @@ interface CoreHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSend$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val paramsArg = args[1] as String
+            api.conversationSend(handleArg, paramsArg) { result: Result<MessageRefParams> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -1797,6 +2064,57 @@ interface CoreHostApi {
             val handleArg = args[0] as Long
             val wrapped: List<Any?> = try {
               listOf(api.conversationSubscribe(handleArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribeMessages$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.conversationSubscribeMessages(handleArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribeParticipants$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.conversationSubscribeParticipants(handleArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribeTyping$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.conversationSubscribeTyping(handleArg))
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1832,6 +2150,154 @@ interface CoreHostApi {
             val handleArg = args[0] as Long
             val wrapped: List<Any?> = try {
               api.conversationSubscriptionUnsubscribe(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageSubscriptionDeleteHandle$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.messageSubscriptionDeleteHandle(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageSubscriptionLoadMore$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val countArg = args[1] as Long?
+            api.messageSubscriptionLoadMore(handleArg, countArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageSubscriptionUnsubscribe$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.messageSubscriptionUnsubscribe(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantSubscriptionDeleteHandle$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.participantSubscriptionDeleteHandle(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantSubscriptionLoadMore$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val countArg = args[1] as Long?
+            api.participantSubscriptionLoadMore(handleArg, countArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantSubscriptionUnsubscribe$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.participantSubscriptionUnsubscribe(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.typingSubscriptionDeleteHandle$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.typingSubscriptionDeleteHandle(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.typingSubscriptionUnsubscribe$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.typingSubscriptionUnsubscribe(handleArg)
               listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
@@ -2199,6 +2665,74 @@ class CoreFlutterApi(private val binaryMessenger: BinaryMessenger, private val m
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationSnapshot$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(handleArg, snapshotArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CorePigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun newConversationListSnapshot(handleArg: Long, snapshotArg: List<ConversationSnapshot>, loadedAllArg: Boolean, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(handleArg, snapshotArg, loadedAllArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CorePigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun newMessageSnapshot(handleArg: Long, snapshotArg: List<MessageSnapshot>?, loadedAllArg: Boolean, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newMessageSnapshot$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(handleArg, snapshotArg, loadedAllArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CorePigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun newParticipantSnapshot(handleArg: Long, snapshotArg: List<ParticipantSnapshot>?, loadedAllArg: Boolean, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newParticipantSnapshot$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(handleArg, snapshotArg, loadedAllArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CorePigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun newTypingSnapshot(handleArg: Long, snapshotArg: TypingSnapshot?, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newTypingSnapshot$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(handleArg, snapshotArg)) {
       if (it is List<*>) {
