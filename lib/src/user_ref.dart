@@ -14,10 +14,19 @@ class UserSubscription {
   // I have no idea on how to port state
   //SubscriptionState state;
 
+  /// Resolves when the subscription starts receiving updates from the server.
   //Completer<SubscriptionState> connected;
 
+  /// Resolves when the subscription permanently stops receiving updates from the server.
+  ///
+  /// @remarks
+  /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
   //Completer<SubscriptionState> terminated;
 
+  /// Unsubscribe from this resource and stop receiving updates.
+  ///
+  /// @remarks
+  /// If the subscription is already in the [UnsubscribedState] or [ErrorState], this is a no-op.
   Future<void> unsubscribe() {
     userSubscriptionOnSnapshots.remove(_handle);
 
@@ -35,6 +44,14 @@ final Finalizer<int> _userOnlineSubscriptionFinalizer = Finalizer((
   await hostApi?.userOnlineSubscriptionDeleteHandle(handle);
 });
 
+/// A subscription to the online status of a user
+///
+/// @remarks
+/// Get a UserOnlineSubscription by calling [UserRef.subscribeOnline].
+///
+/// Remember to `.unsubscribe` the subscription once you are done with it.
+///
+/// @public
 class UserOnlineSubscription {
   final CoreHostApi _api;
   final int _handle;
@@ -42,10 +59,24 @@ class UserOnlineSubscription {
   // I have no idea on how to port state
   //SubscriptionState state;
 
+  /// Resolves when the subscription starts receiving updates from the server.
+  ///
+  /// @remarks
+  /// Wait for this promise if you want to perform some action as soon as the subscription is active.
+  ///
+  /// The promise rejects if the subscription is terminated before it connects.
   //Completer<SubscriptionState> connected;
 
+  /// Resolves when the subscription permanently stops receiving updates from the server.
+  ///
+  /// @remarks
+  /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
   //Completer<SubscriptionState> terminated;
 
+  /// Unsubscribe from this resource and stop receiving updates.
+  ///
+  /// @remarks
+  /// If the subscription is already in the [UnsubscribedState] or [ErrorState], this is a no-op.
   Future<void> unsubscribe() {
     userOnlineSubscriptionOnSnapshots.remove(_handle);
 
@@ -61,28 +92,70 @@ final Finalizer<int> _userFinalizer = Finalizer((handle) async {
   await hostApi?.userDeleteHandle(handle);
 });
 
+/// References the user with a given user ID.
+///
+/// @remarks
+/// Used in all Data API operations affecting that user, such as creating the user, fetching or updating user data, or adding a user to a conversation.
+/// Created via [TalkSession.user].
+///
+/// @public
 class UserRef {
   final CoreHostApi _api;
   final int _handle;
 
+  /// The ID of the referenced user.
+  ///
+  /// @remarks
+  /// Immutable: if you want to reference a different user, get a new UserRef instead.
   final String id;
 
+  /// Fetches a snapshot of the user.
+  ///
+  /// @remarks
+  /// This contains all of a user's public information.
+  /// Fetching a user snapshot doesn't require any permissions. You can read the public information of any user.
+  /// Private information, such as email addresses and phone numbers, aren't included in the response.
+  ///
+  /// @return A snapshot of the user's public attributes, or null if the user doesn't exist.
   Future<UserSnapshot?> get() {
     return _api.userGet(_handle);
   }
 
+  /// Sets properties of this user. The user is created if a user with this ID doesn't already exist.
+  ///
+  /// @remarks
+  /// `name` is required when creating a user. The function will throw if you don't provide a `name` and the user does not exist yet.
   Future<void> set(SetUserParams data) {
     return _api.userSet(_handle, data);
   }
 
+  /// Creates a user with this ID, or does nothing if a user with this ID already exists.
+  ///
+  /// @remarks
+  /// If the user already exists, this operation is still considered successful.
   Future<void> createIfNotExists(CreateUserParams data) {
     return _api.userCreateIfNotExists(_handle, data);
   }
 
+  /// Deletes properties of this user.
+  ///
+  /// @param fields - The names of the properties to delete
+  ///
+  /// @remarks
+  /// To delete a field in the `custom` property, pass it as `custom.FIELD_TO_DELETE`.
+  /// To delete a field in the `pushTokens` property, pass it as `pushTokens.FIELD_TO_DELETE`.
   Future<void> deleteFields(List<String> fields) {
     return _api.userDeleteFields(_handle, fields);
   }
 
+  /// Subscribe to this user's state.
+  ///
+  /// @remarks
+  /// While the subscription is active, `onSnapshot` will be called when the user is created or the snapshot changes.
+  ///
+  /// Remember to call `.unsubscribe` on the subscription once you are done with it.
+  ///
+  /// @return A subscription to the user
   Future<UserSubscription> subscribe([
     void Function(UserSnapshot? snapshot)? onSnapshot,
   ]) async {
@@ -97,6 +170,14 @@ class UserRef {
     return subscription;
   }
 
+  /// Subscribe to this user and their online status.
+  ///
+  /// @remarks
+  /// While the subscription is active, `onSnapshot` will be called when the user is created or the snapshot changes (including changes to the nested UserSnapshot).
+  ///
+  /// Remember to call `.unsubscribe` on the subscription once you are done with it.
+  ///
+  /// @return A subscription to the user's online status
   Future<UserOnlineSubscription> subscribeOnline([
     void Function(UserOnlineSnapshot? snapshot)? onSnapshot,
   ]) async {
