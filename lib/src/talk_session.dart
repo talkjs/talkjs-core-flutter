@@ -49,18 +49,29 @@ class TalkSession {
 
   final UserRef currentUser;
 
+  /// Get a reference to a user
+  ///
+  /// @param id - The ID of the user that you want to reference
+  /// @return A [UserRef] for the user with that ID
+  /// @public
   Future<UserRef> user(String id) async {
     final handle = await _api.sessionUser(_handle, id);
 
     return makeUserRef(api: _api, handle: handle, id: id);
   }
 
+  /// Get a reference to a conversation
+  ///
+  /// @param id - The ID of the conversation that you want to reference
+  /// @return A [ConversationRef] for the conversation with that ID
+  /// @public
   Future<ConversationRef> conversation(String id) async {
     final handle = await _api.sessionConversation(_handle, id);
 
     return makeConversationRef(api: _api, handle: handle, id: id);
   }
 
+  /// Subscribes to the most recently active conversations for the current user
   Future<ConversationListSubscription> subscribeConversations([
     void Function(List<ConversationSnapshot> snapshot, bool loadedAll)?
     onSnapshot,
@@ -93,6 +104,13 @@ class TalkSession {
        );
 }
 
+/// Returns a TalkSession option for the specified App ID and User ID.
+///
+/// @remarks
+/// Backed by a registry, so calling this function twice with the same app and user returns the same session object both times.
+/// A new session will be created if the old one encountered an error or got garbage collected.
+///
+/// The `token` and `tokenFetcher` properties are ignored if there is already a session for that user in the registry.
 Future<TalkSession> getTalkSession(TalkSessionOptions options) async {
   if (hostApi == null) {
     hostApi = CoreHostApi();
