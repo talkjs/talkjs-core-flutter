@@ -15,6 +15,7 @@ Map<int, Function(List<ParticipantSnapshot>? snapshot, bool loadedAll)?>
 participantSubscriptionOnSnapshots = {};
 Map<int, Function(TypingSnapshot? snapshot)?> typingSubscriptionOnSnapshots =
     {};
+Map<int, Function(Exception error)> sessionOnErrorExceptions = {};
 
 class CoreFlutterApiImplementation implements CoreFlutterApi {
   @override
@@ -39,6 +40,11 @@ class CoreFlutterApiImplementation implements CoreFlutterApi {
     bool loadedAll,
   ) {
     conversationListSubscriptionOnSnapshots[handle]?.call(snapshot, loadedAll);
+  }
+
+  @override
+  void newSessionError(int handle, String message) {
+    sessionOnErrorExceptions[handle]?.call(Exception(message));
   }
 
   @override

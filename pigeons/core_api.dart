@@ -653,6 +653,7 @@ abstract class CoreHostApi {
   int sessionUser(int handle, String id);
   int sessionConversation(int handle, String id);
   int sessionSubscribeConversations(int handle);
+  int sessionOnError(int handle);
 
   // ConversationListSubscription
   void conversationListSubscriptionDeleteHandle(int handle);
@@ -661,6 +662,10 @@ abstract class CoreHostApi {
   void conversationListSubscriptionLoadMore(int handle, int? count);
 
   void conversationListSubscriptionUnsubscribe(int handle);
+
+  // ErrorSubscription
+  void sessionOnErrorDeleteHandle(int handle);
+  void sessionOnErrorUnsubscribe(int handle);
 
   // User
   void userDeleteHandle(int handle);
@@ -805,6 +810,7 @@ abstract class CoreFlutterApi {
     List<ConversationSnapshot> snapshot,
     bool loadedAll,
   );
+  void newSessionError(int handle, String message);
   void newMessageSnapshot(
     int handle,
     List<MessageSnapshot>? snapshot,

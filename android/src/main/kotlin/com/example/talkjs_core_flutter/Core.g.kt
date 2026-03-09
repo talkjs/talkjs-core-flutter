@@ -1431,9 +1431,12 @@ interface CoreHostApi {
   fun sessionUser(handle: Long, id: String): Long
   fun sessionConversation(handle: Long, id: String): Long
   fun sessionSubscribeConversations(handle: Long): Long
+  fun sessionOnError(handle: Long): Long
   fun conversationListSubscriptionDeleteHandle(handle: Long)
   fun conversationListSubscriptionLoadMore(handle: Long, count: Long?, callback: (Result<Unit>) -> Unit)
   fun conversationListSubscriptionUnsubscribe(handle: Long)
+  fun sessionOnErrorDeleteHandle(handle: Long)
+  fun sessionOnErrorUnsubscribe(handle: Long)
   fun userDeleteHandle(handle: Long)
   fun userGet(handle: Long, callback: (Result<UserSnapshot?>) -> Unit)
   fun userSet(handle: Long, data: SetUserParams, callback: (Result<Unit>) -> Unit)
@@ -1585,6 +1588,23 @@ interface CoreHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionOnError$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              listOf(api.sessionOnError(handleArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationListSubscriptionDeleteHandle$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -1630,6 +1650,42 @@ interface CoreHostApi {
             val handleArg = args[0] as Long
             val wrapped: List<Any?> = try {
               api.conversationListSubscriptionUnsubscribe(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionOnErrorDeleteHandle$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.sessionOnErrorDeleteHandle(handleArg)
+              listOf(null)
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionOnErrorUnsubscribe$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val wrapped: List<Any?> = try {
+              api.sessionOnErrorUnsubscribe(handleArg)
               listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
@@ -2684,6 +2740,23 @@ class CoreFlutterApi(private val binaryMessenger: BinaryMessenger, private val m
     val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot$separatedMessageChannelSuffix"
     val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
     channel.send(listOf(handleArg, snapshotArg, loadedAllArg)) {
+      if (it is List<*>) {
+        if (it.size > 1) {
+          callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))
+        } else {
+          callback(Result.success(Unit))
+        }
+      } else {
+        callback(Result.failure(CorePigeonUtils.createConnectionError(channelName)))
+      } 
+    }
+  }
+  fun newSessionError(handleArg: Long, messageArg: String, callback: (Result<Unit>) -> Unit)
+{
+    val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
+    val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newSessionError$separatedMessageChannelSuffix"
+    val channel = BasicMessageChannel<Any?>(binaryMessenger, channelName, codec)
+    channel.send(listOf(handleArg, messageArg)) {
       if (it is List<*>) {
         if (it.size > 1) {
           callback(Result.failure(FlutterError(it[0] as String, it[1] as String, it[2] as String?)))

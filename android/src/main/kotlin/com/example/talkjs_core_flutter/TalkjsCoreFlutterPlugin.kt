@@ -31,6 +31,7 @@ import com.talkjs.core.MessageSubscription
 import com.talkjs.core.ParticipantRef
 import com.talkjs.core.ParticipantSubscription
 import com.talkjs.core.ReactionRef
+import com.talkjs.core.Subscription
 import com.talkjs.core.TalkSession
 import com.talkjs.core.TypingSubscription
 import com.talkjs.core.UserOnlineSubscription
@@ -174,6 +175,7 @@ private class PigeonApiImplementation : CoreHostApi {
         mutableMapOf()
     private val conversationListSubscriptions: MutableMap<Long, ConversationListSubscription> =
         mutableMapOf()
+    private val sessionOnErrorSubscriptions: MutableMap<Long, Subscription> = mutableMapOf()
     private val messageSubscriptions: MutableMap<Long, MessageSubscription> = mutableMapOf()
     private val participantSubscriptions: MutableMap<Long, ParticipantSubscription> = mutableMapOf()
     private val typingSubscriptions: MutableMap<Long, TypingSubscription> = mutableMapOf()
@@ -277,6 +279,27 @@ private class PigeonApiImplementation : CoreHostApi {
         return subscriptionHandle
     }
 
+    override fun sessionOnError(handle: Long): Long {
+        val session = sessions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid session handle $handle",
+            "",
+        )
+
+        val subscriptionHandle = nextId
+        nextId += 1
+
+        val subscription = session.onError { error ->
+            scope.launch(Dispatchers.Main) {
+                flutterApi?.newSessionError(subscriptionHandle, error.message ?: "") {}
+            }
+        }
+
+        sessionOnErrorSubscriptions[subscriptionHandle] = subscription
+
+        return subscriptionHandle
+    }
+
     // ConversationListSubscription
     override fun conversationListSubscriptionDeleteHandle(handle: Long) {
         println("Kotlin: conversationListSubscriptionDeleteHandle $handle")
@@ -311,6 +334,23 @@ private class PigeonApiImplementation : CoreHostApi {
         val subscription = conversationListSubscriptions[handle] ?: throw FlutterError(
             "null-error",
             "Invalid conversation list subscription handle $handle",
+            "",
+        )
+
+        subscription.unsubscribe()
+    }
+
+    // ErrorSubscription
+    override fun sessionOnErrorDeleteHandle(handle: Long) {
+        println("Kotlin: sessionOnErrorDeleteHandle $handle")
+
+        sessionOnErrorSubscriptions.remove(handle)
+    }
+
+    override fun sessionOnErrorUnsubscribe(handle: Long) {
+        val subscription = sessionOnErrorSubscriptions[handle] ?: throw FlutterError(
+            "null-error",
+            "Invalid error subscription handle $handle",
             "",
         )
 

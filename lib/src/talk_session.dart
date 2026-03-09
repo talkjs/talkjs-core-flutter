@@ -39,6 +39,32 @@ class ConversationListSubscription {
        _handle = handle;
 }
 
+final Finalizer<int> _sessionOnErrorFinalizer = Finalizer((handle) async {
+  await hostApi?.sessionOnErrorDeleteHandle(handle);
+});
+
+class ErrorSubscription {
+  final CoreHostApi _api;
+  final int _handle;
+
+  // I have no idea on how to port state
+  //SubscriptionState state;
+
+  //Completer<SubscriptionState> connected;
+
+  //Completer<SubscriptionState> terminated;
+
+  Future<void> unsubscribe() {
+    sessionOnErrorExceptions.remove(_handle);
+
+    return _api.sessionOnErrorUnsubscribe(_handle);
+  }
+
+  ErrorSubscription._({required CoreHostApi api, required int handle})
+    : _api = api,
+      _handle = handle;
+}
+
 final Finalizer<int> _sessionFinalizer = Finalizer((handle) async {
   await hostApi?.sessionDeleteHandle(handle);
 });
@@ -86,6 +112,23 @@ class TalkSession {
     );
 
     _conversationListSubscriptionFinalizer.attach(subscription, handle);
+
+    return subscription;
+  }
+
+  /// Attaches a handler that will be called when the session encounters an error
+  ///
+  /// Returns a callback which detaches your handler
+  Future<ErrorSubscription> onError(
+    void Function(Exception error) handler,
+  ) async {
+    final handle = await _api.sessionOnError(_handle);
+
+    sessionOnErrorExceptions[handle] = handler;
+
+    final subscription = ErrorSubscription._(api: _api, handle: handle);
+
+    _sessionOnErrorFinalizer.attach(subscription, handle);
 
     return subscription;
   }
