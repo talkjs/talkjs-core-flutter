@@ -21,6 +21,21 @@ final Finalizer<int> _conversationListSubscriptionFinalizer = Finalizer((
   await hostApi?.conversationListSubscriptionDeleteHandle(handle);
 });
 
+/// A subscription to your most recently active conversations.
+///
+/// @remarks
+/// Get a ConversationListSubscription by calling [TalkSession.subscribeConversations].
+///
+/// The subscription is 'windowed'. Initially, this window contains the 20 most recent conversations.
+/// Conversations are ordered by last activity. The last activity of a conversation is either `joinedAt` or `lastMessage.createdAt`, whichever is higher.
+///
+/// The window will automatically expand to include any conversations you join, and any old conversations that receive new messages after subscribing.
+///
+/// You can expand this window by calling [ConversationListSubscription.loadMore], which extends the window further into the past.
+///
+/// Remember to `.unsubscribe` the subscription once you are done with it.
+///
+/// @public
 class ConversationListSubscription {
   final CoreHostApi _api;
   final int _handle;
@@ -32,10 +47,24 @@ class ConversationListSubscription {
 
   //Completer<SubscriptionState> terminated;
 
+  /// Expand the window to include older conversations
+  ///
+  /// @remarks
+  /// Calling `loadMore` multiple times in parallel will still only load one page of conversations.
+  ///
+  /// Avoid calling `.loadMore` in a loop until you have loaded all conversations.
+  /// This is usually unnecessary: any time a conversation receives a message, it appears at the start of the list of conversations.
+  /// If you do need to call loadMore in a loop, make sure you set a small upper bound (e.g. 100) on the number of conversations, where the loop will exit.
+  ///
+  /// @param count - The number of additional conversations to load. Must be between 1 and 30. Default 20.
   Future<void> loadMore([int? count]) {
     return _api.conversationListSubscriptionLoadMore(_handle, count);
   }
 
+  /// Unsubscribe from this resource and stop receiving updates.
+  ///
+  /// @remarks
+  /// If the subscription is already in the [UnsubscribedState] or [ErrorState], this is a no-op.
   Future<void> unsubscribe() {
     conversationListSubscriptionOnSnapshots.remove(_handle);
 
