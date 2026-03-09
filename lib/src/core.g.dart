@@ -1374,6 +1374,228 @@ class TypingSnapshot {
   int get hashCode => Object.hashAll(_toList());
 }
 
+class GenericFileMetadata {
+  GenericFileMetadata({required this.filename});
+
+  /// The name of the file including extension.
+  String filename;
+
+  List<Object?> _toList() {
+    return <Object?>[filename];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static GenericFileMetadata decode(Object result) {
+    result as List<Object?>;
+    return GenericFileMetadata(filename: result[0]! as String);
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! GenericFileMetadata || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class ImageFileMetadata {
+  ImageFileMetadata({required this.filename, this.width, this.height});
+
+  /// The name of the file including extension.
+  String filename;
+
+  /// The width of the image in pixels, if known.
+  int? width;
+
+  /// The height of the image in pixels, if known.
+  int? height;
+
+  List<Object?> _toList() {
+    return <Object?>[filename, width, height];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static ImageFileMetadata decode(Object result) {
+    result as List<Object?>;
+    return ImageFileMetadata(
+      filename: result[0]! as String,
+      width: result[1] as int?,
+      height: result[2] as int?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! ImageFileMetadata || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class VideoFileMetadata {
+  VideoFileMetadata({
+    required this.filename,
+    this.width,
+    this.height,
+    this.duration,
+  });
+
+  /// The name of the file including extension.
+  String filename;
+
+  /// The width of the video in pixels, if known.
+  int? width;
+
+  /// The height of the video in pixels, if known.
+  int? height;
+
+  /// The duration of the video in seconds, if known.
+  double? duration;
+
+  List<Object?> _toList() {
+    return <Object?>[filename, width, height, duration];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static VideoFileMetadata decode(Object result) {
+    result as List<Object?>;
+    return VideoFileMetadata(
+      filename: result[0]! as String,
+      width: result[1] as int?,
+      height: result[2] as int?,
+      duration: result[3] as double?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! VideoFileMetadata || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class AudioFileMetadata {
+  AudioFileMetadata({required this.filename, this.duration});
+
+  /// The name of the file including extension.
+  String filename;
+
+  /// The duration of the audio file in seconds, if known.
+  double? duration;
+
+  List<Object?> _toList() {
+    return <Object?>[filename, duration];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static AudioFileMetadata decode(Object result) {
+    result as List<Object?>;
+    return AudioFileMetadata(
+      filename: result[0]! as String,
+      duration: result[1] as double?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! AudioFileMetadata || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class VoiceRecordingFileMetadata {
+  VoiceRecordingFileMetadata({required this.filename, this.duration});
+
+  /// The name of the file including extension.
+  String filename;
+
+  /// The duration of the recording in seconds, if known.
+  double? duration;
+
+  List<Object?> _toList() {
+    return <Object?>[filename, duration];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static VoiceRecordingFileMetadata decode(Object result) {
+    result as List<Object?>;
+    return VoiceRecordingFileMetadata(
+      filename: result[0]! as String,
+      duration: result[1] as double?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! VoiceRecordingFileMetadata ||
+        other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
   @override
@@ -1444,6 +1666,21 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is TypingSnapshot) {
       buffer.putUint8(149);
       writeValue(buffer, value.encode());
+    } else if (value is GenericFileMetadata) {
+      buffer.putUint8(150);
+      writeValue(buffer, value.encode());
+    } else if (value is ImageFileMetadata) {
+      buffer.putUint8(151);
+      writeValue(buffer, value.encode());
+    } else if (value is VideoFileMetadata) {
+      buffer.putUint8(152);
+      writeValue(buffer, value.encode());
+    } else if (value is AudioFileMetadata) {
+      buffer.putUint8(153);
+      writeValue(buffer, value.encode());
+    } else if (value is VoiceRecordingFileMetadata) {
+      buffer.putUint8(154);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -1498,6 +1735,16 @@ class _PigeonCodec extends StandardMessageCodec {
         return ParticipantSnapshot.decode(readValue(buffer)!);
       case 149:
         return TypingSnapshot.decode(readValue(buffer)!);
+      case 150:
+        return GenericFileMetadata.decode(readValue(buffer)!);
+      case 151:
+        return ImageFileMetadata.decode(readValue(buffer)!);
+      case 152:
+        return VideoFileMetadata.decode(readValue(buffer)!);
+      case 153:
+        return AudioFileMetadata.decode(readValue(buffer)!);
+      case 154:
+        return VoiceRecordingFileMetadata.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -1693,6 +1940,176 @@ class CoreHostApi {
       );
     } else {
       return (pigeonVar_replyList[0] as int?)!;
+    }
+  }
+
+  Future<String> sessionUploadFile(
+    int handle,
+    Uint8List data,
+    GenericFileMetadata metadata,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadFile$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data, metadata],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?)!;
+    }
+  }
+
+  Future<String> sessionUploadImage(
+    int handle,
+    Uint8List data,
+    ImageFileMetadata metadata,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadImage$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data, metadata],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?)!;
+    }
+  }
+
+  Future<String> sessionUploadVideo(
+    int handle,
+    Uint8List data,
+    VideoFileMetadata metadata,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadVideo$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data, metadata],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?)!;
+    }
+  }
+
+  Future<String> sessionUploadAudio(
+    int handle,
+    Uint8List data,
+    AudioFileMetadata metadata,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadAudio$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data, metadata],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?)!;
+    }
+  }
+
+  Future<String> sessionUploadVoice(
+    int handle,
+    Uint8List data,
+    VoiceRecordingFileMetadata metadata,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadVoice$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, data, metadata],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as String?)!;
     }
   }
 

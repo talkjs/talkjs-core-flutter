@@ -645,6 +645,67 @@ class TypingSnapshot {
   TypingSnapshot({required this.many, this.users});
 }
 
+class GenericFileMetadata {
+  /// The name of the file including extension.
+  String filename;
+
+  GenericFileMetadata({required this.filename});
+}
+
+class ImageFileMetadata {
+  /// The name of the file including extension.
+  String filename;
+
+  /// The width of the image in pixels, if known.
+  int? width;
+
+  /// The height of the image in pixels, if known.
+  int? height;
+
+  ImageFileMetadata({required this.filename, this.width, this.height});
+}
+
+class VideoFileMetadata {
+  /// The name of the file including extension.
+  String filename;
+
+  /// The width of the video in pixels, if known.
+  int? width;
+
+  /// The height of the video in pixels, if known.
+  int? height;
+
+  /// The duration of the video in seconds, if known.
+  double? duration;
+
+  VideoFileMetadata({
+    required this.filename,
+    this.width,
+    this.height,
+    this.duration,
+  });
+}
+
+class AudioFileMetadata {
+  /// The name of the file including extension.
+  String filename;
+
+  /// The duration of the audio file in seconds, if known.
+  double? duration;
+
+  AudioFileMetadata({required this.filename, this.duration});
+}
+
+class VoiceRecordingFileMetadata {
+  /// The name of the file including extension.
+  String filename;
+
+  /// The duration of the recording in seconds, if known.
+  double? duration;
+
+  VoiceRecordingFileMetadata({required this.filename, this.duration});
+}
+
 @HostApi()
 abstract class CoreHostApi {
   // Session
@@ -654,6 +715,41 @@ abstract class CoreHostApi {
   int sessionConversation(int handle, String id);
   int sessionSubscribeConversations(int handle);
   int sessionOnError(int handle);
+
+  @async
+  String sessionUploadFile(
+    int handle,
+    Uint8List data,
+    GenericFileMetadata metadata,
+  );
+
+  @async
+  String sessionUploadImage(
+    int handle,
+    Uint8List data,
+    ImageFileMetadata metadata,
+  );
+
+  @async
+  String sessionUploadVideo(
+    int handle,
+    Uint8List data,
+    VideoFileMetadata metadata,
+  );
+
+  @async
+  String sessionUploadAudio(
+    int handle,
+    Uint8List data,
+    AudioFileMetadata metadata,
+  );
+
+  @async
+  String sessionUploadVoice(
+    int handle,
+    Uint8List data,
+    VoiceRecordingFileMetadata metadata,
+  );
 
   // ConversationListSubscription
   void conversationListSubscriptionDeleteHandle(int handle);

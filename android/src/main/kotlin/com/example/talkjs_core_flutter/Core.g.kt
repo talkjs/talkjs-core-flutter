@@ -1221,6 +1221,179 @@ data class TypingSnapshot (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class GenericFileMetadata (
+  /** The name of the file including extension. */
+  val filename: String
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): GenericFileMetadata {
+      val filename = pigeonVar_list[0] as String
+      return GenericFileMetadata(filename)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      filename,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is GenericFileMetadata) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ImageFileMetadata (
+  /** The name of the file including extension. */
+  val filename: String,
+  /** The width of the image in pixels, if known. */
+  val width: Long? = null,
+  /** The height of the image in pixels, if known. */
+  val height: Long? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): ImageFileMetadata {
+      val filename = pigeonVar_list[0] as String
+      val width = pigeonVar_list[1] as Long?
+      val height = pigeonVar_list[2] as Long?
+      return ImageFileMetadata(filename, width, height)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      filename,
+      width,
+      height,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is ImageFileMetadata) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class VideoFileMetadata (
+  /** The name of the file including extension. */
+  val filename: String,
+  /** The width of the video in pixels, if known. */
+  val width: Long? = null,
+  /** The height of the video in pixels, if known. */
+  val height: Long? = null,
+  /** The duration of the video in seconds, if known. */
+  val duration: Double? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VideoFileMetadata {
+      val filename = pigeonVar_list[0] as String
+      val width = pigeonVar_list[1] as Long?
+      val height = pigeonVar_list[2] as Long?
+      val duration = pigeonVar_list[3] as Double?
+      return VideoFileMetadata(filename, width, height, duration)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      filename,
+      width,
+      height,
+      duration,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is VideoFileMetadata) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class AudioFileMetadata (
+  /** The name of the file including extension. */
+  val filename: String,
+  /** The duration of the audio file in seconds, if known. */
+  val duration: Double? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): AudioFileMetadata {
+      val filename = pigeonVar_list[0] as String
+      val duration = pigeonVar_list[1] as Double?
+      return AudioFileMetadata(filename, duration)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      filename,
+      duration,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is AudioFileMetadata) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class VoiceRecordingFileMetadata (
+  /** The name of the file including extension. */
+  val filename: String,
+  /** The duration of the recording in seconds, if known. */
+  val duration: Double? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): VoiceRecordingFileMetadata {
+      val filename = pigeonVar_list[0] as String
+      val duration = pigeonVar_list[1] as Double?
+      return VoiceRecordingFileMetadata(filename, duration)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      filename,
+      duration,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is VoiceRecordingFileMetadata) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class CorePigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -1329,6 +1502,31 @@ private open class CorePigeonCodec : StandardMessageCodec() {
           TypingSnapshot.fromList(it)
         }
       }
+      150.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          GenericFileMetadata.fromList(it)
+        }
+      }
+      151.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          ImageFileMetadata.fromList(it)
+        }
+      }
+      152.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoFileMetadata.fromList(it)
+        }
+      }
+      153.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AudioFileMetadata.fromList(it)
+        }
+      }
+      154.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VoiceRecordingFileMetadata.fromList(it)
+        }
+      }
       else -> super.readValueOfType(type, buffer)
     }
   }
@@ -1418,6 +1616,26 @@ private open class CorePigeonCodec : StandardMessageCodec() {
         stream.write(149)
         writeValue(stream, value.toList())
       }
+      is GenericFileMetadata -> {
+        stream.write(150)
+        writeValue(stream, value.toList())
+      }
+      is ImageFileMetadata -> {
+        stream.write(151)
+        writeValue(stream, value.toList())
+      }
+      is VideoFileMetadata -> {
+        stream.write(152)
+        writeValue(stream, value.toList())
+      }
+      is AudioFileMetadata -> {
+        stream.write(153)
+        writeValue(stream, value.toList())
+      }
+      is VoiceRecordingFileMetadata -> {
+        stream.write(154)
+        writeValue(stream, value.toList())
+      }
       else -> super.writeValue(stream, value)
     }
   }
@@ -1432,6 +1650,11 @@ interface CoreHostApi {
   fun sessionConversation(handle: Long, id: String): Long
   fun sessionSubscribeConversations(handle: Long): Long
   fun sessionOnError(handle: Long): Long
+  fun sessionUploadFile(handle: Long, data: ByteArray, metadata: GenericFileMetadata, callback: (Result<String>) -> Unit)
+  fun sessionUploadImage(handle: Long, data: ByteArray, metadata: ImageFileMetadata, callback: (Result<String>) -> Unit)
+  fun sessionUploadVideo(handle: Long, data: ByteArray, metadata: VideoFileMetadata, callback: (Result<String>) -> Unit)
+  fun sessionUploadAudio(handle: Long, data: ByteArray, metadata: AudioFileMetadata, callback: (Result<String>) -> Unit)
+  fun sessionUploadVoice(handle: Long, data: ByteArray, metadata: VoiceRecordingFileMetadata, callback: (Result<String>) -> Unit)
   fun conversationListSubscriptionDeleteHandle(handle: Long)
   fun conversationListSubscriptionLoadMore(handle: Long, count: Long?, callback: (Result<Unit>) -> Unit)
   fun conversationListSubscriptionUnsubscribe(handle: Long)
@@ -1599,6 +1822,116 @@ interface CoreHostApi {
               CorePigeonUtils.wrapError(exception)
             }
             reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadFile$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val dataArg = args[1] as ByteArray
+            val metadataArg = args[2] as GenericFileMetadata
+            api.sessionUploadFile(handleArg, dataArg, metadataArg) { result: Result<String> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadImage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val dataArg = args[1] as ByteArray
+            val metadataArg = args[2] as ImageFileMetadata
+            api.sessionUploadImage(handleArg, dataArg, metadataArg) { result: Result<String> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadVideo$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val dataArg = args[1] as ByteArray
+            val metadataArg = args[2] as VideoFileMetadata
+            api.sessionUploadVideo(handleArg, dataArg, metadataArg) { result: Result<String> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadAudio$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val dataArg = args[1] as ByteArray
+            val metadataArg = args[2] as AudioFileMetadata
+            api.sessionUploadAudio(handleArg, dataArg, metadataArg) { result: Result<String> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.sessionUploadVoice$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val dataArg = args[1] as ByteArray
+            val metadataArg = args[2] as VoiceRecordingFileMetadata
+            api.sessionUploadVoice(handleArg, dataArg, metadataArg) { result: Result<String> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
           }
         } else {
           channel.setMessageHandler(null)

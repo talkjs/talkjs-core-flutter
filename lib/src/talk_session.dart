@@ -1,9 +1,19 @@
+import 'dart:typed_data';
+
 import 'core.g.dart';
 import 'api.dart';
 import 'user_ref.dart';
 import 'conversation_ref.dart';
 
-export 'core.g.dart' show ApiUrlOptions, TalkSessionOptions;
+export 'core.g.dart'
+    show
+        ApiUrlOptions,
+        TalkSessionOptions,
+        GenericFileMetadata,
+        ImageFileMetadata,
+        VideoFileMetadata,
+        AudioFileMetadata,
+        VoiceRecordingFileMetadata;
 
 final Finalizer<int> _conversationListSubscriptionFinalizer = Finalizer((
   handle,
@@ -131,6 +141,74 @@ class TalkSession {
     _sessionOnErrorFinalizer.attach(subscription, handle);
 
     return subscription;
+  }
+
+  /// Upload a generic file without any additional metadata.
+  ///
+  /// @remarks
+  /// This function does not send any message, it only uploads the file and returns a file token.
+  /// To send the file in a message, pass the file token in a [SendFileBlock] when calling [ConversationRef.send].
+  ///
+  /// [See the documentation](https://talkjs.com/docs/Reference/Concepts/Message_Content/#sending-message-content) for more information about sending files in messages.
+  ///
+  /// If the file is a video, image, audio file, or voice recording, use one of the other functions like [uploadImage] instead.
+  ///
+  /// @param data The binary file data. Usually a [File](https://developer.mozilla.org/en-US/docs/Web/API/File).
+  /// @param metadata Information about the file
+  /// @return A file token that can be used to send the file in a message.
+  Future<String> uploadFile(Uint8List data, GenericFileMetadata metadata) {
+    return _api.sessionUploadFile(_handle, data, metadata);
+  }
+
+  /// Upload an image with image-specific metadata.
+  ///
+  /// @remarks
+  /// This is a variant of [TalkSession.uploadFile] used for images.
+  ///
+  /// @param data The binary image data. Usually a [File](https://developer.mozilla.org/en-US/docs/Web/API/File).
+  /// @param metadata Information about the image.
+  /// @return A file token that can be used to send the image in a message.
+  Future<String> uploadImage(Uint8List data, ImageFileMetadata metadata) {
+    return _api.sessionUploadImage(_handle, data, metadata);
+  }
+
+  /// Upload a video with video-specific metadata.
+  ///
+  /// @remarks
+  /// This is a variant of [TalkSession.uploadFile] used for videos.
+  ///
+  /// @param data The binary video data. Usually a [File](https://developer.mozilla.org/en-US/docs/Web/API/File).
+  /// @param metadata Information about the video.
+  /// @return A file token that can be used to send the video in a message.
+  Future<String> uploadVideo(Uint8List data, VideoFileMetadata metadata) {
+    return _api.sessionUploadVideo(_handle, data, metadata);
+  }
+
+  /// Upload an audio file with audio-specific metadata.
+  ///
+  /// @remarks
+  /// This is a variant of [TalkSession.uploadFile] used for audio files.
+  ///
+  /// @param data The binary audio data. Usually a [File](https://developer.mozilla.org/en-US/docs/Web/API/File).
+  /// @param metadata Information about the audio file.
+  /// @return A file token that can be used to send the audio file in a message.
+  Future<String> uploadAudio(Uint8List data, AudioFileMetadata metadata) {
+    return _api.sessionUploadAudio(_handle, data, metadata);
+  }
+
+  /// Upload a voice recording with voice-specific metadata.
+  ///
+  /// @remarks
+  /// This is a variant of [TalkSession.uploadFile] used for voice recordings.
+  ///
+  /// @param data The binary audio data. Usually a [File](https://developer.mozilla.org/en-US/docs/Web/API/File).
+  /// @param metadata Information about the voice recording.
+  /// @return A file token that can be used to send the audio file in a message.
+  Future<String> uploadVoice(
+    Uint8List data,
+    VoiceRecordingFileMetadata metadata,
+  ) {
+    return _api.sessionUploadVoice(_handle, data, metadata);
   }
 
   TalkSession._({

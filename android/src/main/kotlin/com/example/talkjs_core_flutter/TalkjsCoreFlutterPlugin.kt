@@ -1,5 +1,6 @@
 package com.example.talkjs_core_flutter
 
+import AudioFileMetadata
 import ConversationAccess
 import ConversationSnapshot
 import CoreFlutterApi
@@ -8,6 +9,8 @@ import CreateConversationParams
 import CreateParticipantParams
 import CreateUserParams
 import FlutterError
+import GenericFileMetadata
+import ImageFileMetadata
 import MessageOrigin
 import MessageRefParams
 import MessageSnapshot
@@ -23,6 +26,8 @@ import TalkSessionOptions
 import TypingSnapshot
 import UserOnlineSnapshot
 import UserSnapshot
+import VideoFileMetadata
+import VoiceRecordingFileMetadata
 import com.talkjs.core.ConversationListSubscription
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
@@ -298,6 +303,151 @@ private class PigeonApiImplementation : CoreHostApi {
         sessionOnErrorSubscriptions[subscriptionHandle] = subscription
 
         return subscriptionHandle
+    }
+
+    override fun sessionUploadFile(
+        handle: Long,
+        data: ByteArray,
+        metadata: GenericFileMetadata,
+        callback: (Result<String>) -> Unit
+    ) {
+        val session = sessions[handle]
+        if (session == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error", "Invalid session handle $handle", ""
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val token = session.uploadFile(
+                data, com.talkjs.core.GenericFileMetadata(filename = metadata.filename)
+            )
+            callback(Result.success(token))
+        }
+    }
+
+    override fun sessionUploadImage(
+        handle: Long,
+        data: ByteArray,
+        metadata: ImageFileMetadata,
+        callback: (Result<String>) -> Unit
+    ) {
+        val session = sessions[handle]
+        if (session == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error", "Invalid session handle $handle", ""
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val token = session.uploadImage(
+                data, com.talkjs.core.ImageFileMetadata(
+                    filename = metadata.filename,
+                    width = metadata.width?.toInt(),
+                    height = metadata.height?.toInt(),
+                )
+            )
+            callback(Result.success(token))
+        }
+    }
+
+    override fun sessionUploadVideo(
+        handle: Long,
+        data: ByteArray,
+        metadata: VideoFileMetadata,
+        callback: (Result<String>) -> Unit
+    ) {
+        val session = sessions[handle]
+        if (session == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error", "Invalid session handle $handle", ""
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val token = session.uploadVideo(
+                data, com.talkjs.core.VideoFileMetadata(
+                    filename = metadata.filename,
+                    width = metadata.width?.toInt(),
+                    height = metadata.height?.toInt(),
+                    duration = metadata.duration,
+                )
+            )
+            callback(Result.success(token))
+        }
+    }
+
+    override fun sessionUploadAudio(
+        handle: Long,
+        data: ByteArray,
+        metadata: AudioFileMetadata,
+        callback: (Result<String>) -> Unit
+    ) {
+        val session = sessions[handle]
+        if (session == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error", "Invalid session handle $handle", ""
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val token = session.uploadAudio(
+                data, com.talkjs.core.AudioFileMetadata(
+                    filename = metadata.filename,
+                    duration = metadata.duration,
+                )
+            )
+            callback(Result.success(token))
+        }
+    }
+
+    override fun sessionUploadVoice(
+        handle: Long,
+        data: ByteArray,
+        metadata: VoiceRecordingFileMetadata,
+        callback: (Result<String>) -> Unit
+    ) {
+        val session = sessions[handle]
+        if (session == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error", "Invalid session handle $handle", ""
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val token = session.uploadVoice(
+                data, com.talkjs.core.VoiceRecordingFileMetadata(
+                    filename = metadata.filename,
+                    duration = metadata.duration,
+                )
+            )
+            callback(Result.success(token))
+        }
     }
 
     // ConversationListSubscription
