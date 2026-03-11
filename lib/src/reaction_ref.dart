@@ -49,7 +49,7 @@ class ReactionRef {
   /// Adds this emoji reaction onto the message, from the current user.
   ///
   /// @remarks
-  /// The function will throw if the request is invalid, the message doesn't exist, there are already 50 different reactions on this message, or if you do not have permission to use emoji reactions on that message.
+  /// The promise will reject if the request is invalid, the message doesn't exist, there are already 50 different reactions on this message, or if you do not have permission to use emoji reactions on that message.
   Future<void> add() {
     return _api.reactionAdd(_handle);
   }
@@ -57,7 +57,7 @@ class ReactionRef {
   /// Removes this emoji reaction from the message, from the current user.
   ///
   /// @remarks
-  /// The function will throw if the request is invalid, the message doesn't exist, or you do not have permission to use emoji reactions on that message.
+  /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to use emoji reactions on that message.
   Future<void> remove() {
     return _api.reactionRemove(_handle);
   }

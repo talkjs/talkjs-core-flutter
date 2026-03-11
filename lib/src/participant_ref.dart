@@ -36,7 +36,7 @@ class ParticipantRef {
   /// @remarks
   /// This contains all of the participant's public information.
   ///
-  /// @return A snapshot of the participant's attributes, or null if the user is not a participant. The function will throw if you are not a participant and try to read information about someone else.
+  /// @return A snapshot of the participant's attributes, or null if the user is not a participant. The promise will reject if you are not a participant and try to read information about someone else.
   Future<ParticipantSnapshot?> get() {
     return _api.participantGet(_handle);
   }
@@ -64,7 +64,7 @@ class ParticipantRef {
   /// @remarks
   /// If the participant already exists, this operation is still considered successful.
   ///
-  /// The function will throw if client-side conversation syncing is disabled and the user is not already a participant.
+  /// The promise will reject if client-side conversation syncing is disabled and the user is not already a participant.
   Future<void> createIfNotExists(CreateParticipantParams data) {
     return _api.participantCreateIfNotExists(_handle, data);
   }

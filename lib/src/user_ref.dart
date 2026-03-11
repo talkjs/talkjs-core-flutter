@@ -124,7 +124,7 @@ class UserRef {
   /// Sets properties of this user. The user is created if a user with this ID doesn't already exist.
   ///
   /// @remarks
-  /// `name` is required when creating a user. The function will throw if you don't provide a `name` and the user does not exist yet.
+  /// `name` is required when creating a user. The promise will reject if you don't provide a `name` and the user does not exist yet.
   Future<void> set(SetUserParams data) {
     return _api.userSet(_handle, data);
   }
