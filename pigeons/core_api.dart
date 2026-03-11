@@ -490,6 +490,44 @@ class MessageRefParams {
   });
 }
 
+/// Parameters you can pass when sending a message
+class SendTextMessageParams {
+  /// The text to send in the message.
+  String text;
+
+  /// Custom metadata you have set on the user.
+  /// Default = no custom metadata
+  Map<String, String>? custom;
+
+  /// The message that you are replying to.
+  /// Default = not a reply
+  String? referencedMessage;
+
+  SendTextMessageParams({
+    required this.text,
+    this.custom,
+    this.referencedMessage,
+  });
+}
+
+/// Parameters you can pass when editing a message.
+///
+/// @remarks
+/// Properties that are `null` will not be changed.
+/// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
+///
+class EditTextMessageParams {
+  /// Custom metadata you have set on the user.
+  /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
+  /// Default = no custom metadata
+  Map<String, String?>? custom;
+
+  /// The new text to set as the message body
+  String? text;
+
+  EditTextMessageParams({this.custom, this.text});
+}
+
 class ConversationSnapshot {
   /// The ID of the conversation
   String id;
@@ -819,6 +857,12 @@ abstract class CoreHostApi {
   @async
   MessageRefParams conversationSend(int handle, String params);
 
+  @async
+  MessageRefParams conversationSendText(
+    int handle,
+    SendTextMessageParams params,
+  );
+
   int conversationSubscribe(int handle);
   int conversationSubscribeMessages(int handle);
   int conversationSubscribeParticipants(int handle);
@@ -877,6 +921,9 @@ abstract class CoreHostApi {
 
   @async
   void messageEdit(int handle, String params);
+
+  @async
+  void messageEditText(int handle, EditTextMessageParams params);
 
   @async
   void messageDeleteFields(int handle, List<String> fields);

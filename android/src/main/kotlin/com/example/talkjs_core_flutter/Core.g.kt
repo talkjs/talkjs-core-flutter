@@ -932,6 +932,99 @@ data class MessageRefParams (
   override fun hashCode(): Int = toList().hashCode()
 }
 
+/**
+ * Parameters you can pass when sending a message
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class SendTextMessageParams (
+  /** The text to send in the message. */
+  val text: String,
+  /**
+   * Custom metadata you have set on the user.
+   * Default = no custom metadata
+   */
+  val custom: Map<String, String>? = null,
+  /**
+   * The message that you are replying to.
+   * Default = not a reply
+   */
+  val referencedMessage: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SendTextMessageParams {
+      val text = pigeonVar_list[0] as String
+      val custom = pigeonVar_list[1] as Map<String, String>?
+      val referencedMessage = pigeonVar_list[2] as String?
+      return SendTextMessageParams(text, custom, referencedMessage)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      text,
+      custom,
+      referencedMessage,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SendTextMessageParams) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/**
+ * Parameters you can pass when editing a message.
+ *
+ * @remarks
+ * Properties that are `null` will not be changed.
+ * To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
+ *
+ *
+ * Generated class from Pigeon that represents data sent in messages.
+ */
+data class EditTextMessageParams (
+  /**
+   * Custom metadata you have set on the user.
+   * This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
+   * Default = no custom metadata
+   */
+  val custom: Map<String, String?>? = null,
+  /** The new text to set as the message body */
+  val text: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): EditTextMessageParams {
+      val custom = pigeonVar_list[0] as Map<String, String?>?
+      val text = pigeonVar_list[1] as String?
+      return EditTextMessageParams(custom, text)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      custom,
+      text,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is EditTextMessageParams) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class ConversationSnapshot (
   /** The ID of the conversation */
@@ -1479,50 +1572,60 @@ private open class CorePigeonCodec : StandardMessageCodec() {
       }
       145.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ConversationSnapshot.fromList(it)
+          SendTextMessageParams.fromList(it)
         }
       }
       146.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SetParticipantParams.fromList(it)
+          EditTextMessageParams.fromList(it)
         }
       }
       147.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CreateParticipantParams.fromList(it)
+          ConversationSnapshot.fromList(it)
         }
       }
       148.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ParticipantSnapshot.fromList(it)
+          SetParticipantParams.fromList(it)
         }
       }
       149.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TypingSnapshot.fromList(it)
+          CreateParticipantParams.fromList(it)
         }
       }
       150.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GenericFileMetadata.fromList(it)
+          ParticipantSnapshot.fromList(it)
         }
       }
       151.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageFileMetadata.fromList(it)
+          TypingSnapshot.fromList(it)
         }
       }
       152.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoFileMetadata.fromList(it)
+          GenericFileMetadata.fromList(it)
         }
       }
       153.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AudioFileMetadata.fromList(it)
+          ImageFileMetadata.fromList(it)
         }
       }
       154.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoFileMetadata.fromList(it)
+        }
+      }
+      155.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AudioFileMetadata.fromList(it)
+        }
+      }
+      156.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           VoiceRecordingFileMetadata.fromList(it)
         }
@@ -1596,44 +1699,52 @@ private open class CorePigeonCodec : StandardMessageCodec() {
         stream.write(144)
         writeValue(stream, value.toList())
       }
-      is ConversationSnapshot -> {
+      is SendTextMessageParams -> {
         stream.write(145)
         writeValue(stream, value.toList())
       }
-      is SetParticipantParams -> {
+      is EditTextMessageParams -> {
         stream.write(146)
         writeValue(stream, value.toList())
       }
-      is CreateParticipantParams -> {
+      is ConversationSnapshot -> {
         stream.write(147)
         writeValue(stream, value.toList())
       }
-      is ParticipantSnapshot -> {
+      is SetParticipantParams -> {
         stream.write(148)
         writeValue(stream, value.toList())
       }
-      is TypingSnapshot -> {
+      is CreateParticipantParams -> {
         stream.write(149)
         writeValue(stream, value.toList())
       }
-      is GenericFileMetadata -> {
+      is ParticipantSnapshot -> {
         stream.write(150)
         writeValue(stream, value.toList())
       }
-      is ImageFileMetadata -> {
+      is TypingSnapshot -> {
         stream.write(151)
         writeValue(stream, value.toList())
       }
-      is VideoFileMetadata -> {
+      is GenericFileMetadata -> {
         stream.write(152)
         writeValue(stream, value.toList())
       }
-      is AudioFileMetadata -> {
+      is ImageFileMetadata -> {
         stream.write(153)
         writeValue(stream, value.toList())
       }
-      is VoiceRecordingFileMetadata -> {
+      is VideoFileMetadata -> {
         stream.write(154)
+        writeValue(stream, value.toList())
+      }
+      is AudioFileMetadata -> {
+        stream.write(155)
+        writeValue(stream, value.toList())
+      }
+      is VoiceRecordingFileMetadata -> {
+        stream.write(156)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -1682,6 +1793,7 @@ interface CoreHostApi {
   fun conversationParticipant(handle: Long, user: String): Long
   fun conversationMessage(handle: Long, messageId: String): Long
   fun conversationSend(handle: Long, params: String, callback: (Result<MessageRefParams>) -> Unit)
+  fun conversationSendText(handle: Long, params: SendTextMessageParams, callback: (Result<MessageRefParams>) -> Unit)
   fun conversationSubscribe(handle: Long): Long
   fun conversationSubscribeMessages(handle: Long): Long
   fun conversationSubscribeParticipants(handle: Long): Long
@@ -1706,6 +1818,7 @@ interface CoreHostApi {
   fun messageDeleteHandle(handle: Long)
   fun messageGet(handle: Long, callback: (Result<MessageSnapshot?>) -> Unit)
   fun messageEdit(handle: Long, params: String, callback: (Result<Unit>) -> Unit)
+  fun messageEditText(handle: Long, params: EditTextMessageParams, callback: (Result<Unit>) -> Unit)
   fun messageDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun messageDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageReaction(handle: Long, emoji: String): Long
@@ -2446,6 +2559,27 @@ interface CoreHostApi {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendText$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val paramsArg = args[1] as SendTextMessageParams
+            api.conversationSendText(handleArg, paramsArg) { result: Result<MessageRefParams> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -2880,6 +3014,26 @@ interface CoreHostApi {
             val handleArg = args[0] as Long
             val paramsArg = args[1] as String
             api.messageEdit(handleArg, paramsArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditText$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val paramsArg = args[1] as EditTextMessageParams
+            api.messageEditText(handleArg, paramsArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

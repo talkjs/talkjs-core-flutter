@@ -4,7 +4,11 @@ import 'participant_ref.dart';
 import 'message_ref.dart';
 
 export 'core.g.dart'
-    show CreateConversationParams, SetConversationParams, ConversationSnapshot;
+    show
+        CreateConversationParams,
+        SetConversationParams,
+        ConversationSnapshot,
+        SendTextMessageParams;
 
 final Finalizer<int> _conversationSubscriptionFinalizer = Finalizer((
   handle,
@@ -351,6 +355,20 @@ class ConversationRef {
   /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
   Future<MessageRef> send(String params) async {
     final refParams = await _api.conversationSend(_handle, params);
+
+    return makeMessageRef(
+      api: _api,
+      handle: refParams.handle,
+      id: refParams.id,
+      conversationId: refParams.conversationId,
+    );
+  }
+
+  /// Sends a message in the conversation
+  ///
+  /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
+  Future<MessageRef> sendText(SendTextMessageParams params) async {
+    final refParams = await _api.conversationSendText(_handle, params);
 
     return makeMessageRef(
       api: _api,

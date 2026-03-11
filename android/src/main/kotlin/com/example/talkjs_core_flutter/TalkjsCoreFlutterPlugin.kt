@@ -8,6 +8,7 @@ import CoreHostApi
 import CreateConversationParams
 import CreateParticipantParams
 import CreateUserParams
+import EditTextMessageParams
 import FlutterError
 import GenericFileMetadata
 import ImageFileMetadata
@@ -19,6 +20,7 @@ import NotificationSettings
 import ParticipantSnapshot
 import ReactionSnapshot
 import ReferencedMessageSnapshot
+import SendTextMessageParams
 import SetConversationParams
 import SetParticipantParams
 import SetUserParams
@@ -978,6 +980,49 @@ private class PigeonApiImplementation : CoreHostApi {
         }
     }
 
+    override fun conversationSendText(
+        handle: Long, params: SendTextMessageParams, callback: (Result<MessageRefParams>) -> Unit
+    ) {
+        val conversation = conversations[handle]
+        if (conversation == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        val messageHandle = nextId
+        nextId += 1
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val ref = conversation.send(
+                com.talkjs.core.SendTextMessageParams(
+                    text = params.text,
+                    custom = params.custom,
+                    referencedMessage = params.referencedMessage,
+                )
+            )
+
+            messages[messageHandle] = ref
+
+            callback(
+                Result.success(
+                    MessageRefParams(
+                        handle = messageHandle,
+                        id = ref.id,
+                        conversationId = ref.conversationId,
+                    )
+                )
+            )
+        }
+    }
+
     override fun conversationSubscribe(handle: Long): Long {
         val ref = conversations[handle] ?: throw FlutterError(
             "null-error",
@@ -1402,6 +1447,34 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.edit(params)
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun messageEditText(
+        handle: Long, params: EditTextMessageParams, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = messages[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid message handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.edit(
+                com.talkjs.core.EditTextMessageParams(
+                    custom = params.custom,
+                    text = params.text,
+                )
+            )
             callback(Result.success(Unit))
         }
     }

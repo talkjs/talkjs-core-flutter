@@ -2,7 +2,7 @@ import 'core.g.dart';
 import 'api.dart';
 import 'reaction_ref.dart';
 
-export 'core.g.dart' show MessageSnapshot;
+export 'core.g.dart' show MessageSnapshot, EditTextMessageParams;
 
 final Finalizer<int> _messageFinalizer = Finalizer((handle) async {
   await hostApi?.messageDeleteHandle(handle);
@@ -41,9 +41,17 @@ class MessageRef {
   /// Edits this message.
   ///
   /// @remarks
-  /// The function will throw if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
+  /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
   Future<void> edit(String params) {
     return _api.messageEdit(_handle, params);
+  }
+
+  /// Edits this message.
+  ///
+  /// @remarks
+  /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
+  Future<void> editText(EditTextMessageParams params) {
+    return _api.messageEditText(_handle, params);
   }
 
   /// Deletes properties of this message.

@@ -1028,6 +1028,109 @@ class MessageRefParams {
   int get hashCode => Object.hashAll(_toList());
 }
 
+/// Parameters you can pass when sending a message
+class SendTextMessageParams {
+  SendTextMessageParams({
+    required this.text,
+    this.custom,
+    this.referencedMessage,
+  });
+
+  /// The text to send in the message.
+  String text;
+
+  /// Custom metadata you have set on the user.
+  /// Default = no custom metadata
+  Map<String, String>? custom;
+
+  /// The message that you are replying to.
+  /// Default = not a reply
+  String? referencedMessage;
+
+  List<Object?> _toList() {
+    return <Object?>[text, custom, referencedMessage];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static SendTextMessageParams decode(Object result) {
+    result as List<Object?>;
+    return SendTextMessageParams(
+      text: result[0]! as String,
+      custom: (result[1] as Map<Object?, Object?>?)?.cast<String, String>(),
+      referencedMessage: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SendTextMessageParams || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+/// Parameters you can pass when editing a message.
+///
+/// @remarks
+/// Properties that are `null` will not be changed.
+/// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
+///
+class EditTextMessageParams {
+  EditTextMessageParams({this.custom, this.text});
+
+  /// Custom metadata you have set on the user.
+  /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
+  /// Default = no custom metadata
+  Map<String, String?>? custom;
+
+  /// The new text to set as the message body
+  String? text;
+
+  List<Object?> _toList() {
+    return <Object?>[custom, text];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static EditTextMessageParams decode(Object result) {
+    result as List<Object?>;
+    return EditTextMessageParams(
+      custom: (result[0] as Map<Object?, Object?>?)?.cast<String, String?>(),
+      text: result[1] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! EditTextMessageParams || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
 class ConversationSnapshot {
   ConversationSnapshot({
     required this.id,
@@ -1651,35 +1754,41 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is MessageRefParams) {
       buffer.putUint8(144);
       writeValue(buffer, value.encode());
-    } else if (value is ConversationSnapshot) {
+    } else if (value is SendTextMessageParams) {
       buffer.putUint8(145);
       writeValue(buffer, value.encode());
-    } else if (value is SetParticipantParams) {
+    } else if (value is EditTextMessageParams) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
-    } else if (value is CreateParticipantParams) {
+    } else if (value is ConversationSnapshot) {
       buffer.putUint8(147);
       writeValue(buffer, value.encode());
-    } else if (value is ParticipantSnapshot) {
+    } else if (value is SetParticipantParams) {
       buffer.putUint8(148);
       writeValue(buffer, value.encode());
-    } else if (value is TypingSnapshot) {
+    } else if (value is CreateParticipantParams) {
       buffer.putUint8(149);
       writeValue(buffer, value.encode());
-    } else if (value is GenericFileMetadata) {
+    } else if (value is ParticipantSnapshot) {
       buffer.putUint8(150);
       writeValue(buffer, value.encode());
-    } else if (value is ImageFileMetadata) {
+    } else if (value is TypingSnapshot) {
       buffer.putUint8(151);
       writeValue(buffer, value.encode());
-    } else if (value is VideoFileMetadata) {
+    } else if (value is GenericFileMetadata) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    } else if (value is AudioFileMetadata) {
+    } else if (value is ImageFileMetadata) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    } else if (value is VoiceRecordingFileMetadata) {
+    } else if (value is VideoFileMetadata) {
       buffer.putUint8(154);
+      writeValue(buffer, value.encode());
+    } else if (value is AudioFileMetadata) {
+      buffer.putUint8(155);
+      writeValue(buffer, value.encode());
+    } else if (value is VoiceRecordingFileMetadata) {
+      buffer.putUint8(156);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1726,24 +1835,28 @@ class _PigeonCodec extends StandardMessageCodec {
       case 144:
         return MessageRefParams.decode(readValue(buffer)!);
       case 145:
-        return ConversationSnapshot.decode(readValue(buffer)!);
+        return SendTextMessageParams.decode(readValue(buffer)!);
       case 146:
-        return SetParticipantParams.decode(readValue(buffer)!);
+        return EditTextMessageParams.decode(readValue(buffer)!);
       case 147:
-        return CreateParticipantParams.decode(readValue(buffer)!);
+        return ConversationSnapshot.decode(readValue(buffer)!);
       case 148:
-        return ParticipantSnapshot.decode(readValue(buffer)!);
+        return SetParticipantParams.decode(readValue(buffer)!);
       case 149:
-        return TypingSnapshot.decode(readValue(buffer)!);
+        return CreateParticipantParams.decode(readValue(buffer)!);
       case 150:
-        return GenericFileMetadata.decode(readValue(buffer)!);
+        return ParticipantSnapshot.decode(readValue(buffer)!);
       case 151:
-        return ImageFileMetadata.decode(readValue(buffer)!);
+        return TypingSnapshot.decode(readValue(buffer)!);
       case 152:
-        return VideoFileMetadata.decode(readValue(buffer)!);
+        return GenericFileMetadata.decode(readValue(buffer)!);
       case 153:
-        return AudioFileMetadata.decode(readValue(buffer)!);
+        return ImageFileMetadata.decode(readValue(buffer)!);
       case 154:
+        return VideoFileMetadata.decode(readValue(buffer)!);
+      case 155:
+        return AudioFileMetadata.decode(readValue(buffer)!);
+      case 156:
         return VoiceRecordingFileMetadata.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -2819,6 +2932,39 @@ class CoreHostApi {
     }
   }
 
+  Future<MessageRefParams> conversationSendText(
+    int handle,
+    SendTextMessageParams params,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendText$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, params],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as MessageRefParams?)!;
+    }
+  }
+
   Future<int> conversationSubscribe(int handle) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSubscribe$pigeonVar_messageChannelSuffix';
@@ -3420,6 +3566,31 @@ class CoreHostApi {
   Future<void> messageEdit(int handle, String params) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEdit$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, params],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> messageEditText(int handle, EditTextMessageParams params) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditText$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
