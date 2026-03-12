@@ -703,63 +703,22 @@ data class ReactionSnapshot (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
-data class ReferencedMessageSnapshot (
-  /** The unique ID that is used to identify the message in TalkJS */
+data class ReferencedMessageSnapshotJson (
   val id: String,
-  /** Referenced messages are always `USER_MESSAGE` because you cannot reply to a system message. */
   val type: MessageType,
-  /**
-   * A snapshot of the user who sent the message.
-   * The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
-   * It is not a historical snapshot.
-   *
-   * @remarks
-   * Guaranteed to be set, unlike in MessageSnapshot, because you cannot reference a SystemMessage
-   */
   val sender: UserSnapshot? = null,
-  /** Custom metadata you have set on the message */
   val custom: Map<String, String>,
-  /** Time at which the message was sent, as a unix timestamp in milliseconds */
   val createdAt: Long,
-  /**
-   * Time at which the message was last edited, as a unix timestamp in milliseconds.
-   * `null` if the message has never been edited.
-   */
   val editedAt: Long? = null,
-  /**
-   * The ID of the message that this message is a reply to, or null if this message is not a reply.
-   *
-   * @remarks
-   * Since this is a snapshot of a referenced message, we do not automatically expand its referenced message.
-   * The ID of its referenced message is provided here instead.
-   */
   val referencedMessageId: String? = null,
-  /**
-   * Where this message originated from:
-   *
-   * - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
-   *
-   * - `REST` = Message sent via the REST API's "send message" endpoint
-   *
-   * - `IMPORT` = Message sent via the REST API's "import messages" endpoint
-   *
-   * - `EMAIL` = Message sent by replying to an email notification
-   */
   val origin: MessageOrigin,
-  /**
-   * The contents of the message, as a plain text string without any formatting or attachments.
-   * Useful for showing in a conversation list or in notifications.
-   */
   val plaintext: String,
-  /**
-   * The main body of the message, as a list of blocks that are rendered top-to-bottom.
-   * All the emoji reactions that have been added to this message.
-   */
+  val contentJson: String,
   val reactions: List<ReactionSnapshot>
 )
  {
   companion object {
-    fun fromList(pigeonVar_list: List<Any?>): ReferencedMessageSnapshot {
+    fun fromList(pigeonVar_list: List<Any?>): ReferencedMessageSnapshotJson {
       val id = pigeonVar_list[0] as String
       val type = pigeonVar_list[1] as MessageType
       val sender = pigeonVar_list[2] as UserSnapshot?
@@ -769,8 +728,9 @@ data class ReferencedMessageSnapshot (
       val referencedMessageId = pigeonVar_list[6] as String?
       val origin = pigeonVar_list[7] as MessageOrigin
       val plaintext = pigeonVar_list[8] as String
-      val reactions = pigeonVar_list[9] as List<ReactionSnapshot>
-      return ReferencedMessageSnapshot(id, type, sender, custom, createdAt, editedAt, referencedMessageId, origin, plaintext, reactions)
+      val contentJson = pigeonVar_list[9] as String
+      val reactions = pigeonVar_list[10] as List<ReactionSnapshot>
+      return ReferencedMessageSnapshotJson(id, type, sender, custom, createdAt, editedAt, referencedMessageId, origin, plaintext, contentJson, reactions)
     }
   }
   fun toList(): List<Any?> {
@@ -784,11 +744,12 @@ data class ReferencedMessageSnapshot (
       referencedMessageId,
       origin,
       plaintext,
+      contentJson,
       reactions,
     )
   }
   override fun equals(other: Any?): Boolean {
-    if (other !is ReferencedMessageSnapshot) {
+    if (other !is ReferencedMessageSnapshotJson) {
       return false
     }
     if (this === other) {
@@ -800,76 +761,34 @@ data class ReferencedMessageSnapshot (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
-data class MessageSnapshot (
-  /** The unique ID that is used to identify the message in TalkJS */
+data class MessageSnapshotJson (
   val id: String,
-  /**
-   * Whether this message was "from a user" or a general system message without a specific sender.
-   *
-   * The `sender` property is always present for `USER_MESSAGE` messages and never present for `SYSTEM_MESSAGE` messages.
-   */
   val type: MessageType,
-  /**
-   * A snapshot of the user who sent the message, or null if it is a system message.
-   * The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
-   * It is not a historical snapshot.
-   */
   val sender: UserSnapshot? = null,
-  /** Custom metadata you have set on the message */
   val custom: Map<String, String>,
-  /** Time at which the message was sent, as a unix timestamp in milliseconds. */
   val createdAt: Long,
-  /**
-   * Time at which the message was last edited, as a unix timestamp in milliseconds.
-   * `null` if the message has never been edited.
-   */
   val editedAt: Long? = null,
-  /**
-   * A snapshot of the message that this message is aa reply to, or `null` if this message is not a reply.
-   *
-   * Only UserMessages can reference other messages.
-   * The referenced message snapshot does not have a `referencedMessage` field.
-   * Instead, it has `referencedMessageId`.
-   * This prevents TalkJS fetching an unlimited number of messages in a long chain of replies.
-   */
-  val referencedMessage: ReferencedMessageSnapshot? = null,
-  /**
-   * Where this message origiranted from:
-   *
-   * - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
-   * - `REST` = Message sent via the REST API's "send message" endpoint
-   * - `IMPORT` = Message sent via the REST API's "import messages" endpoint
-   * - `EMAIL` = Message sent by replying to an email notification
-   */
+  val referencedMessage: ReferencedMessageSnapshotJson? = null,
   val origin: MessageOrigin,
-  /**
-   * The contents of the message, as a plain text string without any formatting or attachments.
-   * Useful for showing in a conversation list or in notifications.
-   */
   val plaintext: String,
-  /**
-   * The main body of the message, as a list of blocks that are rendered top-to-bottom.
-   * All the emoji reactions that have been added to this message.
-   *
-   * @remarks
-   * There can be up to 50 different reactions on each message.
-   */
+  val contentJson: String,
   val reactions: List<ReactionSnapshot>
 )
  {
   companion object {
-    fun fromList(pigeonVar_list: List<Any?>): MessageSnapshot {
+    fun fromList(pigeonVar_list: List<Any?>): MessageSnapshotJson {
       val id = pigeonVar_list[0] as String
       val type = pigeonVar_list[1] as MessageType
       val sender = pigeonVar_list[2] as UserSnapshot?
       val custom = pigeonVar_list[3] as Map<String, String>
       val createdAt = pigeonVar_list[4] as Long
       val editedAt = pigeonVar_list[5] as Long?
-      val referencedMessage = pigeonVar_list[6] as ReferencedMessageSnapshot?
+      val referencedMessage = pigeonVar_list[6] as ReferencedMessageSnapshotJson?
       val origin = pigeonVar_list[7] as MessageOrigin
       val plaintext = pigeonVar_list[8] as String
-      val reactions = pigeonVar_list[9] as List<ReactionSnapshot>
-      return MessageSnapshot(id, type, sender, custom, createdAt, editedAt, referencedMessage, origin, plaintext, reactions)
+      val contentJson = pigeonVar_list[9] as String
+      val reactions = pigeonVar_list[10] as List<ReactionSnapshot>
+      return MessageSnapshotJson(id, type, sender, custom, createdAt, editedAt, referencedMessage, origin, plaintext, contentJson, reactions)
     }
   }
   fun toList(): List<Any?> {
@@ -883,11 +802,12 @@ data class MessageSnapshot (
       referencedMessage,
       origin,
       plaintext,
+      contentJson,
       reactions,
     )
   }
   override fun equals(other: Any?): Boolean {
-    if (other !is MessageSnapshot) {
+    if (other !is MessageSnapshotJson) {
       return false
     }
     if (this === other) {
@@ -1026,74 +946,91 @@ data class EditTextMessageParams (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
-data class ConversationSnapshot (
-  /** The ID of the conversation */
+data class SendMessageParamsJson (
+  val contentJson: String,
+  val custom: Map<String, String>? = null,
+  val referencedMessage: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): SendMessageParamsJson {
+      val contentJson = pigeonVar_list[0] as String
+      val custom = pigeonVar_list[1] as Map<String, String>?
+      val referencedMessage = pigeonVar_list[2] as String?
+      return SendMessageParamsJson(contentJson, custom, referencedMessage)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      contentJson,
+      custom,
+      referencedMessage,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is SendMessageParamsJson) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class EditMessageParamsJson (
+  val custom: Map<String, String?>? = null,
+  val contentJson: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): EditMessageParamsJson {
+      val custom = pigeonVar_list[0] as Map<String, String?>?
+      val contentJson = pigeonVar_list[1] as String?
+      return EditMessageParamsJson(custom, contentJson)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      custom,
+      contentJson,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is EditMessageParamsJson) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return CorePigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class ConversationSnapshotJson (
   val id: String,
-  /** Contains the conversation subject, or `null` if the conversation does not have a subject specified. */
   val subject: String? = null,
-  /** Contains the URL of a photo to represent the topic of the conversation or `null` if the conversation does not have a photo specified. */
   val photoUrl: String? = null,
-  /**
-   * One or more welcome messages that will be rendered at the start of this conversation as system messages.
-   *
-   * @remarks
-   * Welcome messages are rendered in the UI as messages, but they are not real messages.
-   * This means they do not appear when you list messages using the REST API or JS/Kotlin Data API, and you cannot reply or react to them.
-   */
   val welcomeMessages: List<String>,
-  /** Custom metadata you have set on the conversation */
   val custom: Map<String, String>,
-  /** The date that the conversation was created, as a unix timestamp in milliseconds. */
   val createdAt: Long,
-  /** The date that the current user joined the conversation, as a unix timestamp in milliseconds. */
   val joinedAt: Long,
-  /** The last message sent in this conversation, or `null` if not messages have been sent. */
-  val lastMessage: MessageSnapshot? = null,
-  /** The number of messages in this conversation that the current user hasn't read. */
+  val lastMessage: MessageSnapshotJson? = null,
   val unreadMessageCount: Long,
-  /**
-   * The most recent date that the current user read the conversation.
-   *
-   * @remarks
-   * This value is updated whenever you read a message in a chat UI, open an email notification, or mark the conversation as read using an API like [ConversationRef.markAsRead].
-   *
-   * Any messages sent after this timestamp are unread messages.
-   */
   val readUntil: Long,
-  /**
-   * Everyone in the conversation has read any messages sent on or before this date.
-   *
-   * @remarks
-   * This is the minimum of all the participants' `readUntil` values.
-   * Any messages sent on or before this timestamp should show a "read" indicator in the UI.
-   *
-   * This value will rarely change in very large conversations.
-   * If just one person stops checking their messages, `everyoneReadUntil` will never update.
-   */
   val everyoneReadUntil: Long,
-  /**
-   * Whether the conversation should be considered unread.
-   *
-   * This can be true even when `unreadMessageCount` is zero, if the user has manually marked the conversation as unread.
-   */
   val isUnread: Boolean,
-  /** The current user's permission level in this conversation. */
   val access: ConversationAccess,
-  /**
-   * The current user's notification settings for this conversation.
-   *
-   * `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
-   */
   val notify: NotificationSettings,
-  /**
-   * @suppress
-   * For back-compat
-   */
   val lastMessageAt: Long? = null
 )
  {
   companion object {
-    fun fromList(pigeonVar_list: List<Any?>): ConversationSnapshot {
+    fun fromList(pigeonVar_list: List<Any?>): ConversationSnapshotJson {
       val id = pigeonVar_list[0] as String
       val subject = pigeonVar_list[1] as String?
       val photoUrl = pigeonVar_list[2] as String?
@@ -1101,7 +1038,7 @@ data class ConversationSnapshot (
       val custom = pigeonVar_list[4] as Map<String, String>
       val createdAt = pigeonVar_list[5] as Long
       val joinedAt = pigeonVar_list[6] as Long
-      val lastMessage = pigeonVar_list[7] as MessageSnapshot?
+      val lastMessage = pigeonVar_list[7] as MessageSnapshotJson?
       val unreadMessageCount = pigeonVar_list[8] as Long
       val readUntil = pigeonVar_list[9] as Long
       val everyoneReadUntil = pigeonVar_list[10] as Long
@@ -1109,7 +1046,7 @@ data class ConversationSnapshot (
       val access = pigeonVar_list[12] as ConversationAccess
       val notify = pigeonVar_list[13] as NotificationSettings
       val lastMessageAt = pigeonVar_list[14] as Long?
-      return ConversationSnapshot(id, subject, photoUrl, welcomeMessages, custom, createdAt, joinedAt, lastMessage, unreadMessageCount, readUntil, everyoneReadUntil, isUnread, access, notify, lastMessageAt)
+      return ConversationSnapshotJson(id, subject, photoUrl, welcomeMessages, custom, createdAt, joinedAt, lastMessage, unreadMessageCount, readUntil, everyoneReadUntil, isUnread, access, notify, lastMessageAt)
     }
   }
   fun toList(): List<Any?> {
@@ -1132,7 +1069,7 @@ data class ConversationSnapshot (
     )
   }
   override fun equals(other: Any?): Boolean {
-    if (other !is ConversationSnapshot) {
+    if (other !is ConversationSnapshotJson) {
       return false
     }
     if (this === other) {
@@ -1557,12 +1494,12 @@ private open class CorePigeonCodec : StandardMessageCodec() {
       }
       142.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ReferencedMessageSnapshot.fromList(it)
+          ReferencedMessageSnapshotJson.fromList(it)
         }
       }
       143.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          MessageSnapshot.fromList(it)
+          MessageSnapshotJson.fromList(it)
         }
       }
       144.toByte() -> {
@@ -1582,50 +1519,60 @@ private open class CorePigeonCodec : StandardMessageCodec() {
       }
       147.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ConversationSnapshot.fromList(it)
+          SendMessageParamsJson.fromList(it)
         }
       }
       148.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          SetParticipantParams.fromList(it)
+          EditMessageParamsJson.fromList(it)
         }
       }
       149.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          CreateParticipantParams.fromList(it)
+          ConversationSnapshotJson.fromList(it)
         }
       }
       150.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ParticipantSnapshot.fromList(it)
+          SetParticipantParams.fromList(it)
         }
       }
       151.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TypingSnapshot.fromList(it)
+          CreateParticipantParams.fromList(it)
         }
       }
       152.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GenericFileMetadata.fromList(it)
+          ParticipantSnapshot.fromList(it)
         }
       }
       153.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageFileMetadata.fromList(it)
+          TypingSnapshot.fromList(it)
         }
       }
       154.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoFileMetadata.fromList(it)
+          GenericFileMetadata.fromList(it)
         }
       }
       155.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          AudioFileMetadata.fromList(it)
+          ImageFileMetadata.fromList(it)
         }
       }
       156.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          VideoFileMetadata.fromList(it)
+        }
+      }
+      157.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          AudioFileMetadata.fromList(it)
+        }
+      }
+      158.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           VoiceRecordingFileMetadata.fromList(it)
         }
@@ -1687,11 +1634,11 @@ private open class CorePigeonCodec : StandardMessageCodec() {
         stream.write(141)
         writeValue(stream, value.toList())
       }
-      is ReferencedMessageSnapshot -> {
+      is ReferencedMessageSnapshotJson -> {
         stream.write(142)
         writeValue(stream, value.toList())
       }
-      is MessageSnapshot -> {
+      is MessageSnapshotJson -> {
         stream.write(143)
         writeValue(stream, value.toList())
       }
@@ -1707,44 +1654,52 @@ private open class CorePigeonCodec : StandardMessageCodec() {
         stream.write(146)
         writeValue(stream, value.toList())
       }
-      is ConversationSnapshot -> {
+      is SendMessageParamsJson -> {
         stream.write(147)
         writeValue(stream, value.toList())
       }
-      is SetParticipantParams -> {
+      is EditMessageParamsJson -> {
         stream.write(148)
         writeValue(stream, value.toList())
       }
-      is CreateParticipantParams -> {
+      is ConversationSnapshotJson -> {
         stream.write(149)
         writeValue(stream, value.toList())
       }
-      is ParticipantSnapshot -> {
+      is SetParticipantParams -> {
         stream.write(150)
         writeValue(stream, value.toList())
       }
-      is TypingSnapshot -> {
+      is CreateParticipantParams -> {
         stream.write(151)
         writeValue(stream, value.toList())
       }
-      is GenericFileMetadata -> {
+      is ParticipantSnapshot -> {
         stream.write(152)
         writeValue(stream, value.toList())
       }
-      is ImageFileMetadata -> {
+      is TypingSnapshot -> {
         stream.write(153)
         writeValue(stream, value.toList())
       }
-      is VideoFileMetadata -> {
+      is GenericFileMetadata -> {
         stream.write(154)
         writeValue(stream, value.toList())
       }
-      is AudioFileMetadata -> {
+      is ImageFileMetadata -> {
         stream.write(155)
         writeValue(stream, value.toList())
       }
-      is VoiceRecordingFileMetadata -> {
+      is VideoFileMetadata -> {
         stream.write(156)
+        writeValue(stream, value.toList())
+      }
+      is AudioFileMetadata -> {
+        stream.write(157)
+        writeValue(stream, value.toList())
+      }
+      is VoiceRecordingFileMetadata -> {
+        stream.write(158)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -1783,7 +1738,7 @@ interface CoreHostApi {
   fun userOnlineSubscriptionDeleteHandle(handle: Long)
   fun userOnlineSubscriptionUnsubscribe(handle: Long)
   fun conversationDeleteHandle(handle: Long)
-  fun conversationGet(handle: Long, callback: (Result<ConversationSnapshot?>) -> Unit)
+  fun conversationGet(handle: Long, callback: (Result<ConversationSnapshotJson?>) -> Unit)
   fun conversationSet(handle: Long, data: SetConversationParams, callback: (Result<Unit>) -> Unit)
   fun conversationCreateIfNotExists(handle: Long, data: CreateConversationParams, callback: (Result<Unit>) -> Unit)
   fun conversationDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
@@ -1794,6 +1749,7 @@ interface CoreHostApi {
   fun conversationMessage(handle: Long, messageId: String): Long
   fun conversationSend(handle: Long, params: String, callback: (Result<MessageRefParams>) -> Unit)
   fun conversationSendText(handle: Long, params: SendTextMessageParams, callback: (Result<MessageRefParams>) -> Unit)
+  fun conversationSendMessage(handle: Long, params: SendMessageParamsJson, callback: (Result<MessageRefParams>) -> Unit)
   fun conversationSubscribe(handle: Long): Long
   fun conversationSubscribeMessages(handle: Long): Long
   fun conversationSubscribeParticipants(handle: Long): Long
@@ -1816,9 +1772,10 @@ interface CoreHostApi {
   fun participantDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun participantDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageDeleteHandle(handle: Long)
-  fun messageGet(handle: Long, callback: (Result<MessageSnapshot?>) -> Unit)
+  fun messageGet(handle: Long, callback: (Result<MessageSnapshotJson?>) -> Unit)
   fun messageEdit(handle: Long, params: String, callback: (Result<Unit>) -> Unit)
   fun messageEditText(handle: Long, params: EditTextMessageParams, callback: (Result<Unit>) -> Unit)
+  fun messageEditMessage(handle: Long, params: EditMessageParamsJson, callback: (Result<Unit>) -> Unit)
   fun messageDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun messageDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageReaction(handle: Long, emoji: String): Long
@@ -2370,7 +2327,7 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            api.conversationGet(handleArg) { result: Result<ConversationSnapshot?> ->
+            api.conversationGet(handleArg) { result: Result<ConversationSnapshotJson?> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -2566,6 +2523,27 @@ interface CoreHostApi {
             val handleArg = args[0] as Long
             val paramsArg = args[1] as SendTextMessageParams
             api.conversationSendText(handleArg, paramsArg) { result: Result<MessageRefParams> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(CorePigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendMessage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val paramsArg = args[1] as SendMessageParamsJson
+            api.conversationSendMessage(handleArg, paramsArg) { result: Result<MessageRefParams> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -2992,7 +2970,7 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            api.messageGet(handleArg) { result: Result<MessageSnapshot?> ->
+            api.messageGet(handleArg) { result: Result<MessageSnapshotJson?> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -3034,6 +3012,26 @@ interface CoreHostApi {
             val handleArg = args[0] as Long
             val paramsArg = args[1] as EditTextMessageParams
             api.messageEditText(handleArg, paramsArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(CorePigeonUtils.wrapError(error))
+              } else {
+                reply.reply(CorePigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditMessage$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val handleArg = args[0] as Long
+            val paramsArg = args[1] as EditMessageParamsJson
+            api.messageEditMessage(handleArg, paramsArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -3204,7 +3202,7 @@ class CoreFlutterApi(private val binaryMessenger: BinaryMessenger, private val m
       } 
     }
   }
-  fun newConversationSnapshot(handleArg: Long, snapshotArg: ConversationSnapshot?, callback: (Result<Unit>) -> Unit)
+  fun newConversationSnapshot(handleArg: Long, snapshotArg: ConversationSnapshotJson?, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationSnapshot$separatedMessageChannelSuffix"
@@ -3221,7 +3219,7 @@ class CoreFlutterApi(private val binaryMessenger: BinaryMessenger, private val m
       } 
     }
   }
-  fun newConversationListSnapshot(handleArg: Long, snapshotArg: List<ConversationSnapshot>, loadedAllArg: Boolean, callback: (Result<Unit>) -> Unit)
+  fun newConversationListSnapshot(handleArg: Long, snapshotArg: List<ConversationSnapshotJson>, loadedAllArg: Boolean, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot$separatedMessageChannelSuffix"
@@ -3255,7 +3253,7 @@ class CoreFlutterApi(private val binaryMessenger: BinaryMessenger, private val m
       } 
     }
   }
-  fun newMessageSnapshot(handleArg: Long, snapshotArg: List<MessageSnapshot>?, loadedAllArg: Boolean, callback: (Result<Unit>) -> Unit)
+  fun newMessageSnapshot(handleArg: Long, snapshotArg: List<MessageSnapshotJson>?, loadedAllArg: Boolean, callback: (Result<Unit>) -> Unit)
 {
     val separatedMessageChannelSuffix = if (messageChannelSuffix.isNotEmpty()) ".$messageChannelSuffix" else ""
     val channelName = "dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newMessageSnapshot$separatedMessageChannelSuffix"

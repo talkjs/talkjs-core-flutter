@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'core.g.dart';
+import 'snapshots.dart';
 
 CoreHostApi? hostApi;
 
@@ -45,17 +46,22 @@ class CoreFlutterApiImplementation implements CoreFlutterApi {
   }
 
   @override
-  void newConversationSnapshot(int handle, ConversationSnapshot? snapshot) {
-    conversationSubscriptionOnSnapshots[handle]?.call(snapshot);
+  void newConversationSnapshot(int handle, ConversationSnapshotJson? snapshot) {
+    conversationSubscriptionOnSnapshots[handle]?.call(
+      snapshot == null ? null : conversationSnapshotFromJson(snapshot),
+    );
   }
 
   @override
   void newConversationListSnapshot(
     int handle,
-    List<ConversationSnapshot> snapshot,
+    List<ConversationSnapshotJson> snapshot,
     bool loadedAll,
   ) {
-    conversationListSubscriptionOnSnapshots[handle]?.call(snapshot, loadedAll);
+    conversationListSubscriptionOnSnapshots[handle]?.call(
+      snapshot.map(conversationSnapshotFromJson).toList(),
+      loadedAll,
+    );
   }
 
   @override
@@ -66,10 +72,13 @@ class CoreFlutterApiImplementation implements CoreFlutterApi {
   @override
   void newMessageSnapshot(
     int handle,
-    List<MessageSnapshot>? snapshot,
+    List<MessageSnapshotJson>? snapshot,
     bool loadedAll,
   ) {
-    messageSubscriptionOnSnapshots[handle]?.call(snapshot, loadedAll);
+    messageSubscriptionOnSnapshots[handle]?.call(
+      snapshot?.map(messageSnapshotFromJson).toList(),
+      loadedAll,
+    );
   }
 
   @override

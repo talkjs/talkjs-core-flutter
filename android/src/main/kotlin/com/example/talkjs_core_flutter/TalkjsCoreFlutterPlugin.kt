@@ -2,24 +2,26 @@ package com.example.talkjs_core_flutter
 
 import AudioFileMetadata
 import ConversationAccess
-import ConversationSnapshot
+import ConversationSnapshotJson
 import CoreFlutterApi
 import CoreHostApi
 import CreateConversationParams
 import CreateParticipantParams
 import CreateUserParams
+import EditMessageParamsJson
 import EditTextMessageParams
 import FlutterError
 import GenericFileMetadata
 import ImageFileMetadata
 import MessageOrigin
 import MessageRefParams
-import MessageSnapshot
+import MessageSnapshotJson
 import MessageType
 import NotificationSettings
 import ParticipantSnapshot
 import ReactionSnapshot
-import ReferencedMessageSnapshot
+import ReferencedMessageSnapshotJson
+import SendMessageParamsJson
 import SendTextMessageParams
 import SetConversationParams
 import SetParticipantParams
@@ -30,9 +32,14 @@ import UserOnlineSnapshot
 import UserSnapshot
 import VideoFileMetadata
 import VoiceRecordingFileMetadata
+import com.talkjs.core.AudioBlock
+import com.talkjs.core.ContentBlock
 import com.talkjs.core.ConversationListSubscription
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
+import com.talkjs.core.GenericFileBlock
+import com.talkjs.core.ImageBlock
+import com.talkjs.core.LocationBlock
 import com.talkjs.core.MessageRef
 import com.talkjs.core.MessageSubscription
 import com.talkjs.core.ParticipantRef
@@ -40,15 +47,64 @@ import com.talkjs.core.ParticipantSubscription
 import com.talkjs.core.ReactionRef
 import com.talkjs.core.Subscription
 import com.talkjs.core.TalkSession
+import com.talkjs.core.TextBlock
 import com.talkjs.core.TypingSubscription
 import com.talkjs.core.UserOnlineSubscription
 import com.talkjs.core.UserRef
 import com.talkjs.core.UserSubscription
+import com.talkjs.core.VideoBlock
+import com.talkjs.core.VoiceBlock
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.ClassDiscriminatorMode
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonPrimitive
+
+@OptIn(ExperimentalSerializationApi::class)
+private val jsonFormat = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+
+    // We don't want Kotlin's polymorphic annotations on serialized classes
+    classDiscriminatorMode = ClassDiscriminatorMode.NONE
+}
+
+private fun serializeContent(content: List<ContentBlock>): String =
+    jsonFormat.encodeToString(content)
+
+private fun deserializeContent(contentJson: String): List<ContentBlock> {
+    val array = jsonFormat.parseToJsonElement(contentJson) as JsonArray
+    return array.map { element ->
+        if (element !is JsonObject) {
+            throw Exception("Failed to deserialize ContentBlock")
+        }
+        deserializeContentBlock(element)
+    }
+}
+
+private fun deserializeContentBlock(decoded: JsonObject): ContentBlock =
+    when (decoded["type"]?.jsonPrimitive?.contentOrNull) {
+        "text" -> jsonFormat.decodeFromJsonElement<TextBlock>(decoded)
+        "location" -> jsonFormat.decodeFromJsonElement<LocationBlock>(decoded)
+        "file" -> when (decoded["subtype"]?.jsonPrimitive?.contentOrNull) {
+            "video" -> jsonFormat.decodeFromJsonElement<VideoBlock>(decoded)
+            "image" -> jsonFormat.decodeFromJsonElement<ImageBlock>(decoded)
+            "audio" -> jsonFormat.decodeFromJsonElement<AudioBlock>(decoded)
+            "voice" -> jsonFormat.decodeFromJsonElement<VoiceBlock>(decoded)
+            null -> jsonFormat.decodeFromJsonElement<GenericFileBlock>(decoded)
+            else -> throw Exception("Failed to deserialize ContentBlock: unknown subtype")
+        }
+
+        else -> throw Exception("Failed to deserialize ContentBlock: unknown type")
+    }
 
 private fun makeUserSnapshot(snapshot: com.talkjs.core.UserSnapshot): UserSnapshot = UserSnapshot(
     id = snapshot.id,
@@ -80,8 +136,8 @@ private fun makeReactionSnapshot(snapshot: com.talkjs.core.ReactionSnapshot): Re
         currentUserReacted = snapshot.currentUserReacted,
     )
 
-private fun makeReferencedMessageSnapshot(snapshot: com.talkjs.core.ReferencedMessageSnapshot): ReferencedMessageSnapshot =
-    ReferencedMessageSnapshot(
+private fun makeReferencedMessageSnapshot(snapshot: com.talkjs.core.ReferencedMessageSnapshot): ReferencedMessageSnapshotJson =
+    ReferencedMessageSnapshotJson(
         id = snapshot.id,
         type = makeMessageType(snapshot.type),
         sender = snapshot.sender?.let { makeUserSnapshot(it) },
@@ -91,11 +147,12 @@ private fun makeReferencedMessageSnapshot(snapshot: com.talkjs.core.ReferencedMe
         referencedMessageId = snapshot.referencedMessageId,
         origin = makeMessageOrigin(snapshot.origin),
         plaintext = snapshot.plaintext,
+        contentJson = serializeContent(snapshot.content),
         reactions = snapshot.reactions.map { makeReactionSnapshot(it) },
     )
 
-private fun makeMessageSnapshot(snapshot: com.talkjs.core.MessageSnapshot): MessageSnapshot =
-    MessageSnapshot(
+private fun makeMessageSnapshot(snapshot: com.talkjs.core.MessageSnapshot): MessageSnapshotJson =
+    MessageSnapshotJson(
         id = snapshot.id,
         type = makeMessageType(snapshot.type),
         sender = snapshot.sender?.let { makeUserSnapshot(it) },
@@ -105,6 +162,7 @@ private fun makeMessageSnapshot(snapshot: com.talkjs.core.MessageSnapshot): Mess
         referencedMessage = snapshot.referencedMessage?.let { makeReferencedMessageSnapshot(it) },
         origin = makeMessageOrigin(snapshot.origin),
         plaintext = snapshot.plaintext,
+        contentJson = serializeContent(snapshot.content),
         reactions = snapshot.reactions.map { makeReactionSnapshot(it) },
     )
 
@@ -134,8 +192,8 @@ private fun makeNotificationSettings(notify: NotificationSettings): com.talkjs.c
         NotificationSettings.MENTIONS_ONLY -> com.talkjs.core.NotificationSettings.MENTIONS_ONLY
     }
 
-private fun makeConversationSnapshot(snapshot: com.talkjs.core.ConversationSnapshot): ConversationSnapshot =
-    ConversationSnapshot(
+private fun makeConversationSnapshot(snapshot: com.talkjs.core.ConversationSnapshot): ConversationSnapshotJson =
+    ConversationSnapshotJson(
         id = snapshot.id,
         subject = snapshot.subject,
         photoUrl = snapshot.photoUrl,
@@ -819,7 +877,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationGet(
-        handle: Long, callback: (Result<ConversationSnapshot?>) -> Unit
+        handle: Long, callback: (Result<ConversationSnapshotJson?>) -> Unit
     ) {
         val ref = conversations[handle]
         if (ref == null) {
@@ -1094,6 +1152,49 @@ private class PigeonApiImplementation : CoreHostApi {
             val ref = conversation.send(
                 com.talkjs.core.SendTextMessageParams(
                     text = params.text,
+                    custom = params.custom,
+                    referencedMessage = params.referencedMessage,
+                )
+            )
+
+            messages[messageHandle] = ref
+
+            callback(
+                Result.success(
+                    MessageRefParams(
+                        handle = messageHandle,
+                        id = ref.id,
+                        conversationId = ref.conversationId,
+                    )
+                )
+            )
+        }
+    }
+
+    override fun conversationSendMessage(
+        handle: Long, params: SendMessageParamsJson, callback: (Result<MessageRefParams>) -> Unit
+    ) {
+        val conversation = conversations[handle]
+        if (conversation == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid conversation handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        val messageHandle = nextId
+        nextId += 1
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            val ref = conversation.send(
+                com.talkjs.core.SendMessageParams(
+                    content = deserializeContent(params.contentJson),
                     custom = params.custom,
                     referencedMessage = params.referencedMessage,
                 )
@@ -1614,7 +1715,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun messageGet(
-        handle: Long, callback: (Result<MessageSnapshot?>) -> Unit
+        handle: Long, callback: (Result<MessageSnapshotJson?>) -> Unit
     ) {
         val ref = messages[handle]
         if (ref == null) {
@@ -1683,6 +1784,34 @@ private class PigeonApiImplementation : CoreHostApi {
                 com.talkjs.core.EditTextMessageParams(
                     custom = params.custom,
                     text = params.text,
+                )
+            )
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun messageEditMessage(
+        handle: Long, params: EditMessageParamsJson, callback: (Result<Unit>) -> Unit
+    ) {
+        val ref = messages[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid message handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.edit(
+                com.talkjs.core.EditMessageParams(
+                    custom = params.custom,
+                    content = params.contentJson?.let { deserializeContent(it) },
                 )
             )
             callback(Result.success(Unit))

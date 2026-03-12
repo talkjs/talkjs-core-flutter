@@ -11,6 +11,7 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle:8.11.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
     }
 }
 
@@ -24,6 +25,7 @@ allprojects {
 plugins {
     id("com.android.library")
     id("kotlin-android")
+    kotlin("plugin.serialization") version "2.2.20"
 }
 
 android {
@@ -72,6 +74,7 @@ android {
 
 dependencies {
     implementation("com.talkjs:core:0.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")
 }

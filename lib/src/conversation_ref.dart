@@ -2,15 +2,14 @@ import 'dart:async';
 
 import 'core.g.dart';
 import 'api.dart';
+import 'snapshots.dart';
+import 'entity_tree.dart';
 import 'participant_ref.dart';
 import 'message_ref.dart';
 
 export 'core.g.dart'
-    show
-        CreateConversationParams,
-        SetConversationParams,
-        ConversationSnapshot,
-        SendTextMessageParams;
+    show CreateConversationParams, SetConversationParams, SendTextMessageParams;
+export 'snapshots.dart' show ConversationSnapshot;
 
 final Finalizer<int> _conversationSubscriptionFinalizer = Finalizer((
   handle,
@@ -256,6 +255,37 @@ class TypingSubscription {
        _handle = handle;
 }
 
+/// Parameters you can pass to [ConversationRef.sendMessage].
+///
+/// @remarks
+/// Properties that are `null` will be set to the default.
+///
+/// This is the more advanced method for editing a message, giving full control over the message content.
+/// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
+///
+/// @public
+class SendMessageParams {
+  /// The most important part of the message, either some text, a file attachment, or a location.
+  ///
+  /// @remarks
+  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
+  final List<SendContentBlock> content;
+
+  /// Custom metadata you have set on the user.
+  /// Default = no custom metadata
+  final Map<String, String>? custom;
+
+  /// The message that you are replying to.
+  /// Default = not a reply
+  final String? referencedMessage;
+
+  const SendMessageParams({
+    required this.content,
+    this.custom,
+    this.referencedMessage,
+  });
+}
+
 class ConversationRef {
   final CoreHostApi _api;
   final int _handle;
@@ -271,8 +301,9 @@ class ConversationRef {
   /// This contains all of the information related to the conversation and the current user's participation in the conversation.
   ///
   /// @return A snapshot of the current user's view of the conversation, or `null` if the current user is not a participant (including if the conversation doesn't exist)
-  Future<ConversationSnapshot?> get() {
-    return _api.conversationGet(_handle);
+  Future<ConversationSnapshot?> get() async {
+    final snapshot = await _api.conversationGet(_handle);
+    return snapshot == null ? null : conversationSnapshotFromJson(snapshot);
   }
 
   /// Sets properties of this conversation and your participation in it.
@@ -373,6 +404,27 @@ class ConversationRef {
   /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
   Future<MessageRef> send(String params) async {
     final refParams = await _api.conversationSend(_handle, params);
+
+    return makeMessageRef(
+      api: _api,
+      handle: refParams.handle,
+      id: refParams.id,
+      conversationId: refParams.conversationId,
+    );
+  }
+
+  /// Sends a message in the conversation
+  ///
+  /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
+  Future<MessageRef> sendMessage(SendMessageParams params) async {
+    final refParams = await _api.conversationSendMessage(
+      _handle,
+      SendMessageParamsJson(
+        contentJson: serializeContent(params.content),
+        custom: params.custom,
+        referencedMessage: params.referencedMessage,
+      ),
+    );
 
     return makeMessageRef(
       api: _api,

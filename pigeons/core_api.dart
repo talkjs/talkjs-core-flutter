@@ -344,60 +344,20 @@ enum MessageType { userMessage, systemMessage }
 
 enum MessageOrigin { web, rest, import, email }
 
-class ReferencedMessageSnapshot {
-  /// The unique ID that is used to identify the message in TalkJS
+class ReferencedMessageSnapshotJson {
   String id;
-
-  /// Referenced messages are always `USER_MESSAGE` because you cannot reply to a system message.
   MessageType type;
-
-  /// A snapshot of the user who sent the message.
-  /// The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
-  /// It is not a historical snapshot.
-  ///
-  /// @remarks
-  /// Guaranteed to be set, unlike in MessageSnapshot, because you cannot reference a SystemMessage
   UserSnapshot? sender;
-
-  /// Custom metadata you have set on the message
   Map<String, String> custom;
-
-  /// Time at which the message was sent, as a unix timestamp in milliseconds
   int createdAt;
-
-  /// Time at which the message was last edited, as a unix timestamp in milliseconds.
-  /// `null` if the message has never been edited.
   int? editedAt;
-
-  /// The ID of the message that this message is a reply to, or null if this message is not a reply.
-  ///
-  /// @remarks
-  /// Since this is a snapshot of a referenced message, we do not automatically expand its referenced message.
-  /// The ID of its referenced message is provided here instead.
   String? referencedMessageId;
-
-  /// Where this message originated from:
-  ///
-  /// - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
-  ///
-  /// - `REST` = Message sent via the REST API's "send message" endpoint
-  ///
-  /// - `IMPORT` = Message sent via the REST API's "import messages" endpoint
-  ///
-  /// - `EMAIL` = Message sent by replying to an email notification
   MessageOrigin origin;
-
-  /// The contents of the message, as a plain text string without any formatting or attachments.
-  /// Useful for showing in a conversation list or in notifications.
   String plaintext;
-
-  /// The main body of the message, as a list of blocks that are rendered top-to-bottom.
-  //List<ContentBlock> content;
-
-  /// All the emoji reactions that have been added to this message.
+  String contentJson;
   List<ReactionSnapshot> reactions;
 
-  ReferencedMessageSnapshot({
+  ReferencedMessageSnapshotJson({
     required this.id,
     required this.type,
     this.sender,
@@ -407,64 +367,25 @@ class ReferencedMessageSnapshot {
     this.referencedMessageId,
     required this.origin,
     required this.plaintext,
+    required this.contentJson,
     required this.reactions,
   });
 }
 
-class MessageSnapshot {
-  /// The unique ID that is used to identify the message in TalkJS
+class MessageSnapshotJson {
   String id;
-
-  /// Whether this message was "from a user" or a general system message without a specific sender.
-  ///
-  /// The `sender` property is always present for `USER_MESSAGE` messages and never present for `SYSTEM_MESSAGE` messages.
   MessageType type;
-
-  /// A snapshot of the user who sent the message, or null if it is a system message.
-  /// The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
-  /// It is not a historical snapshot.
   UserSnapshot? sender;
-
-  /// Custom metadata you have set on the message
   Map<String, String> custom;
-
-  /// Time at which the message was sent, as a unix timestamp in milliseconds.
   int createdAt;
-
-  /// Time at which the message was last edited, as a unix timestamp in milliseconds.
-  /// `null` if the message has never been edited.
   int? editedAt;
-
-  /// A snapshot of the message that this message is aa reply to, or `null` if this message is not a reply.
-  ///
-  /// Only UserMessages can reference other messages.
-  /// The referenced message snapshot does not have a `referencedMessage` field.
-  /// Instead, it has `referencedMessageId`.
-  /// This prevents TalkJS fetching an unlimited number of messages in a long chain of replies.
-  ReferencedMessageSnapshot? referencedMessage;
-
-  /// Where this message origiranted from:
-  ///
-  /// - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
-  /// - `REST` = Message sent via the REST API's "send message" endpoint
-  /// - `IMPORT` = Message sent via the REST API's "import messages" endpoint
-  /// - `EMAIL` = Message sent by replying to an email notification
+  ReferencedMessageSnapshotJson? referencedMessage;
   MessageOrigin origin;
-
-  /// The contents of the message, as a plain text string without any formatting or attachments.
-  /// Useful for showing in a conversation list or in notifications.
   String plaintext;
-
-  /// The main body of the message, as a list of blocks that are rendered top-to-bottom.
-  //List<ContentBlock> content;
-
-  /// All the emoji reactions that have been added to this message.
-  ///
-  /// @remarks
-  /// There can be up to 50 different reactions on each message.
+  String contentJson;
   List<ReactionSnapshot> reactions;
 
-  MessageSnapshot({
+  MessageSnapshotJson({
     required this.id,
     required this.type,
     this.sender,
@@ -474,6 +395,7 @@ class MessageSnapshot {
     this.referencedMessage,
     required this.origin,
     required this.plaintext,
+    required this.contentJson,
     required this.reactions,
   });
 }
@@ -528,74 +450,43 @@ class EditTextMessageParams {
   EditTextMessageParams({this.custom, this.text});
 }
 
-class ConversationSnapshot {
-  /// The ID of the conversation
+class SendMessageParamsJson {
+  String contentJson;
+  Map<String, String>? custom;
+  String? referencedMessage;
+
+  SendMessageParamsJson({
+    required this.contentJson,
+    this.custom,
+    this.referencedMessage,
+  });
+}
+
+class EditMessageParamsJson {
+  Map<String, String?>? custom;
+  String? contentJson;
+
+  EditMessageParamsJson({this.custom, this.contentJson});
+}
+
+class ConversationSnapshotJson {
   String id;
-
-  /// Contains the conversation subject, or `null` if the conversation does not have a subject specified.
   String? subject;
-
-  /// Contains the URL of a photo to represent the topic of the conversation or `null` if the conversation does not have a photo specified.
   String? photoUrl;
-
-  /// One or more welcome messages that will be rendered at the start of this conversation as system messages.
-  ///
-  /// @remarks
-  /// Welcome messages are rendered in the UI as messages, but they are not real messages.
-  /// This means they do not appear when you list messages using the REST API or JS/Kotlin Data API, and you cannot reply or react to them.
   List<String> welcomeMessages;
-
-  /// Custom metadata you have set on the conversation
   Map<String, String> custom;
-
-  /// The date that the conversation was created, as a unix timestamp in milliseconds.
   int createdAt;
-
-  /// The date that the current user joined the conversation, as a unix timestamp in milliseconds.
   int joinedAt;
-
-  /// The last message sent in this conversation, or `null` if not messages have been sent.
-  MessageSnapshot? lastMessage;
-
-  /// The number of messages in this conversation that the current user hasn't read.
+  MessageSnapshotJson? lastMessage;
   int unreadMessageCount;
-
-  /// The most recent date that the current user read the conversation.
-  ///
-  /// @remarks
-  /// This value is updated whenever you read a message in a chat UI, open an email notification, or mark the conversation as read using an API like [ConversationRef.markAsRead].
-  ///
-  /// Any messages sent after this timestamp are unread messages.
   int readUntil;
-
-  /// Everyone in the conversation has read any messages sent on or before this date.
-  ///
-  /// @remarks
-  /// This is the minimum of all the participants' `readUntil` values.
-  /// Any messages sent on or before this timestamp should show a "read" indicator in the UI.
-  ///
-  /// This value will rarely change in very large conversations.
-  /// If just one person stops checking their messages, `everyoneReadUntil` will never update.
   int everyoneReadUntil;
-
-  /// Whether the conversation should be considered unread.
-  ///
-  /// This can be true even when `unreadMessageCount` is zero, if the user has manually marked the conversation as unread.
   bool isUnread;
-
-  /// The current user's permission level in this conversation.
   ConversationAccess access;
-
-  /// The current user's notification settings for this conversation.
-  ///
-  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
   NotificationSettings notify;
-
-  /// @suppress
-  /// For back-compat
   int? lastMessageAt;
 
-  ConversationSnapshot({
+  ConversationSnapshotJson({
     required this.id,
     this.subject,
     this.photoUrl,
@@ -831,7 +722,7 @@ abstract class CoreHostApi {
   void conversationDeleteHandle(int handle);
 
   @async
-  ConversationSnapshot? conversationGet(int handle);
+  ConversationSnapshotJson? conversationGet(int handle);
 
   @async
   void conversationSet(int handle, SetConversationParams data);
@@ -861,6 +752,12 @@ abstract class CoreHostApi {
   MessageRefParams conversationSendText(
     int handle,
     SendTextMessageParams params,
+  );
+
+  @async
+  MessageRefParams conversationSendMessage(
+    int handle,
+    SendMessageParamsJson params,
   );
 
   int conversationSubscribe(int handle);
@@ -917,13 +814,16 @@ abstract class CoreHostApi {
   void messageDeleteHandle(int handle);
 
   @async
-  MessageSnapshot? messageGet(int handle);
+  MessageSnapshotJson? messageGet(int handle);
 
   @async
   void messageEdit(int handle, String params);
 
   @async
   void messageEditText(int handle, EditTextMessageParams params);
+
+  @async
+  void messageEditMessage(int handle, EditMessageParamsJson params);
 
   @async
   void messageDeleteFields(int handle, List<String> fields);
@@ -947,16 +847,16 @@ abstract class CoreHostApi {
 abstract class CoreFlutterApi {
   void newUserSnapshot(int handle, UserSnapshot? snapshot);
   void newUserOnlineSnapshot(int handle, UserOnlineSnapshot? snapshot);
-  void newConversationSnapshot(int handle, ConversationSnapshot? snapshot);
+  void newConversationSnapshot(int handle, ConversationSnapshotJson? snapshot);
   void newConversationListSnapshot(
     int handle,
-    List<ConversationSnapshot> snapshot,
+    List<ConversationSnapshotJson> snapshot,
     bool loadedAll,
   );
   void newSessionError(int handle, String message);
   void newMessageSnapshot(
     int handle,
-    List<MessageSnapshot>? snapshot,
+    List<MessageSnapshotJson>? snapshot,
     bool loadedAll,
   );
   void newParticipantSnapshot(

@@ -1,12 +1,42 @@
 import 'core.g.dart';
 import 'api.dart';
+import 'snapshots.dart';
+import 'entity_tree.dart';
 import 'reaction_ref.dart';
 
-export 'core.g.dart' show MessageSnapshot, EditTextMessageParams;
+export 'core.g.dart' show EditTextMessageParams;
+export 'snapshots.dart' show MessageSnapshot, ReferencedMessageSnapshot;
 
 final Finalizer<int> _messageFinalizer = Finalizer((handle) async {
   await hostApi?.messageDeleteHandle(handle);
 });
+
+/// Parameters you can pass to [MessageRef.editMessage].
+///
+/// @remarks
+/// Properties that are `null` will not be changed.
+/// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
+///
+/// This is the more advanced method for editing a message. It gives you full control over the message content.
+/// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
+///
+/// @public
+class EditMessageParams {
+  /// Custom metadata you have set on the message.
+  /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
+  /// Default = no custom metadata
+  final Map<String, String?>? custom;
+
+  /// The new content for the message.
+  ///
+  /// @remarks
+  /// Any value provided here will overwrite the existing message content.
+  ///
+  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
+  final List<SendContentBlock>? content;
+
+  const EditMessageParams({this.custom, this.content});
+}
 
 /// References the message with a given message ID.
 ///
@@ -34,8 +64,9 @@ class MessageRef {
   /// Fetches a snapshot of the message.
   ///
   /// @return A snapshot of the message's attributes, or null if the message doesn't exist, the conversation doesn't exist, or you're not a participant in the conversation.
-  Future<MessageSnapshot?> get() {
-    return _api.messageGet(_handle);
+  Future<MessageSnapshot?> get() async {
+    final snapshot = await _api.messageGet(_handle);
+    return snapshot == null ? null : messageSnapshotFromJson(snapshot);
   }
 
   /// Edits this message.
@@ -52,6 +83,22 @@ class MessageRef {
   /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
   Future<void> editText(EditTextMessageParams params) {
     return _api.messageEditText(_handle, params);
+  }
+
+  /// Edits this message.
+  ///
+  /// @remarks
+  /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
+  Future<void> editMessage(EditMessageParams params) {
+    return _api.messageEditMessage(
+      _handle,
+      EditMessageParamsJson(
+        custom: params.custom,
+        contentJson: params.content == null
+            ? null
+            : serializeContent(params.content!),
+      ),
+    );
   }
 
   /// Deletes properties of this message.

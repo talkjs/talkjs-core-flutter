@@ -748,8 +748,8 @@ class ReactionSnapshot {
   int get hashCode => Object.hashAll(_toList());
 }
 
-class ReferencedMessageSnapshot {
-  ReferencedMessageSnapshot({
+class ReferencedMessageSnapshotJson {
+  ReferencedMessageSnapshotJson({
     required this.id,
     required this.type,
     this.sender,
@@ -759,57 +759,30 @@ class ReferencedMessageSnapshot {
     this.referencedMessageId,
     required this.origin,
     required this.plaintext,
+    required this.contentJson,
     required this.reactions,
   });
 
-  /// The unique ID that is used to identify the message in TalkJS
   String id;
 
-  /// Referenced messages are always `USER_MESSAGE` because you cannot reply to a system message.
   MessageType type;
 
-  /// A snapshot of the user who sent the message.
-  /// The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
-  /// It is not a historical snapshot.
-  ///
-  /// @remarks
-  /// Guaranteed to be set, unlike in MessageSnapshot, because you cannot reference a SystemMessage
   UserSnapshot? sender;
 
-  /// Custom metadata you have set on the message
   Map<String, String> custom;
 
-  /// Time at which the message was sent, as a unix timestamp in milliseconds
   int createdAt;
 
-  /// Time at which the message was last edited, as a unix timestamp in milliseconds.
-  /// `null` if the message has never been edited.
   int? editedAt;
 
-  /// The ID of the message that this message is a reply to, or null if this message is not a reply.
-  ///
-  /// @remarks
-  /// Since this is a snapshot of a referenced message, we do not automatically expand its referenced message.
-  /// The ID of its referenced message is provided here instead.
   String? referencedMessageId;
 
-  /// Where this message originated from:
-  ///
-  /// - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
-  ///
-  /// - `REST` = Message sent via the REST API's "send message" endpoint
-  ///
-  /// - `IMPORT` = Message sent via the REST API's "import messages" endpoint
-  ///
-  /// - `EMAIL` = Message sent by replying to an email notification
   MessageOrigin origin;
 
-  /// The contents of the message, as a plain text string without any formatting or attachments.
-  /// Useful for showing in a conversation list or in notifications.
   String plaintext;
 
-  /// The main body of the message, as a list of blocks that are rendered top-to-bottom.
-  /// All the emoji reactions that have been added to this message.
+  String contentJson;
+
   List<ReactionSnapshot> reactions;
 
   List<Object?> _toList() {
@@ -823,6 +796,7 @@ class ReferencedMessageSnapshot {
       referencedMessageId,
       origin,
       plaintext,
+      contentJson,
       reactions,
     ];
   }
@@ -831,9 +805,9 @@ class ReferencedMessageSnapshot {
     return _toList();
   }
 
-  static ReferencedMessageSnapshot decode(Object result) {
+  static ReferencedMessageSnapshotJson decode(Object result) {
     result as List<Object?>;
-    return ReferencedMessageSnapshot(
+    return ReferencedMessageSnapshotJson(
       id: result[0]! as String,
       type: result[1]! as MessageType,
       sender: result[2] as UserSnapshot?,
@@ -843,14 +817,15 @@ class ReferencedMessageSnapshot {
       referencedMessageId: result[6] as String?,
       origin: result[7]! as MessageOrigin,
       plaintext: result[8]! as String,
-      reactions: (result[9] as List<Object?>?)!.cast<ReactionSnapshot>(),
+      contentJson: result[9]! as String,
+      reactions: (result[10] as List<Object?>?)!.cast<ReactionSnapshot>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! ReferencedMessageSnapshot ||
+    if (other is! ReferencedMessageSnapshotJson ||
         other.runtimeType != runtimeType) {
       return false;
     }
@@ -865,8 +840,8 @@ class ReferencedMessageSnapshot {
   int get hashCode => Object.hashAll(_toList());
 }
 
-class MessageSnapshot {
-  MessageSnapshot({
+class MessageSnapshotJson {
+  MessageSnapshotJson({
     required this.id,
     required this.type,
     this.sender,
@@ -876,57 +851,30 @@ class MessageSnapshot {
     this.referencedMessage,
     required this.origin,
     required this.plaintext,
+    required this.contentJson,
     required this.reactions,
   });
 
-  /// The unique ID that is used to identify the message in TalkJS
   String id;
 
-  /// Whether this message was "from a user" or a general system message without a specific sender.
-  ///
-  /// The `sender` property is always present for `USER_MESSAGE` messages and never present for `SYSTEM_MESSAGE` messages.
   MessageType type;
 
-  /// A snapshot of the user who sent the message, or null if it is a system message.
-  /// The user's attributes may have been updated since they sent the message, in which case this snapshot contains the updated data.
-  /// It is not a historical snapshot.
   UserSnapshot? sender;
 
-  /// Custom metadata you have set on the message
   Map<String, String> custom;
 
-  /// Time at which the message was sent, as a unix timestamp in milliseconds.
   int createdAt;
 
-  /// Time at which the message was last edited, as a unix timestamp in milliseconds.
-  /// `null` if the message has never been edited.
   int? editedAt;
 
-  /// A snapshot of the message that this message is aa reply to, or `null` if this message is not a reply.
-  ///
-  /// Only UserMessages can reference other messages.
-  /// The referenced message snapshot does not have a `referencedMessage` field.
-  /// Instead, it has `referencedMessageId`.
-  /// This prevents TalkJS fetching an unlimited number of messages in a long chain of replies.
-  ReferencedMessageSnapshot? referencedMessage;
+  ReferencedMessageSnapshotJson? referencedMessage;
 
-  /// Where this message origiranted from:
-  ///
-  /// - `WEB` = Message sent via the UI or via `ConversationBuilder.sendMessage`
-  /// - `REST` = Message sent via the REST API's "send message" endpoint
-  /// - `IMPORT` = Message sent via the REST API's "import messages" endpoint
-  /// - `EMAIL` = Message sent by replying to an email notification
   MessageOrigin origin;
 
-  /// The contents of the message, as a plain text string without any formatting or attachments.
-  /// Useful for showing in a conversation list or in notifications.
   String plaintext;
 
-  /// The main body of the message, as a list of blocks that are rendered top-to-bottom.
-  /// All the emoji reactions that have been added to this message.
-  ///
-  /// @remarks
-  /// There can be up to 50 different reactions on each message.
+  String contentJson;
+
   List<ReactionSnapshot> reactions;
 
   List<Object?> _toList() {
@@ -940,6 +888,7 @@ class MessageSnapshot {
       referencedMessage,
       origin,
       plaintext,
+      contentJson,
       reactions,
     ];
   }
@@ -948,26 +897,27 @@ class MessageSnapshot {
     return _toList();
   }
 
-  static MessageSnapshot decode(Object result) {
+  static MessageSnapshotJson decode(Object result) {
     result as List<Object?>;
-    return MessageSnapshot(
+    return MessageSnapshotJson(
       id: result[0]! as String,
       type: result[1]! as MessageType,
       sender: result[2] as UserSnapshot?,
       custom: (result[3] as Map<Object?, Object?>?)!.cast<String, String>(),
       createdAt: result[4]! as int,
       editedAt: result[5] as int?,
-      referencedMessage: result[6] as ReferencedMessageSnapshot?,
+      referencedMessage: result[6] as ReferencedMessageSnapshotJson?,
       origin: result[7]! as MessageOrigin,
       plaintext: result[8]! as String,
-      reactions: (result[9] as List<Object?>?)!.cast<ReactionSnapshot>(),
+      contentJson: result[9]! as String,
+      reactions: (result[10] as List<Object?>?)!.cast<ReactionSnapshot>(),
     );
   }
 
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! MessageSnapshot || other.runtimeType != runtimeType) {
+    if (other is! MessageSnapshotJson || other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -1131,8 +1081,95 @@ class EditTextMessageParams {
   int get hashCode => Object.hashAll(_toList());
 }
 
-class ConversationSnapshot {
-  ConversationSnapshot({
+class SendMessageParamsJson {
+  SendMessageParamsJson({
+    required this.contentJson,
+    this.custom,
+    this.referencedMessage,
+  });
+
+  String contentJson;
+
+  Map<String, String>? custom;
+
+  String? referencedMessage;
+
+  List<Object?> _toList() {
+    return <Object?>[contentJson, custom, referencedMessage];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static SendMessageParamsJson decode(Object result) {
+    result as List<Object?>;
+    return SendMessageParamsJson(
+      contentJson: result[0]! as String,
+      custom: (result[1] as Map<Object?, Object?>?)?.cast<String, String>(),
+      referencedMessage: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! SendMessageParamsJson || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class EditMessageParamsJson {
+  EditMessageParamsJson({this.custom, this.contentJson});
+
+  Map<String, String?>? custom;
+
+  String? contentJson;
+
+  List<Object?> _toList() {
+    return <Object?>[custom, contentJson];
+  }
+
+  Object encode() {
+    return _toList();
+  }
+
+  static EditMessageParamsJson decode(Object result) {
+    result as List<Object?>;
+    return EditMessageParamsJson(
+      custom: (result[0] as Map<Object?, Object?>?)?.cast<String, String?>(),
+      contentJson: result[1] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! EditMessageParamsJson || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList());
+}
+
+class ConversationSnapshotJson {
+  ConversationSnapshotJson({
     required this.id,
     this.subject,
     this.photoUrl,
@@ -1150,70 +1187,34 @@ class ConversationSnapshot {
     this.lastMessageAt,
   });
 
-  /// The ID of the conversation
   String id;
 
-  /// Contains the conversation subject, or `null` if the conversation does not have a subject specified.
   String? subject;
 
-  /// Contains the URL of a photo to represent the topic of the conversation or `null` if the conversation does not have a photo specified.
   String? photoUrl;
 
-  /// One or more welcome messages that will be rendered at the start of this conversation as system messages.
-  ///
-  /// @remarks
-  /// Welcome messages are rendered in the UI as messages, but they are not real messages.
-  /// This means they do not appear when you list messages using the REST API or JS/Kotlin Data API, and you cannot reply or react to them.
   List<String> welcomeMessages;
 
-  /// Custom metadata you have set on the conversation
   Map<String, String> custom;
 
-  /// The date that the conversation was created, as a unix timestamp in milliseconds.
   int createdAt;
 
-  /// The date that the current user joined the conversation, as a unix timestamp in milliseconds.
   int joinedAt;
 
-  /// The last message sent in this conversation, or `null` if not messages have been sent.
-  MessageSnapshot? lastMessage;
+  MessageSnapshotJson? lastMessage;
 
-  /// The number of messages in this conversation that the current user hasn't read.
   int unreadMessageCount;
 
-  /// The most recent date that the current user read the conversation.
-  ///
-  /// @remarks
-  /// This value is updated whenever you read a message in a chat UI, open an email notification, or mark the conversation as read using an API like [ConversationRef.markAsRead].
-  ///
-  /// Any messages sent after this timestamp are unread messages.
   int readUntil;
 
-  /// Everyone in the conversation has read any messages sent on or before this date.
-  ///
-  /// @remarks
-  /// This is the minimum of all the participants' `readUntil` values.
-  /// Any messages sent on or before this timestamp should show a "read" indicator in the UI.
-  ///
-  /// This value will rarely change in very large conversations.
-  /// If just one person stops checking their messages, `everyoneReadUntil` will never update.
   int everyoneReadUntil;
 
-  /// Whether the conversation should be considered unread.
-  ///
-  /// This can be true even when `unreadMessageCount` is zero, if the user has manually marked the conversation as unread.
   bool isUnread;
 
-  /// The current user's permission level in this conversation.
   ConversationAccess access;
 
-  /// The current user's notification settings for this conversation.
-  ///
-  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
   NotificationSettings notify;
 
-  /// @suppress
-  /// For back-compat
   int? lastMessageAt;
 
   List<Object?> _toList() {
@@ -1240,9 +1241,9 @@ class ConversationSnapshot {
     return _toList();
   }
 
-  static ConversationSnapshot decode(Object result) {
+  static ConversationSnapshotJson decode(Object result) {
     result as List<Object?>;
-    return ConversationSnapshot(
+    return ConversationSnapshotJson(
       id: result[0]! as String,
       subject: result[1] as String?,
       photoUrl: result[2] as String?,
@@ -1250,7 +1251,7 @@ class ConversationSnapshot {
       custom: (result[4] as Map<Object?, Object?>?)!.cast<String, String>(),
       createdAt: result[5]! as int,
       joinedAt: result[6]! as int,
-      lastMessage: result[7] as MessageSnapshot?,
+      lastMessage: result[7] as MessageSnapshotJson?,
       unreadMessageCount: result[8]! as int,
       readUntil: result[9]! as int,
       everyoneReadUntil: result[10]! as int,
@@ -1264,7 +1265,8 @@ class ConversationSnapshot {
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes
   bool operator ==(Object other) {
-    if (other is! ConversationSnapshot || other.runtimeType != runtimeType) {
+    if (other is! ConversationSnapshotJson ||
+        other.runtimeType != runtimeType) {
       return false;
     }
     if (identical(this, other)) {
@@ -1745,10 +1747,10 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is ReactionSnapshot) {
       buffer.putUint8(141);
       writeValue(buffer, value.encode());
-    } else if (value is ReferencedMessageSnapshot) {
+    } else if (value is ReferencedMessageSnapshotJson) {
       buffer.putUint8(142);
       writeValue(buffer, value.encode());
-    } else if (value is MessageSnapshot) {
+    } else if (value is MessageSnapshotJson) {
       buffer.putUint8(143);
       writeValue(buffer, value.encode());
     } else if (value is MessageRefParams) {
@@ -1760,35 +1762,41 @@ class _PigeonCodec extends StandardMessageCodec {
     } else if (value is EditTextMessageParams) {
       buffer.putUint8(146);
       writeValue(buffer, value.encode());
-    } else if (value is ConversationSnapshot) {
+    } else if (value is SendMessageParamsJson) {
       buffer.putUint8(147);
       writeValue(buffer, value.encode());
-    } else if (value is SetParticipantParams) {
+    } else if (value is EditMessageParamsJson) {
       buffer.putUint8(148);
       writeValue(buffer, value.encode());
-    } else if (value is CreateParticipantParams) {
+    } else if (value is ConversationSnapshotJson) {
       buffer.putUint8(149);
       writeValue(buffer, value.encode());
-    } else if (value is ParticipantSnapshot) {
+    } else if (value is SetParticipantParams) {
       buffer.putUint8(150);
       writeValue(buffer, value.encode());
-    } else if (value is TypingSnapshot) {
+    } else if (value is CreateParticipantParams) {
       buffer.putUint8(151);
       writeValue(buffer, value.encode());
-    } else if (value is GenericFileMetadata) {
+    } else if (value is ParticipantSnapshot) {
       buffer.putUint8(152);
       writeValue(buffer, value.encode());
-    } else if (value is ImageFileMetadata) {
+    } else if (value is TypingSnapshot) {
       buffer.putUint8(153);
       writeValue(buffer, value.encode());
-    } else if (value is VideoFileMetadata) {
+    } else if (value is GenericFileMetadata) {
       buffer.putUint8(154);
       writeValue(buffer, value.encode());
-    } else if (value is AudioFileMetadata) {
+    } else if (value is ImageFileMetadata) {
       buffer.putUint8(155);
       writeValue(buffer, value.encode());
-    } else if (value is VoiceRecordingFileMetadata) {
+    } else if (value is VideoFileMetadata) {
       buffer.putUint8(156);
+      writeValue(buffer, value.encode());
+    } else if (value is AudioFileMetadata) {
+      buffer.putUint8(157);
+      writeValue(buffer, value.encode());
+    } else if (value is VoiceRecordingFileMetadata) {
+      buffer.putUint8(158);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1829,9 +1837,9 @@ class _PigeonCodec extends StandardMessageCodec {
       case 141:
         return ReactionSnapshot.decode(readValue(buffer)!);
       case 142:
-        return ReferencedMessageSnapshot.decode(readValue(buffer)!);
+        return ReferencedMessageSnapshotJson.decode(readValue(buffer)!);
       case 143:
-        return MessageSnapshot.decode(readValue(buffer)!);
+        return MessageSnapshotJson.decode(readValue(buffer)!);
       case 144:
         return MessageRefParams.decode(readValue(buffer)!);
       case 145:
@@ -1839,24 +1847,28 @@ class _PigeonCodec extends StandardMessageCodec {
       case 146:
         return EditTextMessageParams.decode(readValue(buffer)!);
       case 147:
-        return ConversationSnapshot.decode(readValue(buffer)!);
+        return SendMessageParamsJson.decode(readValue(buffer)!);
       case 148:
-        return SetParticipantParams.decode(readValue(buffer)!);
+        return EditMessageParamsJson.decode(readValue(buffer)!);
       case 149:
-        return CreateParticipantParams.decode(readValue(buffer)!);
+        return ConversationSnapshotJson.decode(readValue(buffer)!);
       case 150:
-        return ParticipantSnapshot.decode(readValue(buffer)!);
+        return SetParticipantParams.decode(readValue(buffer)!);
       case 151:
-        return TypingSnapshot.decode(readValue(buffer)!);
+        return CreateParticipantParams.decode(readValue(buffer)!);
       case 152:
-        return GenericFileMetadata.decode(readValue(buffer)!);
+        return ParticipantSnapshot.decode(readValue(buffer)!);
       case 153:
-        return ImageFileMetadata.decode(readValue(buffer)!);
+        return TypingSnapshot.decode(readValue(buffer)!);
       case 154:
-        return VideoFileMetadata.decode(readValue(buffer)!);
+        return GenericFileMetadata.decode(readValue(buffer)!);
       case 155:
-        return AudioFileMetadata.decode(readValue(buffer)!);
+        return ImageFileMetadata.decode(readValue(buffer)!);
       case 156:
+        return VideoFileMetadata.decode(readValue(buffer)!);
+      case 157:
+        return AudioFileMetadata.decode(readValue(buffer)!);
+      case 158:
         return VoiceRecordingFileMetadata.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -2664,7 +2676,7 @@ class CoreHostApi {
     }
   }
 
-  Future<ConversationSnapshot?> conversationGet(int handle) async {
+  Future<ConversationSnapshotJson?> conversationGet(int handle) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationGet$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -2685,7 +2697,7 @@ class CoreHostApi {
         details: pigeonVar_replyList[2],
       );
     } else {
-      return (pigeonVar_replyList[0] as ConversationSnapshot?);
+      return (pigeonVar_replyList[0] as ConversationSnapshotJson?);
     }
   }
 
@@ -2938,6 +2950,39 @@ class CoreHostApi {
   ) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendText$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, params],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as MessageRefParams?)!;
+    }
+  }
+
+  Future<MessageRefParams> conversationSendMessage(
+    int handle,
+    SendMessageParamsJson params,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendMessage$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -3538,7 +3583,7 @@ class CoreHostApi {
     }
   }
 
-  Future<MessageSnapshot?> messageGet(int handle) async {
+  Future<MessageSnapshotJson?> messageGet(int handle) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageGet$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
@@ -3559,7 +3604,7 @@ class CoreHostApi {
         details: pigeonVar_replyList[2],
       );
     } else {
-      return (pigeonVar_replyList[0] as MessageSnapshot?);
+      return (pigeonVar_replyList[0] as MessageSnapshotJson?);
     }
   }
 
@@ -3591,6 +3636,34 @@ class CoreHostApi {
   Future<void> messageEditText(int handle, EditTextMessageParams params) async {
     final pigeonVar_channelName =
         'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditText$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
+      <Object?>[handle, params],
+    );
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> messageEditMessage(
+    int handle,
+    EditMessageParamsJson params,
+  ) async {
+    final pigeonVar_channelName =
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditMessage$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -3776,11 +3849,11 @@ abstract class CoreFlutterApi {
 
   void newUserOnlineSnapshot(int handle, UserOnlineSnapshot? snapshot);
 
-  void newConversationSnapshot(int handle, ConversationSnapshot? snapshot);
+  void newConversationSnapshot(int handle, ConversationSnapshotJson? snapshot);
 
   void newConversationListSnapshot(
     int handle,
-    List<ConversationSnapshot> snapshot,
+    List<ConversationSnapshotJson> snapshot,
     bool loadedAll,
   );
 
@@ -3788,7 +3861,7 @@ abstract class CoreFlutterApi {
 
   void newMessageSnapshot(
     int handle,
-    List<MessageSnapshot>? snapshot,
+    List<MessageSnapshotJson>? snapshot,
     bool loadedAll,
   );
 
@@ -3953,8 +4026,8 @@ abstract class CoreFlutterApi {
             arg_handle != null,
             'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationSnapshot was null, expected non-null int.',
           );
-          final ConversationSnapshot? arg_snapshot =
-              (args[1] as ConversationSnapshot?);
+          final ConversationSnapshotJson? arg_snapshot =
+              (args[1] as ConversationSnapshotJson?);
           try {
             api.newConversationSnapshot(arg_handle!, arg_snapshot);
             return wrapResponse(empty: true);
@@ -3988,11 +4061,11 @@ abstract class CoreFlutterApi {
             arg_handle != null,
             'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot was null, expected non-null int.',
           );
-          final List<ConversationSnapshot>? arg_snapshot =
-              (args[1] as List<Object?>?)?.cast<ConversationSnapshot>();
+          final List<ConversationSnapshotJson>? arg_snapshot =
+              (args[1] as List<Object?>?)?.cast<ConversationSnapshotJson>();
           assert(
             arg_snapshot != null,
-            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot was null, expected non-null List<ConversationSnapshot>.',
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newConversationListSnapshot was null, expected non-null List<ConversationSnapshotJson>.',
           );
           final bool? arg_loadedAll = (args[2] as bool?);
           assert(
@@ -4074,8 +4147,8 @@ abstract class CoreFlutterApi {
             arg_handle != null,
             'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.newMessageSnapshot was null, expected non-null int.',
           );
-          final List<MessageSnapshot>? arg_snapshot =
-              (args[1] as List<Object?>?)?.cast<MessageSnapshot>();
+          final List<MessageSnapshotJson>? arg_snapshot =
+              (args[1] as List<Object?>?)?.cast<MessageSnapshotJson>();
           final bool? arg_loadedAll = (args[2] as bool?);
           assert(
             arg_loadedAll != null,
