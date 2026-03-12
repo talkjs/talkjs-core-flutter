@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:talkjs_core_flutter/talkjs_core_flutter.dart';
 import 'chat_box_page.dart';
@@ -15,6 +16,7 @@ class _ConversationListPageState extends State<ConversationListPage> {
   TalkSession? _session;
   List<ConversationSnapshot> _conversations = [];
   ConversationListSubscription? _subscription;
+  bool _isConnected = false;
 
   @override
   void initState() {
@@ -24,7 +26,14 @@ class _ConversationListPageState extends State<ConversationListPage> {
         ?.subscribeConversations((snapshots, loadedAll) {
           setState(() => _conversations = snapshots);
         })
-        .then((sub) => _subscription = sub);
+        .then((sub) {
+          _subscription = sub;
+          sub.connected.then((_) {
+            if (mounted) {
+              setState(() => _isConnected = true);
+            }
+          }, onError: (_) {});
+        });
   }
 
   @override
@@ -40,24 +49,44 @@ class _ConversationListPageState extends State<ConversationListPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('ConversationList'),
       ),
-      body: ListView(
-        children: _conversations.map((conversation) {
-          final label = conversation.subject ?? conversation.id;
-          return ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ChatBoxPage(
-                    session: _session,
-                    conversationId: conversation.id,
-                  ),
-                ),
-              );
-            },
-            child: Text(label),
-          );
-        }).toList(),
+      body: Column(
+        children: [
+          if (!_isConnected)
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Center(
+                    child: SizedBox(
+                      width: min(constraints.maxWidth, constraints.maxHeight),
+                      height: min(constraints.maxWidth, constraints.maxHeight),
+                      child: const CircularProgressIndicator(),
+                    ),
+                  );
+                },
+              ),
+            )
+          else
+            Expanded(
+              child: ListView(
+                children: _conversations.map((conversation) {
+                  return ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatBoxPage(
+                            session: _session,
+                            conversationId: conversation.id,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text(conversation.subject ?? conversation.id),
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -283,6 +283,36 @@ private class PigeonApiImplementation : CoreHostApi {
 
         conversationListSubscriptions[subscriptionHandle] = subscription
 
+        scope.launch {
+            try {
+                subscription.connected.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationListSubscriptionConnectedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationListSubscriptionConnectedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
+        scope.launch {
+            try {
+                subscription.terminated.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationListSubscriptionTerminatedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationListSubscriptionTerminatedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
         return subscriptionHandle
     }
 
@@ -655,6 +685,36 @@ private class PigeonApiImplementation : CoreHostApi {
 
         userSubscriptions[subscriptionHandle] = subscription
 
+        scope.launch {
+            try {
+                subscription.connected.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userSubscriptionConnectedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userSubscriptionConnectedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
+        scope.launch {
+            try {
+                subscription.terminated.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userSubscriptionTerminatedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userSubscriptionTerminatedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
         return subscriptionHandle
     }
 
@@ -683,6 +743,36 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         userOnlineSubscriptions[subscriptionHandle] = subscription
+
+        scope.launch {
+            try {
+                subscription.connected.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userOnlineSubscriptionConnectedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userOnlineSubscriptionConnectedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
+        scope.launch {
+            try {
+                subscription.terminated.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userOnlineSubscriptionTerminatedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.userOnlineSubscriptionTerminatedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
 
         return subscriptionHandle
     }
@@ -1044,6 +1134,36 @@ private class PigeonApiImplementation : CoreHostApi {
 
         conversationSubscriptions[subscriptionHandle] = subscription
 
+        scope.launch {
+            try {
+                subscription.connected.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationSubscriptionConnectedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationSubscriptionConnectedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
+        scope.launch {
+            try {
+                subscription.terminated.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationSubscriptionTerminatedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.conversationSubscriptionTerminatedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
         return subscriptionHandle
     }
 
@@ -1068,6 +1188,36 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         messageSubscriptions[subscriptionHandle] = subscription
+
+        scope.launch {
+            try {
+                subscription.connected.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.messageSubscriptionConnectedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.messageSubscriptionConnectedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
+        scope.launch {
+            try {
+                subscription.terminated.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.messageSubscriptionTerminatedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.messageSubscriptionTerminatedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
 
         return subscriptionHandle
     }
@@ -1094,6 +1244,36 @@ private class PigeonApiImplementation : CoreHostApi {
 
         participantSubscriptions[subscriptionHandle] = subscription
 
+        scope.launch {
+            try {
+                subscription.connected.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.participantSubscriptionConnectedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.participantSubscriptionConnectedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
+        scope.launch {
+            try {
+                subscription.terminated.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.participantSubscriptionTerminatedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.participantSubscriptionTerminatedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
         return subscriptionHandle
     }
 
@@ -1117,6 +1297,36 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         typingSubscriptions[subscriptionHandle] = subscription
+
+        scope.launch {
+            try {
+                subscription.connected.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.typingSubscriptionConnectedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.typingSubscriptionConnectedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
+
+        scope.launch {
+            try {
+                subscription.terminated.await()
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.typingSubscriptionTerminatedResolve(subscriptionHandle) {}
+                }
+            } catch (e: Exception) {
+                scope.launch(Dispatchers.Main) {
+                    flutterApi?.typingSubscriptionTerminatedReject(
+                        subscriptionHandle, e.message ?: ""
+                    ) {}
+                }
+            }
+        }
 
         return subscriptionHandle
     }

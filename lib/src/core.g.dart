@@ -3800,6 +3800,62 @@ abstract class CoreFlutterApi {
 
   void newTypingSnapshot(int handle, TypingSnapshot? snapshot);
 
+  void userSubscriptionConnectedResolve(int handle);
+
+  void userSubscriptionConnectedReject(int handle, String error);
+
+  void userSubscriptionTerminatedResolve(int handle);
+
+  void userSubscriptionTerminatedReject(int handle, String error);
+
+  void userOnlineSubscriptionConnectedResolve(int handle);
+
+  void userOnlineSubscriptionConnectedReject(int handle, String error);
+
+  void userOnlineSubscriptionTerminatedResolve(int handle);
+
+  void userOnlineSubscriptionTerminatedReject(int handle, String error);
+
+  void conversationListSubscriptionConnectedResolve(int handle);
+
+  void conversationListSubscriptionConnectedReject(int handle, String error);
+
+  void conversationListSubscriptionTerminatedResolve(int handle);
+
+  void conversationListSubscriptionTerminatedReject(int handle, String error);
+
+  void conversationSubscriptionConnectedResolve(int handle);
+
+  void conversationSubscriptionConnectedReject(int handle, String error);
+
+  void conversationSubscriptionTerminatedResolve(int handle);
+
+  void conversationSubscriptionTerminatedReject(int handle, String error);
+
+  void messageSubscriptionConnectedResolve(int handle);
+
+  void messageSubscriptionConnectedReject(int handle, String error);
+
+  void messageSubscriptionTerminatedResolve(int handle);
+
+  void messageSubscriptionTerminatedReject(int handle, String error);
+
+  void participantSubscriptionConnectedResolve(int handle);
+
+  void participantSubscriptionConnectedReject(int handle, String error);
+
+  void participantSubscriptionTerminatedResolve(int handle);
+
+  void participantSubscriptionTerminatedReject(int handle, String error);
+
+  void typingSubscriptionConnectedResolve(int handle);
+
+  void typingSubscriptionConnectedReject(int handle, String error);
+
+  void typingSubscriptionTerminatedResolve(int handle);
+
+  void typingSubscriptionTerminatedReject(int handle, String error);
+
   static void setUp(
     CoreFlutterApi? api, {
     BinaryMessenger? binaryMessenger,
@@ -4105,6 +4161,1015 @@ abstract class CoreFlutterApi {
           final TypingSnapshot? arg_snapshot = (args[1] as TypingSnapshot?);
           try {
             api.newTypingSnapshot(arg_handle!, arg_snapshot);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionConnectedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionConnectedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionConnectedResolve was null, expected non-null int.',
+          );
+          try {
+            api.userSubscriptionConnectedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionConnectedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionConnectedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionConnectedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionConnectedReject was null, expected non-null String.',
+          );
+          try {
+            api.userSubscriptionConnectedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionTerminatedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionTerminatedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionTerminatedResolve was null, expected non-null int.',
+          );
+          try {
+            api.userSubscriptionTerminatedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionTerminatedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionTerminatedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionTerminatedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userSubscriptionTerminatedReject was null, expected non-null String.',
+          );
+          try {
+            api.userSubscriptionTerminatedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionConnectedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionConnectedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionConnectedResolve was null, expected non-null int.',
+          );
+          try {
+            api.userOnlineSubscriptionConnectedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionConnectedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionConnectedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionConnectedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionConnectedReject was null, expected non-null String.',
+          );
+          try {
+            api.userOnlineSubscriptionConnectedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionTerminatedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionTerminatedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionTerminatedResolve was null, expected non-null int.',
+          );
+          try {
+            api.userOnlineSubscriptionTerminatedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionTerminatedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionTerminatedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionTerminatedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.userOnlineSubscriptionTerminatedReject was null, expected non-null String.',
+          );
+          try {
+            api.userOnlineSubscriptionTerminatedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionConnectedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionConnectedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionConnectedResolve was null, expected non-null int.',
+          );
+          try {
+            api.conversationListSubscriptionConnectedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionConnectedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionConnectedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionConnectedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionConnectedReject was null, expected non-null String.',
+          );
+          try {
+            api.conversationListSubscriptionConnectedReject(
+              arg_handle!,
+              arg_error!,
+            );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionTerminatedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionTerminatedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionTerminatedResolve was null, expected non-null int.',
+          );
+          try {
+            api.conversationListSubscriptionTerminatedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionTerminatedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionTerminatedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionTerminatedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationListSubscriptionTerminatedReject was null, expected non-null String.',
+          );
+          try {
+            api.conversationListSubscriptionTerminatedReject(
+              arg_handle!,
+              arg_error!,
+            );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionConnectedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionConnectedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionConnectedResolve was null, expected non-null int.',
+          );
+          try {
+            api.conversationSubscriptionConnectedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionConnectedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionConnectedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionConnectedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionConnectedReject was null, expected non-null String.',
+          );
+          try {
+            api.conversationSubscriptionConnectedReject(
+              arg_handle!,
+              arg_error!,
+            );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionTerminatedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionTerminatedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionTerminatedResolve was null, expected non-null int.',
+          );
+          try {
+            api.conversationSubscriptionTerminatedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionTerminatedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionTerminatedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionTerminatedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.conversationSubscriptionTerminatedReject was null, expected non-null String.',
+          );
+          try {
+            api.conversationSubscriptionTerminatedReject(
+              arg_handle!,
+              arg_error!,
+            );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionConnectedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionConnectedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionConnectedResolve was null, expected non-null int.',
+          );
+          try {
+            api.messageSubscriptionConnectedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionConnectedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionConnectedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionConnectedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionConnectedReject was null, expected non-null String.',
+          );
+          try {
+            api.messageSubscriptionConnectedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionTerminatedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionTerminatedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionTerminatedResolve was null, expected non-null int.',
+          );
+          try {
+            api.messageSubscriptionTerminatedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionTerminatedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionTerminatedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionTerminatedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.messageSubscriptionTerminatedReject was null, expected non-null String.',
+          );
+          try {
+            api.messageSubscriptionTerminatedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionConnectedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionConnectedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionConnectedResolve was null, expected non-null int.',
+          );
+          try {
+            api.participantSubscriptionConnectedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionConnectedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionConnectedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionConnectedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionConnectedReject was null, expected non-null String.',
+          );
+          try {
+            api.participantSubscriptionConnectedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionTerminatedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionTerminatedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionTerminatedResolve was null, expected non-null int.',
+          );
+          try {
+            api.participantSubscriptionTerminatedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionTerminatedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionTerminatedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionTerminatedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.participantSubscriptionTerminatedReject was null, expected non-null String.',
+          );
+          try {
+            api.participantSubscriptionTerminatedReject(
+              arg_handle!,
+              arg_error!,
+            );
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionConnectedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionConnectedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionConnectedResolve was null, expected non-null int.',
+          );
+          try {
+            api.typingSubscriptionConnectedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionConnectedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionConnectedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionConnectedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionConnectedReject was null, expected non-null String.',
+          );
+          try {
+            api.typingSubscriptionConnectedReject(arg_handle!, arg_error!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionTerminatedResolve$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionTerminatedResolve was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionTerminatedResolve was null, expected non-null int.',
+          );
+          try {
+            api.typingSubscriptionTerminatedResolve(arg_handle!);
+            return wrapResponse(empty: true);
+          } on PlatformException catch (e) {
+            return wrapResponse(error: e);
+          } catch (e) {
+            return wrapResponse(
+              error: PlatformException(code: 'error', message: e.toString()),
+            );
+          }
+        });
+      }
+    }
+    {
+      final pigeonVar_channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionTerminatedReject$messageChannelSuffix',
+        pigeonChannelCodec,
+        binaryMessenger: binaryMessenger,
+      );
+      if (api == null) {
+        pigeonVar_channel.setMessageHandler(null);
+      } else {
+        pigeonVar_channel.setMessageHandler((Object? message) async {
+          assert(
+            message != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionTerminatedReject was null.',
+          );
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_handle = (args[0] as int?);
+          assert(
+            arg_handle != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionTerminatedReject was null, expected non-null int.',
+          );
+          final String? arg_error = (args[1] as String?);
+          assert(
+            arg_error != null,
+            'Argument for dev.flutter.pigeon.talkjs_core_flutter.CoreFlutterApi.typingSubscriptionTerminatedReject was null, expected non-null String.',
+          );
+          try {
+            api.typingSubscriptionTerminatedReject(arg_handle!, arg_error!);
             return wrapResponse(empty: true);
           } on PlatformException catch (e) {
             return wrapResponse(error: e);

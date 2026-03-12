@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'core.g.dart';
 import 'api.dart';
 
@@ -15,13 +17,13 @@ class UserSubscription {
   //SubscriptionState state;
 
   /// Resolves when the subscription starts receiving updates from the server.
-  //Completer<SubscriptionState> connected;
+  final Future<void> connected;
 
   /// Resolves when the subscription permanently stops receiving updates from the server.
   ///
   /// @remarks
   /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
-  //Completer<SubscriptionState> terminated;
+  final Future<void> terminated;
 
   /// Unsubscribe from this resource and stop receiving updates.
   ///
@@ -33,9 +35,13 @@ class UserSubscription {
     return _api.userSubscriptionUnsubscribe(_handle);
   }
 
-  UserSubscription._({required CoreHostApi api, required int handle})
-    : _api = api,
-      _handle = handle;
+  UserSubscription._({
+    required CoreHostApi api,
+    required int handle,
+    required this.connected,
+    required this.terminated,
+  }) : _api = api,
+       _handle = handle;
 }
 
 final Finalizer<int> _userOnlineSubscriptionFinalizer = Finalizer((
@@ -65,13 +71,13 @@ class UserOnlineSubscription {
   /// Wait for this promise if you want to perform some action as soon as the subscription is active.
   ///
   /// The promise rejects if the subscription is terminated before it connects.
-  //Completer<SubscriptionState> connected;
+  final Future<void> connected;
 
   /// Resolves when the subscription permanently stops receiving updates from the server.
   ///
   /// @remarks
   /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
-  //Completer<SubscriptionState> terminated;
+  final Future<void> terminated;
 
   /// Unsubscribe from this resource and stop receiving updates.
   ///
@@ -83,9 +89,13 @@ class UserOnlineSubscription {
     return _api.userOnlineSubscriptionUnsubscribe(_handle);
   }
 
-  UserOnlineSubscription._({required CoreHostApi api, required int handle})
-    : _api = api,
-      _handle = handle;
+  UserOnlineSubscription._({
+    required CoreHostApi api,
+    required int handle,
+    required this.connected,
+    required this.terminated,
+  }) : _api = api,
+       _handle = handle;
 }
 
 final Finalizer<int> _userFinalizer = Finalizer((handle) async {
@@ -163,7 +173,17 @@ class UserRef {
 
     userSubscriptionOnSnapshots[handle] = onSnapshot;
 
-    final subscription = UserSubscription._(api: _api, handle: handle);
+    final connectedCompleter = Completer<void>();
+    final terminatedCompleter = Completer<void>();
+    userSubscriptionConnectedCompleters[handle] = connectedCompleter;
+    userSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+
+    final subscription = UserSubscription._(
+      api: _api,
+      handle: handle,
+      connected: connectedCompleter.future,
+      terminated: terminatedCompleter.future,
+    );
 
     _userSubscriptionFinalizer.attach(subscription, handle);
 
@@ -185,7 +205,17 @@ class UserRef {
 
     userOnlineSubscriptionOnSnapshots[handle] = onSnapshot;
 
-    final subscription = UserOnlineSubscription._(api: _api, handle: handle);
+    final connectedCompleter = Completer<void>();
+    final terminatedCompleter = Completer<void>();
+    userOnlineSubscriptionConnectedCompleters[handle] = connectedCompleter;
+    userOnlineSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+
+    final subscription = UserOnlineSubscription._(
+      api: _api,
+      handle: handle,
+      connected: connectedCompleter.future,
+      terminated: terminatedCompleter.future,
+    );
 
     _userOnlineSubscriptionFinalizer.attach(subscription, handle);
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'core.g.dart';
 import 'api.dart';
 import 'participant_ref.dart';
@@ -30,13 +32,13 @@ class ConversationSubscription {
   //SubscriptionState state;
 
   /// Resolves when the subscription starts receiving updates from the server.
-  //Completer<SubscriptionState> connected;
+  final Future<void> connected;
 
   /// Resolves when the subscription permanently stops receiving updates from the server.
   ///
   /// @remarks
   /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
-  //Completer<SubscriptionState> terminated;
+  final Future<void> terminated;
 
   /// Unsubscribe from this resource and stop receiving updates.
   ///
@@ -48,9 +50,13 @@ class ConversationSubscription {
     return _api.conversationSubscriptionUnsubscribe(_handle);
   }
 
-  ConversationSubscription._({required CoreHostApi api, required int handle})
-    : _api = api,
-      _handle = handle;
+  ConversationSubscription._({
+    required CoreHostApi api,
+    required int handle,
+    required this.connected,
+    required this.terminated,
+  }) : _api = api,
+       _handle = handle;
 }
 
 final Finalizer<int> _messageSubscriptionFinalizer = Finalizer((handle) async {
@@ -83,13 +89,13 @@ class MessageSubscription {
   /// Wait for this promise if you want to perform some action as soon as the subscription is active.
   ///
   /// The promise rejects if the subscription is terminated before it connects.
-  //Completer<SubscriptionState> connected;
+  final Future<void> connected;
 
   /// Resolves when the subscription permanently stops receiving updates from the server.
   ///
   /// @remarks
   /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
-  //Completer<SubscriptionState> terminated;
+  final Future<void> terminated;
 
   /// Expand the window to include older messages
   ///
@@ -111,9 +117,13 @@ class MessageSubscription {
     return _api.messageSubscriptionUnsubscribe(_handle);
   }
 
-  MessageSubscription._({required CoreHostApi api, required int handle})
-    : _api = api,
-      _handle = handle;
+  MessageSubscription._({
+    required CoreHostApi api,
+    required int handle,
+    required this.connected,
+    required this.terminated,
+  }) : _api = api,
+       _handle = handle;
 }
 
 final Finalizer<int> _participantSubscriptionFinalizer = Finalizer((
@@ -149,13 +159,13 @@ class ParticipantSubscription {
   /// Wait for this promise if you want to perform some action as soon as the subscription is active.
   ///
   /// The promise rejects if the subscription is terminated before it connects.
-  //Completer<SubscriptionState> connected;
+  final Future<void> connected;
 
   /// Resolves when the subscription permanently stops receiving updates from the server.
   ///
   /// @remarks
   /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
-  //Completer<SubscriptionState> terminated;
+  final Future<void> terminated;
 
   /// Expand the window to include older participants
   ///
@@ -180,9 +190,13 @@ class ParticipantSubscription {
     return _api.participantSubscriptionUnsubscribe(_handle);
   }
 
-  ParticipantSubscription._({required CoreHostApi api, required int handle})
-    : _api = api,
-      _handle = handle;
+  ParticipantSubscription._({
+    required CoreHostApi api,
+    required int handle,
+    required this.connected,
+    required this.terminated,
+  }) : _api = api,
+       _handle = handle;
 }
 
 final Finalizer<int> _conversationFinalizer = Finalizer((handle) async {
@@ -215,13 +229,13 @@ class TypingSubscription {
   /// Wait for this promise if you want to perform some action as soon as the subscription is active.
   ///
   /// The promise rejects if the subscription is terminated before it connects.
-  //Completer<SubscriptionState> connected;
+  final Future<void> connected;
 
   /// Resolves when the subscription permanently stops receiving updates from the server.
   ///
   /// @remarks
   /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
-  //Completer<SubscriptionState> terminated;
+  final Future<void> terminated;
 
   /// Unsubscribe from this resource and stop receiving updates.
   ///
@@ -233,9 +247,13 @@ class TypingSubscription {
     return _api.typingSubscriptionUnsubscribe(_handle);
   }
 
-  TypingSubscription._({required CoreHostApi api, required int handle})
-    : _api = api,
-      _handle = handle;
+  TypingSubscription._({
+    required CoreHostApi api,
+    required int handle,
+    required this.connected,
+    required this.terminated,
+  }) : _api = api,
+       _handle = handle;
 }
 
 class ConversationRef {
@@ -392,7 +410,17 @@ class ConversationRef {
 
     conversationSubscriptionOnSnapshots[handle] = onSnapshot;
 
-    final subscription = ConversationSubscription._(api: _api, handle: handle);
+    final connectedCompleter = Completer<void>();
+    final terminatedCompleter = Completer<void>();
+    conversationSubscriptionConnectedCompleters[handle] = connectedCompleter;
+    conversationSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+
+    final subscription = ConversationSubscription._(
+      api: _api,
+      handle: handle,
+      connected: connectedCompleter.future,
+      terminated: terminatedCompleter.future,
+    );
 
     _conversationSubscriptionFinalizer.attach(subscription, handle);
 
@@ -419,7 +447,17 @@ class ConversationRef {
 
     messageSubscriptionOnSnapshots[handle] = onSnapshot;
 
-    final subscription = MessageSubscription._(api: _api, handle: handle);
+    final connectedCompleter = Completer<void>();
+    final terminatedCompleter = Completer<void>();
+    messageSubscriptionConnectedCompleters[handle] = connectedCompleter;
+    messageSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+
+    final subscription = MessageSubscription._(
+      api: _api,
+      handle: handle,
+      connected: connectedCompleter.future,
+      terminated: terminatedCompleter.future,
+    );
 
     _messageSubscriptionFinalizer.attach(subscription, handle);
 
@@ -451,7 +489,17 @@ class ConversationRef {
 
     participantSubscriptionOnSnapshots[handle] = onSnapshot;
 
-    final subscription = ParticipantSubscription._(api: _api, handle: handle);
+    final connectedCompleter = Completer<void>();
+    final terminatedCompleter = Completer<void>();
+    participantSubscriptionConnectedCompleters[handle] = connectedCompleter;
+    participantSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+
+    final subscription = ParticipantSubscription._(
+      api: _api,
+      handle: handle,
+      connected: connectedCompleter.future,
+      terminated: terminatedCompleter.future,
+    );
 
     _participantSubscriptionFinalizer.attach(subscription, handle);
 
@@ -475,7 +523,17 @@ class ConversationRef {
 
     typingSubscriptionOnSnapshots[handle] = onSnapshot;
 
-    final subscription = TypingSubscription._(api: _api, handle: handle);
+    final connectedCompleter = Completer<void>();
+    final terminatedCompleter = Completer<void>();
+    typingSubscriptionConnectedCompleters[handle] = connectedCompleter;
+    typingSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+
+    final subscription = TypingSubscription._(
+      api: _api,
+      handle: handle,
+      connected: connectedCompleter.future,
+      terminated: terminatedCompleter.future,
+    );
 
     _typingSubscriptionFinalizer.attach(subscription, handle);
 

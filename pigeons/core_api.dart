@@ -965,4 +965,32 @@ abstract class CoreFlutterApi {
     bool loadedAll,
   );
   void newTypingSnapshot(int handle, TypingSnapshot? snapshot);
+  void userSubscriptionConnectedResolve(int handle);
+  void userSubscriptionConnectedReject(int handle, String error);
+  void userSubscriptionTerminatedResolve(int handle);
+  void userSubscriptionTerminatedReject(int handle, String error);
+  void userOnlineSubscriptionConnectedResolve(int handle);
+  void userOnlineSubscriptionConnectedReject(int handle, String error);
+  void userOnlineSubscriptionTerminatedResolve(int handle);
+  void userOnlineSubscriptionTerminatedReject(int handle, String error);
+  void conversationListSubscriptionConnectedResolve(int handle);
+  void conversationListSubscriptionConnectedReject(int handle, String error);
+  void conversationListSubscriptionTerminatedResolve(int handle);
+  void conversationListSubscriptionTerminatedReject(int handle, String error);
+  void conversationSubscriptionConnectedResolve(int handle);
+  void conversationSubscriptionConnectedReject(int handle, String error);
+  void conversationSubscriptionTerminatedResolve(int handle);
+  void conversationSubscriptionTerminatedReject(int handle, String error);
+  void messageSubscriptionConnectedResolve(int handle);
+  void messageSubscriptionConnectedReject(int handle, String error);
+  void messageSubscriptionTerminatedResolve(int handle);
+  void messageSubscriptionTerminatedReject(int handle, String error);
+  void participantSubscriptionConnectedResolve(int handle);
+  void participantSubscriptionConnectedReject(int handle, String error);
+  void participantSubscriptionTerminatedResolve(int handle);
+  void participantSubscriptionTerminatedReject(int handle, String error);
+  void typingSubscriptionConnectedResolve(int handle);
+  void typingSubscriptionConnectedReject(int handle, String error);
+  void typingSubscriptionTerminatedResolve(int handle);
+  void typingSubscriptionTerminatedReject(int handle, String error);
 }

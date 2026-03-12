@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'core.g.dart';
@@ -43,9 +44,19 @@ class ConversationListSubscription {
   // I have no idea on how to port state
   //SubscriptionState state;
 
-  //Completer<SubscriptionState> connected;
+  /// Resolves when the subscription starts receiving updates from the server.
+  ///
+  /// @remarks
+  /// Wait for this promise if you want to perform some action as soon as the subscription is active.
+  ///
+  /// The promise rejects if the subscription is terminated before it connects.
+  final Future<void> connected;
 
-  //Completer<SubscriptionState> terminated;
+  /// Resolves when the subscription permanently stops receiving updates from the server.
+  ///
+  /// @remarks
+  /// This is either because you unsubscribed or because the subscription encountered an unrecoverable error.
+  final Future<void> terminated;
 
   /// Expand the window to include older conversations
   ///
@@ -74,6 +85,8 @@ class ConversationListSubscription {
   ConversationListSubscription._({
     required CoreHostApi api,
     required int handle,
+    required this.connected,
+    required this.terminated,
   }) : _api = api,
        _handle = handle;
 }
@@ -85,13 +98,6 @@ final Finalizer<int> _sessionOnErrorFinalizer = Finalizer((handle) async {
 class ErrorSubscription {
   final CoreHostApi _api;
   final int _handle;
-
-  // I have no idea on how to port state
-  //SubscriptionState state;
-
-  //Completer<SubscriptionState> connected;
-
-  //Completer<SubscriptionState> terminated;
 
   Future<void> unsubscribe() {
     sessionOnErrorExceptions.remove(_handle);
@@ -145,9 +151,18 @@ class TalkSession {
 
     conversationListSubscriptionOnSnapshots[handle] = onSnapshot;
 
+    final connectedCompleter = Completer<void>();
+    final terminatedCompleter = Completer<void>();
+    conversationListSubscriptionConnectedCompleters[handle] =
+        connectedCompleter;
+    conversationListSubscriptionTerminatedCompleters[handle] =
+        terminatedCompleter;
+
     final subscription = ConversationListSubscription._(
       api: _api,
       handle: handle,
+      connected: connectedCompleter.future,
+      terminated: terminatedCompleter.future,
     );
 
     _conversationListSubscriptionFinalizer.attach(subscription, handle);

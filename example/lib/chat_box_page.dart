@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:talkjs_core_flutter/talkjs_core_flutter.dart';
 
@@ -20,6 +21,7 @@ class _ChatBoxPageState extends State<ChatBoxPage> {
   ConversationRef? _ref;
   List<MessageSnapshot> _messages = [];
   MessageSubscription? _subscription;
+  bool _isConnected = false;
   final TextEditingController _textController = TextEditingController();
 
   @override
@@ -32,7 +34,14 @@ class _ChatBoxPageState extends State<ChatBoxPage> {
           .subscribeMessages((messages, _) {
             setState(() => _messages = messages ?? []);
           })
-          .then((sub) => _subscription = sub);
+          .then((sub) {
+            _subscription = sub;
+            sub.connected.then((_) {
+              if (mounted) {
+                setState(() => _isConnected = true);
+              }
+            }, onError: (_) {});
+          });
     });
   }
 
@@ -52,17 +61,32 @@ class _ChatBoxPageState extends State<ChatBoxPage> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: ListView(
-              children: _messages
-                  .map(
-                    (message) => Text(
-                      '${message.sender?.name ?? "System message"}: ${message.plaintext}',
+          if (!_isConnected)
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Center(
+                    child: SizedBox(
+                      width: min(constraints.maxWidth, constraints.maxHeight),
+                      height: min(constraints.maxWidth, constraints.maxHeight),
+                      child: const CircularProgressIndicator(),
                     ),
-                  )
-                  .toList(),
+                  );
+                },
+              ),
+            )
+          else
+            Expanded(
+              child: ListView(
+                children: _messages
+                    .map(
+                      (message) => Text(
+                        '${message.sender?.name ?? "System message"}: ${message.plaintext}',
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
           Row(
             children: [
               Expanded(
