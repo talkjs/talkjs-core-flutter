@@ -1782,6 +1782,7 @@ interface CoreHostApi {
   fun reactionDeleteHandle(handle: Long)
   fun reactionAdd(handle: Long, callback: (Result<Unit>) -> Unit)
   fun reactionRemove(handle: Long, callback: (Result<Unit>) -> Unit)
+  fun testContentSerialization(contentJson: String): String
 
   companion object {
     /** The codec used by CoreHostApi. */
@@ -3152,6 +3153,23 @@ interface CoreHostApi {
                 reply.reply(CorePigeonUtils.wrapResult(null))
               }
             }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.testContentSerialization$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contentJsonArg = args[0] as String
+            val wrapped: List<Any?> = try {
+              listOf(api.testContentSerialization(contentJsonArg))
+            } catch (exception: Throwable) {
+              CorePigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
           }
         } else {
           channel.setMessageHandler(null)

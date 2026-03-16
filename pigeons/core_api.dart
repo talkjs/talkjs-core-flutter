@@ -841,6 +841,9 @@ abstract class CoreHostApi {
 
   @async
   void reactionRemove(int handle);
+
+  // Test endpoints
+  String testContentSerialization(String contentJson);
 }
 
 @FlutterApi()

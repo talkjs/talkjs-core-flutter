@@ -1,0 +1,8 @@
+# To run the content (de)serialization tests
+
+Make sure that the Android emulator is running before running the tests.
+
+```bash
+cd example
+flutter test integration_test/content_serialization_test.dart --reporter expanded
+```
