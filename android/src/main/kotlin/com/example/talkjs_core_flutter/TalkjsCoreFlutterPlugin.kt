@@ -32,17 +32,13 @@ import UserOnlineSnapshot
 import UserSnapshot
 import VideoFileMetadata
 import VoiceRecordingFileMetadata
-import com.talkjs.core.AudioBlock
 import com.talkjs.core.AutoLink
 import com.talkjs.core.CodeSpan
 import com.talkjs.core.ContentBlock
 import com.talkjs.core.ConversationListSubscription
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
-import com.talkjs.core.GenericFileBlock
-import com.talkjs.core.ImageBlock
 import com.talkjs.core.Link
-import com.talkjs.core.LocationBlock
 import com.talkjs.core.Markup
 import com.talkjs.core.MessageRef
 import com.talkjs.core.MessageSubscription
@@ -57,58 +53,18 @@ import com.talkjs.core.UserOnlineSubscription
 import com.talkjs.core.UserRef
 import com.talkjs.core.UserSubscription
 import com.talkjs.core.VideoBlock
-import com.talkjs.core.VoiceBlock
+import com.talkjs.core.jsonFormat
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.ClassDiscriminatorMode
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.jsonPrimitive
-
-@OptIn(ExperimentalSerializationApi::class)
-private val jsonFormat = Json {
-    isLenient = true
-    ignoreUnknownKeys = true
-
-    // We don't want Kotlin's polymorphic annotations on serialized classes
-    classDiscriminatorMode = ClassDiscriminatorMode.NONE
-}
 
 private fun serializeContent(content: List<ContentBlock>): String =
     jsonFormat.encodeToString(content)
 
-private fun deserializeContent(contentJson: String): List<ContentBlock> {
-    val array = jsonFormat.parseToJsonElement(contentJson) as JsonArray
-    return array.map { element ->
-        if (element !is JsonObject) {
-            throw Exception("Failed to deserialize ContentBlock")
-        }
-        deserializeContentBlock(element)
-    }
-}
-
-private fun deserializeContentBlock(decoded: JsonObject): ContentBlock =
-    when (decoded["type"]?.jsonPrimitive?.contentOrNull) {
-        "text" -> jsonFormat.decodeFromJsonElement<TextBlock>(decoded)
-        "location" -> jsonFormat.decodeFromJsonElement<LocationBlock>(decoded)
-        "file" -> when (decoded["subtype"]?.jsonPrimitive?.contentOrNull) {
-            "video" -> jsonFormat.decodeFromJsonElement<VideoBlock>(decoded)
-            "image" -> jsonFormat.decodeFromJsonElement<ImageBlock>(decoded)
-            "audio" -> jsonFormat.decodeFromJsonElement<AudioBlock>(decoded)
-            "voice" -> jsonFormat.decodeFromJsonElement<VoiceBlock>(decoded)
-            null -> jsonFormat.decodeFromJsonElement<GenericFileBlock>(decoded)
-            else -> throw Exception("Failed to deserialize ContentBlock: unknown subtype")
-        }
-
-        else -> throw Exception("Failed to deserialize ContentBlock: unknown type")
-    }
+private fun deserializeContent(contentJson: String): List<ContentBlock> =
+    jsonFormat.decodeFromString(contentJson)
 
 private fun makeUserSnapshot(snapshot: com.talkjs.core.UserSnapshot): UserSnapshot = UserSnapshot(
     id = snapshot.id,
