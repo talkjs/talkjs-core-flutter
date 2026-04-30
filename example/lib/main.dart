@@ -44,9 +44,9 @@ class _HomePageState extends State<HomePage> {
         appId: 't8Serdim',
         userId: '654321',
         apiUrls: ApiUrlOptions(
-          realtimeWsApiUrl: "ws://192.168.122.6:4000/public_api/v1",
-          internalHttpApiUrl: "http://192.168.122.6:4000/api/v0",
-          restApiHttpUrl: "http://192.168.122.6:4000/public_api/v1",
+          realtimeWsApiUrl: "ws://192.168.122.72:4000/public_api/v1",
+          internalHttpApiUrl: "http://192.168.122.72:4000/api/v0",
+          restApiHttpUrl: "http://192.168.122.72:4000/public_api/v1",
         ),
         token: null,
       ),
