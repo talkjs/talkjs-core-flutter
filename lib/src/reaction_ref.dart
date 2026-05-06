@@ -1,8 +1,6 @@
 import 'core.g.dart';
 import 'api.dart';
 
-export 'core.g.dart' show ReactionSnapshot;
-
 final Finalizer<int> _reactionFinalizer = Finalizer((handle) async {
   await hostApi?.reactionDeleteHandle(handle);
 });

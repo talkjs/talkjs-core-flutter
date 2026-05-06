@@ -1,15 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'core.g.dart';
 import 'api.dart';
 import 'snapshots.dart';
-import 'entity_tree.dart';
+import 'params.dart';
 import 'participant_ref.dart';
 import 'message_ref.dart';
-
-export 'core.g.dart'
-    show CreateConversationParams, SetConversationParams, SendTextMessageParams;
-export 'snapshots.dart' show ConversationSnapshot;
 
 final Finalizer<int> _conversationSubscriptionFinalizer = Finalizer((
   handle,
@@ -255,37 +252,6 @@ class TypingSubscription {
        _handle = handle;
 }
 
-/// Parameters you can pass to [ConversationRef.sendMessage].
-///
-/// @remarks
-/// Properties that are `null` will be set to the default.
-///
-/// This is the more advanced method for editing a message, giving full control over the message content.
-/// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
-///
-/// @public
-class SendMessageParams {
-  /// The most important part of the message, either some text, a file attachment, or a location.
-  ///
-  /// @remarks
-  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
-  final List<SendContentBlock> content;
-
-  /// Custom metadata you have set on the user.
-  /// Default = no custom metadata
-  final Map<String, String>? custom;
-
-  /// The message that you are replying to.
-  /// Default = not a reply
-  final String? referencedMessage;
-
-  const SendMessageParams({
-    required this.content,
-    this.custom,
-    this.referencedMessage,
-  });
-}
-
 class ConversationRef {
   final CoreHostApi _api;
   final int _handle;
@@ -302,8 +268,12 @@ class ConversationRef {
   ///
   /// @return A snapshot of the current user's view of the conversation, or `null` if the current user is not a participant (including if the conversation doesn't exist)
   Future<ConversationSnapshot?> get() async {
-    final snapshot = await _api.conversationGet(_handle);
-    return snapshot == null ? null : conversationSnapshotFromJson(snapshot);
+    final snapshotJson = await _api.conversationGet(_handle);
+    if (snapshotJson == null) {
+      return null;
+    }
+
+    return ConversationSnapshot.fromJson(jsonDecode(snapshotJson));
   }
 
   /// Sets properties of this conversation and your participation in it.
@@ -316,7 +286,7 @@ class ConversationRef {
   ///
   /// @param params Parameters you pass when updating a conversation
   Future<void> set(SetConversationParams data) {
-    return _api.conversationSet(_handle, data);
+    return _api.conversationSet(_handle, jsonEncode(data.toJson()));
   }
 
   /// Creates this conversation if it does not already exist.
@@ -327,7 +297,10 @@ class ConversationRef {
   /// If the conversation already exists or you are already a participant, this operation is still considered successful.
   /// The promise rejects if you are not already a participant and client-side conversation syncing is disabled.
   Future<void> createIfNotExists(CreateConversationParams data) {
-    return _api.conversationCreateIfNotExists(_handle, data);
+    return _api.conversationCreateIfNotExists(
+      _handle,
+      jsonEncode(data.toJson()),
+    );
   }
 
   /// Deletes properties of this conversation.
@@ -419,11 +392,7 @@ class ConversationRef {
   Future<MessageRef> sendMessage(SendMessageParams params) async {
     final refParams = await _api.conversationSendMessage(
       _handle,
-      SendMessageParamsJson(
-        contentJson: serializeContent(params.content),
-        custom: params.custom,
-        referencedMessage: params.referencedMessage,
-      ),
+      jsonEncode(params.toJson()),
     );
 
     return makeMessageRef(
@@ -438,7 +407,10 @@ class ConversationRef {
   ///
   /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
   Future<MessageRef> sendText(SendTextMessageParams params) async {
-    final refParams = await _api.conversationSendText(_handle, params);
+    final refParams = await _api.conversationSendText(
+      _handle,
+      jsonEncode(params.toJson()),
+    );
 
     return makeMessageRef(
       api: _api,

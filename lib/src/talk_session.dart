@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'core.g.dart';
 import 'api.dart';
+import 'snapshots.dart';
 import 'user_ref.dart';
 import 'conversation_ref.dart';
 

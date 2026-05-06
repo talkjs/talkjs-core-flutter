@@ -1,8 +1,9 @@
+import 'dart:convert';
+
 import 'core.g.dart';
 import 'api.dart';
-
-export 'core.g.dart'
-    show CreateParticipantParams, SetParticipantParams, ParticipantSnapshot;
+import 'snapshots.dart';
+import 'params.dart';
 
 final Finalizer<int> _participantFinalizer = Finalizer((handle) async {
   await hostApi?.participantDeleteHandle(handle);
@@ -37,8 +38,13 @@ class ParticipantRef {
   /// This contains all of the participant's public information.
   ///
   /// @return A snapshot of the participant's attributes, or null if the user is not a participant. The promise will reject if you are not a participant and try to read information about someone else.
-  Future<ParticipantSnapshot?> get() {
-    return _api.participantGet(_handle);
+  Future<ParticipantSnapshot?> get() async {
+    final snapshotJson = await _api.participantGet(_handle);
+    if (snapshotJson == null) {
+      return null;
+    }
+
+    return ParticipantSnapshot.fromJson(jsonDecode(snapshotJson));
   }
 
   /// Sets properties of this participant. If the user is not already a participant in the conversation, they will be added.
@@ -47,7 +53,7 @@ class ParticipantRef {
   /// When client-side conversation syncing is disabled, you must already be a participant and you cannot set anything except the `notify` property.
   /// Everything else requires client-side conversation syncing to be enabled, and will cause the function to throw.
   Future<void> set(SetParticipantParams data) {
-    return _api.participantSet(_handle, data);
+    return _api.participantSet(_handle, jsonEncode(data.toJson()));
   }
 
   /// Edits properties of a pre-existing participant. If the user is not already a participant in the conversation, the function will throw.
@@ -56,7 +62,7 @@ class ParticipantRef {
   /// When client-side conversation syncing is disabled, you must already be a participant and you cannot set anything except the `notify` property.
   /// Everything else requires client-side conversation syncing to be enabled, and will cause the function to throw.
   Future<void> edit(SetParticipantParams data) {
-    return _api.participantEdit(_handle, data);
+    return _api.participantEdit(_handle, jsonEncode(data.toJson()));
   }
 
   /// Adds the user as a participant, or does nothing if they are already a participant.
@@ -66,7 +72,10 @@ class ParticipantRef {
   ///
   /// The promise will reject if client-side conversation syncing is disabled and the user is not already a participant.
   Future<void> createIfNotExists(CreateParticipantParams data) {
-    return _api.participantCreateIfNotExists(_handle, data);
+    return _api.participantCreateIfNotExists(
+      _handle,
+      jsonEncode(data.toJson()),
+    );
   }
 
   /// Deletes properties of this participant.

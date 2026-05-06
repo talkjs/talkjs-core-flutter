@@ -1,9 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'core.g.dart';
 import 'api.dart';
-
-export 'core.g.dart' show CreateUserParams, SetUserParams, UserSnapshot;
+import 'snapshots.dart';
+import 'params.dart';
 
 final Finalizer<int> _userSubscriptionFinalizer = Finalizer((handle) async {
   await hostApi?.userSubscriptionDeleteHandle(handle);
@@ -127,8 +128,13 @@ class UserRef {
   /// Private information, such as email addresses and phone numbers, aren't included in the response.
   ///
   /// @return A snapshot of the user's public attributes, or null if the user doesn't exist.
-  Future<UserSnapshot?> get() {
-    return _api.userGet(_handle);
+  Future<UserSnapshot?> get() async {
+    final json = await _api.userGet(_handle);
+    if (json == null) {
+      return null;
+    }
+
+    return UserSnapshot.fromJson(jsonDecode(json));
   }
 
   /// Sets properties of this user. The user is created if a user with this ID doesn't already exist.
@@ -136,7 +142,7 @@ class UserRef {
   /// @remarks
   /// `name` is required when creating a user. The promise will reject if you don't provide a `name` and the user does not exist yet.
   Future<void> set(SetUserParams data) {
-    return _api.userSet(_handle, data);
+    return _api.userSet(_handle, jsonEncode(data.toJson()));
   }
 
   /// Creates a user with this ID, or does nothing if a user with this ID already exists.
@@ -144,7 +150,7 @@ class UserRef {
   /// @remarks
   /// If the user already exists, this operation is still considered successful.
   Future<void> createIfNotExists(CreateUserParams data) {
-    return _api.userCreateIfNotExists(_handle, data);
+    return _api.userCreateIfNotExists(_handle, jsonEncode(data.toJson()));
   }
 
   /// Deletes properties of this user.
