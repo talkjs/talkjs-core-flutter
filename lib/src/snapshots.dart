@@ -2,11 +2,13 @@ import 'package:flutter/foundation.dart';
 
 import 'entity_tree.dart';
 
-enum ConversationAccess { read, readWrite }
+// ignore: constant_identifier_names
+enum ConversationAccess { Read, ReadWrite }
 
 enum NotificationSettings { yes, no, mentionsOnly }
 
-enum MessageType { userMessage, systemMessage }
+// ignore: constant_identifier_names
+enum MessageType { UserMessage, SystemMessage }
 
 enum MessageOrigin { web, rest, import, email }
 
@@ -305,13 +307,13 @@ class ParticipantSnapshot {
 
   ParticipantSnapshot.fromJson(Map<String, dynamic> json)
     : user = UserSnapshot.fromJson(json['user'] as Map<String, dynamic>),
-      access = _conversationAccessFromJson(json['access'] as String),
+      access = ConversationAccess.values.byName(json['access'] as String),
       notify = _notificationSettingsFromJson(json['notify']),
       joinedAt = json['joinedAt'] as int;
 
   Map<String, dynamic> toJson() => {
     'user': user.toJson(),
-    'access': conversationAccessToJson(access),
+    'access': access.name,
     'notify': notificationSettingsToJson(notify),
     'joinedAt': joinedAt,
   };
@@ -470,7 +472,7 @@ class ReferencedMessageSnapshot {
 
   ReferencedMessageSnapshot.fromJson(Map<String, dynamic> json)
     : id = json['id'] as String,
-      type = _messageTypeFromJson(json['type'] as String),
+      type = MessageType.values.byName(json['type'] as String),
       sender = json['sender'] == null
           ? null
           : UserSnapshot.fromJson(json['sender'] as Map<String, dynamic>),
@@ -478,7 +480,7 @@ class ReferencedMessageSnapshot {
       createdAt = json['createdAt'] as int,
       editedAt = json['editedAt'] as int?,
       referencedMessageId = json['referencedMessageId'] as String?,
-      origin = _messageOriginFromJson(json['origin'] as String),
+      origin = MessageOrigin.values.byName(json['origin'] as String),
       plaintext = json['plaintext'] as String,
       content = (json['content'] as List<dynamic>)
           .map(
@@ -494,13 +496,13 @@ class ReferencedMessageSnapshot {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'type': _messageTypeToJson(type),
+    'type': type.name,
     'sender': sender?.toJson(),
     'custom': custom,
     'createdAt': createdAt,
     'editedAt': editedAt,
     'referencedMessageId': referencedMessageId,
-    'origin': _messageOriginToJson(origin),
+    'origin': origin.name,
     'plaintext': plaintext,
     'content': content.map((block) => block.toJson()).toList(),
     'reactions': reactions.map((r) => r.toJson()).toList(),
@@ -642,7 +644,7 @@ class MessageSnapshot {
 
   MessageSnapshot.fromJson(Map<String, dynamic> json)
     : id = json['id'] as String,
-      type = _messageTypeFromJson(json['type'] as String),
+      type = MessageType.values.byName(json['type'] as String),
       sender = json['sender'] == null
           ? null
           : UserSnapshot.fromJson(json['sender'] as Map<String, dynamic>),
@@ -654,7 +656,7 @@ class MessageSnapshot {
           : ReferencedMessageSnapshot.fromJson(
               json['referencedMessage'] as Map<String, dynamic>,
             ),
-      origin = _messageOriginFromJson(json['origin'] as String),
+      origin = MessageOrigin.values.byName(json['origin'] as String),
       plaintext = json['plaintext'] as String,
       content = (json['content'] as List<dynamic>)
           .map(
@@ -670,13 +672,13 @@ class MessageSnapshot {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'type': _messageTypeToJson(type),
+    'type': type.name,
     'sender': sender?.toJson(),
     'custom': custom,
     'createdAt': createdAt,
     'editedAt': editedAt,
     'referencedMessage': referencedMessage?.toJson(),
-    'origin': _messageOriginToJson(origin),
+    'origin': origin.name,
     'plaintext': plaintext,
     'content': content.map((block) => block.toJson()).toList(),
     'reactions': reactions.map((r) => r.toJson()).toList(),
@@ -849,7 +851,7 @@ class ConversationSnapshot {
       readUntil = json['readUntil'] as int,
       everyoneReadUntil = json['everyoneReadUntil'] as int,
       isUnread = json['isUnread'] as bool,
-      access = _conversationAccessFromJson(json['access'] as String),
+      access = ConversationAccess.values.byName(json['access'] as String),
       notify = _notificationSettingsFromJson(json['notify']),
       lastMessageAt = json['lastMessageAt'] as int?;
 
@@ -866,7 +868,7 @@ class ConversationSnapshot {
     'readUntil': readUntil,
     'everyoneReadUntil': everyoneReadUntil,
     'isUnread': isUnread,
-    'access': conversationAccessToJson(access),
+    'access': access.name,
     'notify': notificationSettingsToJson(notify),
     'lastMessageAt': lastMessageAt,
   };
@@ -967,17 +969,6 @@ class ConversationSnapshot {
 
 // Implementation details
 
-ConversationAccess _conversationAccessFromJson(String value) => switch (value) {
-  'Read' => ConversationAccess.read,
-  'ReadWrite' => ConversationAccess.readWrite,
-  _ => throw Exception('Failed to deserialize ConversationAccess'),
-};
-
-String conversationAccessToJson(ConversationAccess access) => switch (access) {
-  ConversationAccess.read => 'Read',
-  ConversationAccess.readWrite => 'ReadWrite',
-};
-
 NotificationSettings _notificationSettingsFromJson(dynamic value) =>
     switch (value) {
       true => NotificationSettings.yes,
@@ -992,29 +983,3 @@ dynamic notificationSettingsToJson(NotificationSettings notify) =>
       NotificationSettings.no => false,
       NotificationSettings.mentionsOnly => 'mentionsOnly',
     };
-
-MessageType _messageTypeFromJson(String value) => switch (value) {
-  'UserMessage' => MessageType.userMessage,
-  'SystemMessage' => MessageType.systemMessage,
-  _ => throw Exception('Failed to deserialize MessageType'),
-};
-
-String _messageTypeToJson(MessageType type) => switch (type) {
-  MessageType.userMessage => 'UserMessage',
-  MessageType.systemMessage => 'SystemMessage',
-};
-
-MessageOrigin _messageOriginFromJson(String value) => switch (value) {
-  'web' => MessageOrigin.web,
-  'rest' => MessageOrigin.rest,
-  'import' => MessageOrigin.import,
-  'email' => MessageOrigin.email,
-  _ => throw Exception('Failed to deserialize MessageOrigin'),
-};
-
-String _messageOriginToJson(MessageOrigin origin) => switch (origin) {
-  MessageOrigin.web => 'web',
-  MessageOrigin.rest => 'rest',
-  MessageOrigin.import => 'import',
-  MessageOrigin.email => 'email',
-};

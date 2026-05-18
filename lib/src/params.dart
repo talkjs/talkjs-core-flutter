@@ -193,7 +193,7 @@ class CreateConversationParams {
     'photoUrl': photoUrl,
     'welcomeMessages': welcomeMessages,
     'custom': custom,
-    'access': access == null ? null : conversationAccessToJson(access!),
+    'access': access?.name,
     'notify': notify == null ? null : notificationSettingsToJson(notify!),
   };
 }
@@ -242,7 +242,7 @@ class SetConversationParams {
     'photoUrl': photoUrl,
     'welcomeMessages': welcomeMessages,
     'custom': custom,
-    'access': access == null ? null : conversationAccessToJson(access!),
+    'access': access?.name,
     'notify': notify == null ? null : notificationSettingsToJson(notify!),
   };
 }
@@ -262,7 +262,7 @@ class CreateParticipantParams {
   const CreateParticipantParams({this.access, this.notify});
 
   Map<String, dynamic> toJson() => {
-    'access': access == null ? null : conversationAccessToJson(access!),
+    'access': access?.name,
     'notify': notify == null ? null : notificationSettingsToJson(notify!),
   };
 }
@@ -285,7 +285,7 @@ class SetParticipantParams {
   const SetParticipantParams({this.access, this.notify});
 
   Map<String, dynamic> toJson() => {
-    'access': access == null ? null : conversationAccessToJson(access!),
+    'access': access?.name,
     'notify': notify == null ? null : notificationSettingsToJson(notify!),
   };
 }
