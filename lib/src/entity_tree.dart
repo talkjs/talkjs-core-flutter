@@ -1553,14 +1553,12 @@ String serializeContent(List<SendContentBlock> content) {
 }
 
 List<ContentBlock> deserializeContent(String json) {
-  final List<dynamic> list = jsonDecode(json);
-
-  return list
-      .map((e) => _deserializeContentBlock(e as Map<String, dynamic>))
+  return (jsonDecode(json) as List<dynamic>)
+      .map((block) => deserializeContentBlock(block as Map<String, dynamic>))
       .toList();
 }
 
-ContentBlock _deserializeContentBlock(Map<String, dynamic> json) {
+ContentBlock deserializeContentBlock(Map<String, dynamic> json) {
   return switch (json['type'] as String?) {
     'text' => TextBlock(
       children: _deserializeEntityTree(json['children'] as List<dynamic>),

@@ -61,24 +61,14 @@ Let's first take a look at `TalkjsCoreFlutterPlugin.kt`:
 The auto generated classes might have the same members and look identical to
 the classes already defined in the TalkJS Core library, but in Kotlin they are
 treated as completely different and incompatible classes.
-Let's take as an example `UserSnapshot`:
-The `UserSnapshot` defined in `Core.g.kt` is a different class compared
-to `com.talkjs.core.UserSnapshot`.
-Now, Flutter uses `UserSnapshot` as defined in `Core.g.kt`, but all of
-TalkJS Core uses `com.talkjs.core.UserSnapshot`.
-In order to convert from `com.talkjs.core.UserSnapshot` to `UserSnapshot`
-there is a function called `makeUserSnapshot`.
-
-This applies to all the data structures defined in the Pigeon file, *except*
-for ContentBlock & friends (the Entity Tree stuff).
-
-Considering that the Entity Tree stuff is a multitude of classes with
-non-trivial hierarchy, and also considering that all of these classes are
-JSON-serializable, I decided to bypass the whole Pigeon conversions, and
-convert them to JSON when passing them to/from Native.
+For this reason, I decided to completely bypass the whole Pigeon conversions
+for most of the classes, and use JSON when passing them to/from Native.
 This has the tradeoff that I needed to implement the JSON (de)serialization
 for those classes on the Dart side, but on the Native side I get JSON
 (de)serialization and mapping to the correct classes for free.
+The only classes that still go through Pigeon are `TalkSessionOptions` and the
+metadata classes used for file uploads, because they are not JSON-serializable
+on the native side.
 
 ### API
 
@@ -100,6 +90,16 @@ Each class has a private constructor (`UserRef._`) that is called by the
 function that provides it (for example `session.user`).
 
 Each method of the class is a thin wrapper to the native API.
+
+The `snapshots.dart` and `entity_tree.dart` files contain snapshots and entity
+tree stuff, that are JSON-serializable, and they also implement the `==`
+operator and `hashCode` functions, so that they can be compared structurally.
+Structural comparison is needed, so that when building the UI on top of this
+library, the UI needs to be re-rendered only if the snapshots change.
+
+The `params.dart` file contains the classes for the `params` parameters of the
+various Refs. They only need to implement the `toJson` method, because they
+only get passed from Dart to Native and never on the other way.
 
 ### Subscription snapshots
 

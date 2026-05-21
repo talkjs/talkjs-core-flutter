@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'core.g.dart';
 import 'snapshots.dart';
@@ -36,30 +37,49 @@ Map<int, Completer<void>> typingSubscriptionTerminatedCompleters = {};
 
 class CoreFlutterApiImplementation implements CoreFlutterApi {
   @override
-  void newUserSnapshot(int handle, UserSnapshot? snapshot) {
+  void newUserSnapshot(int handle, String? snapshotJson) {
+    UserSnapshot? snapshot;
+    if (snapshotJson != null) {
+      snapshot = UserSnapshot.fromJson(jsonDecode(snapshotJson));
+    }
+
     userSubscriptionOnSnapshots[handle]?.call(snapshot);
   }
 
   @override
-  void newUserOnlineSnapshot(int handle, UserOnlineSnapshot? snapshot) {
+  void newUserOnlineSnapshot(int handle, String? snapshotJson) {
+    UserOnlineSnapshot? snapshot;
+    if (snapshotJson != null) {
+      snapshot = UserOnlineSnapshot.fromJson(jsonDecode(snapshotJson));
+    }
+
     userOnlineSubscriptionOnSnapshots[handle]?.call(snapshot);
   }
 
   @override
-  void newConversationSnapshot(int handle, ConversationSnapshotJson? snapshot) {
-    conversationSubscriptionOnSnapshots[handle]?.call(
-      snapshot == null ? null : conversationSnapshotFromJson(snapshot),
-    );
+  void newConversationSnapshot(int handle, String? snapshotJson) {
+    ConversationSnapshot? snapshot;
+    if (snapshotJson != null) {
+      snapshot = ConversationSnapshot.fromJson(jsonDecode(snapshotJson));
+    }
+
+    conversationSubscriptionOnSnapshots[handle]?.call(snapshot);
   }
 
   @override
   void newConversationListSnapshot(
     int handle,
-    List<ConversationSnapshotJson> snapshot,
+    String snapshotJson,
     bool loadedAll,
   ) {
     conversationListSubscriptionOnSnapshots[handle]?.call(
-      snapshot.map(conversationSnapshotFromJson).toList(),
+      (jsonDecode(snapshotJson) as List<dynamic>)
+          .map(
+            (conversation) => ConversationSnapshot.fromJson(
+              conversation as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
       loadedAll,
     );
   }
@@ -70,28 +90,47 @@ class CoreFlutterApiImplementation implements CoreFlutterApi {
   }
 
   @override
-  void newMessageSnapshot(
-    int handle,
-    List<MessageSnapshotJson>? snapshot,
-    bool loadedAll,
-  ) {
-    messageSubscriptionOnSnapshots[handle]?.call(
-      snapshot?.map(messageSnapshotFromJson).toList(),
-      loadedAll,
-    );
+  void newMessageSnapshot(int handle, String? snapshotJson, bool loadedAll) {
+    List<MessageSnapshot>? snapshot;
+    if (snapshotJson != null) {
+      snapshot = (jsonDecode(snapshotJson) as List<dynamic>)
+          .map(
+            (message) =>
+                MessageSnapshot.fromJson(message as Map<String, dynamic>),
+          )
+          .toList();
+    }
+
+    messageSubscriptionOnSnapshots[handle]?.call(snapshot, loadedAll);
   }
 
   @override
   void newParticipantSnapshot(
     int handle,
-    List<ParticipantSnapshot>? snapshot,
+    String? snapshotJson,
     bool loadedAll,
   ) {
+    List<ParticipantSnapshot>? snapshot;
+    if (snapshotJson != null) {
+      snapshot = (jsonDecode(snapshotJson) as List<dynamic>)
+          .map(
+            (participant) => ParticipantSnapshot.fromJson(
+              participant as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+    }
+
     participantSubscriptionOnSnapshots[handle]?.call(snapshot, loadedAll);
   }
 
   @override
-  void newTypingSnapshot(int handle, TypingSnapshot? snapshot) {
+  void newTypingSnapshot(int handle, String? snapshotJson) {
+    TypingSnapshot? snapshot;
+    if (snapshotJson != null) {
+      snapshot = TypingSnapshot.fromJson(jsonDecode(snapshotJson));
+    }
+
     typingSubscriptionOnSnapshots[handle]?.call(snapshot);
   }
 

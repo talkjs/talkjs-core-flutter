@@ -1,35 +1,13 @@
 package com.example.talkjs_core_flutter
 
 import AudioFileMetadata
-import ConversationAccess
-import ConversationSnapshotJson
 import CoreFlutterApi
 import CoreHostApi
-import CreateConversationParams
-import CreateParticipantParams
-import CreateUserParams
-import EditMessageParamsJson
-import EditTextMessageParams
 import FlutterError
 import GenericFileMetadata
 import ImageFileMetadata
-import MessageOrigin
-import MessageRefParams
-import MessageSnapshotJson
-import MessageType
-import NotificationSettings
-import ParticipantSnapshot
-import ReactionSnapshot
-import ReferencedMessageSnapshotJson
-import SendMessageParamsJson
-import SendTextMessageParams
-import SetConversationParams
-import SetParticipantParams
-import SetUserParams
+import MessageRefBuildData
 import TalkSessionOptions
-import TypingSnapshot
-import UserOnlineSnapshot
-import UserSnapshot
 import VideoFileMetadata
 import VoiceRecordingFileMetadata
 import com.talkjs.core.AutoLink
@@ -38,6 +16,8 @@ import com.talkjs.core.ContentBlock
 import com.talkjs.core.ConversationListSubscription
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
+import com.talkjs.core.EditMessageParams
+import com.talkjs.core.EditTextMessageParams
 import com.talkjs.core.Link
 import com.talkjs.core.Markup
 import com.talkjs.core.MessageRef
@@ -45,6 +25,8 @@ import com.talkjs.core.MessageSubscription
 import com.talkjs.core.ParticipantRef
 import com.talkjs.core.ParticipantSubscription
 import com.talkjs.core.ReactionRef
+import com.talkjs.core.SendMessageParams
+import com.talkjs.core.SendTextMessageParams
 import com.talkjs.core.Subscription
 import com.talkjs.core.TalkSession
 import com.talkjs.core.TextBlock
@@ -59,131 +41,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-private fun serializeContent(content: List<ContentBlock>): String =
-    jsonFormat.encodeToString(content)
-
-private fun deserializeContent(contentJson: String): List<ContentBlock> =
-    jsonFormat.decodeFromString(contentJson)
-
-private fun makeUserSnapshot(snapshot: com.talkjs.core.UserSnapshot): UserSnapshot = UserSnapshot(
-    id = snapshot.id,
-    name = snapshot.name,
-    custom = snapshot.custom,
-    role = snapshot.role,
-    locale = snapshot.locale,
-    photoUrl = snapshot.photoUrl,
-    welcomeMessage = snapshot.welcomeMessage,
-)
-
-private fun makeMessageType(type: com.talkjs.core.MessageType): MessageType = when (type) {
-    com.talkjs.core.MessageType.USER_MESSAGE -> MessageType.USER_MESSAGE
-    com.talkjs.core.MessageType.SYSTEM_MESSAGE -> MessageType.SYSTEM_MESSAGE
-}
-
-private fun makeMessageOrigin(origin: com.talkjs.core.MessageOrigin): MessageOrigin =
-    when (origin) {
-        com.talkjs.core.MessageOrigin.WEB -> MessageOrigin.WEB
-        com.talkjs.core.MessageOrigin.REST -> MessageOrigin.REST
-        com.talkjs.core.MessageOrigin.IMPORT -> MessageOrigin.IMPORT
-        com.talkjs.core.MessageOrigin.EMAIL -> MessageOrigin.EMAIL
-    }
-
-private fun makeReactionSnapshot(snapshot: com.talkjs.core.ReactionSnapshot): ReactionSnapshot =
-    ReactionSnapshot(
-        emoji = snapshot.emoji,
-        count = snapshot.count.toLong(),
-        currentUserReacted = snapshot.currentUserReacted,
-    )
-
-private fun makeReferencedMessageSnapshot(snapshot: com.talkjs.core.ReferencedMessageSnapshot): ReferencedMessageSnapshotJson =
-    ReferencedMessageSnapshotJson(
-        id = snapshot.id,
-        type = makeMessageType(snapshot.type),
-        sender = snapshot.sender?.let { makeUserSnapshot(it) },
-        custom = snapshot.custom,
-        createdAt = snapshot.createdAt,
-        editedAt = snapshot.editedAt,
-        referencedMessageId = snapshot.referencedMessageId,
-        origin = makeMessageOrigin(snapshot.origin),
-        plaintext = snapshot.plaintext,
-        contentJson = serializeContent(snapshot.content),
-        reactions = snapshot.reactions.map { makeReactionSnapshot(it) },
-    )
-
-private fun makeMessageSnapshot(snapshot: com.talkjs.core.MessageSnapshot): MessageSnapshotJson =
-    MessageSnapshotJson(
-        id = snapshot.id,
-        type = makeMessageType(snapshot.type),
-        sender = snapshot.sender?.let { makeUserSnapshot(it) },
-        custom = snapshot.custom,
-        createdAt = snapshot.createdAt,
-        editedAt = snapshot.editedAt,
-        referencedMessage = snapshot.referencedMessage?.let { makeReferencedMessageSnapshot(it) },
-        origin = makeMessageOrigin(snapshot.origin),
-        plaintext = snapshot.plaintext,
-        contentJson = serializeContent(snapshot.content),
-        reactions = snapshot.reactions.map { makeReactionSnapshot(it) },
-    )
-
-private fun makeConversationAccess(access: com.talkjs.core.ConversationAccess): ConversationAccess =
-    when (access) {
-        com.talkjs.core.ConversationAccess.READ -> ConversationAccess.READ
-        com.talkjs.core.ConversationAccess.READ_WRITE -> ConversationAccess.READ_WRITE
-    }
-
-private fun makeConversationAccess(access: ConversationAccess): com.talkjs.core.ConversationAccess =
-    when (access) {
-        ConversationAccess.READ -> com.talkjs.core.ConversationAccess.READ
-        ConversationAccess.READ_WRITE -> com.talkjs.core.ConversationAccess.READ_WRITE
-    }
-
-private fun makeNotificationSettings(notify: com.talkjs.core.NotificationSettings): NotificationSettings =
-    when (notify) {
-        com.talkjs.core.NotificationSettings.TRUE -> NotificationSettings.YES
-        com.talkjs.core.NotificationSettings.FALSE -> NotificationSettings.NO
-        com.talkjs.core.NotificationSettings.MENTIONS_ONLY -> NotificationSettings.MENTIONS_ONLY
-    }
-
-private fun makeNotificationSettings(notify: NotificationSettings): com.talkjs.core.NotificationSettings =
-    when (notify) {
-        NotificationSettings.YES -> com.talkjs.core.NotificationSettings.TRUE
-        NotificationSettings.NO -> com.talkjs.core.NotificationSettings.FALSE
-        NotificationSettings.MENTIONS_ONLY -> com.talkjs.core.NotificationSettings.MENTIONS_ONLY
-    }
-
-private fun makeConversationSnapshot(snapshot: com.talkjs.core.ConversationSnapshot): ConversationSnapshotJson =
-    ConversationSnapshotJson(
-        id = snapshot.id,
-        subject = snapshot.subject,
-        photoUrl = snapshot.photoUrl,
-        welcomeMessages = snapshot.welcomeMessages,
-        custom = snapshot.custom,
-        createdAt = snapshot.createdAt,
-        joinedAt = snapshot.joinedAt,
-        lastMessage = snapshot.lastMessage?.let { makeMessageSnapshot(it) },
-        unreadMessageCount = snapshot.unreadMessageCount.toLong(),
-        readUntil = snapshot.readUntil,
-        everyoneReadUntil = snapshot.everyoneReadUntil,
-        isUnread = snapshot.isUnread,
-        access = makeConversationAccess(snapshot.access),
-        notify = makeNotificationSettings(snapshot.notify),
-        lastMessageAt = snapshot.lastMessageAt,
-    )
-
-private fun makeParticipantSnapshot(snapshot: com.talkjs.core.ParticipantSnapshot): ParticipantSnapshot =
-    ParticipantSnapshot(
-        user = makeUserSnapshot(snapshot.user),
-        access = makeConversationAccess(snapshot.access),
-        notify = makeNotificationSettings(snapshot.notify),
-        joinedAt = snapshot.joinedAt,
-    )
-
-private fun makeTypingSnapshot(snapshot: com.talkjs.core.TypingSnapshot): TypingSnapshot =
-    TypingSnapshot(
-        many = snapshot.many,
-        users = snapshot.users?.map { makeUserSnapshot(it) },
-    )
 
 private var flutterApi: CoreFlutterApi? = null
 
@@ -293,7 +150,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newConversationListSnapshot(
                     subscriptionHandle,
-                    snapshot.map { makeConversationSnapshot(it) },
+                    jsonFormat.encodeToString(snapshot),
                     loadedAll,
                 ) {}
             }
@@ -565,7 +422,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun userGet(
-        handle: Long, callback: (Result<UserSnapshot?>) -> Unit
+        handle: Long, callback: (Result<String?>) -> Unit
     ) {
         val ref = users[handle]
         if (ref == null) {
@@ -583,12 +440,12 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val snapshot = ref.get()
-            callback(Result.success(snapshot?.let { makeUserSnapshot(it) }))
+            callback(Result.success(snapshot?.let { jsonFormat.encodeToString(it) }))
         }
     }
 
     override fun userSet(
-        handle: Long, data: SetUserParams, callback: (Result<Unit>) -> Unit
+        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = users[handle]
         if (ref == null) {
@@ -605,26 +462,14 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(
-                com.talkjs.core.SetUserParams(
-                    name = data.name,
-                    custom = data.custom,
-                    locale = data.locale,
-                    photoUrl = data.photoUrl,
-                    role = data.role,
-                    welcomeMessage = data.welcomeMessage,
-                    email = data.email,
-                    phone = data.phone,
-                    pushTokens = data.pushTokens,
-                )
-            )
+            ref.set(jsonFormat.decodeFromString(dataJson))
             callback(Result.success(Unit))
         }
     }
 
     override fun userCreateIfNotExists(
         handle: Long,
-        data: CreateUserParams,
+        dataJson: String,
         callback: (Result<Unit>) -> Unit,
     ) {
         val ref = users[handle]
@@ -642,19 +487,7 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(
-                com.talkjs.core.CreateUserParams(
-                    name = data.name,
-                    custom = data.custom,
-                    locale = data.locale,
-                    photoUrl = data.photoUrl,
-                    role = data.role,
-                    welcomeMessage = data.welcomeMessage,
-                    email = data.email,
-                    phone = data.phone,
-                    pushTokens = data.pushTokens,
-                )
-            )
+            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
             callback(Result.success(Unit))
         }
     }
@@ -696,7 +529,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newUserSnapshot(
                     subscriptionHandle,
-                    snapshot?.let { makeUserSnapshot(it) },
+                    snapshot?.let { jsonFormat.encodeToString(it) },
                 ) {}
             }
         }
@@ -750,12 +583,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newUserOnlineSnapshot(
                     subscriptionHandle,
-                    snapshot?.let {
-                        UserOnlineSnapshot(
-                            user = makeUserSnapshot(it.user),
-                            isConnected = it.isConnected,
-                        )
-                    },
+                    snapshot?.let { jsonFormat.encodeToString(it) },
                 ) {}
             }
         }
@@ -837,7 +665,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationGet(
-        handle: Long, callback: (Result<ConversationSnapshotJson?>) -> Unit
+        handle: Long, callback: (Result<String?>) -> Unit
     ) {
         val ref = conversations[handle]
         if (ref == null) {
@@ -856,13 +684,13 @@ private class PigeonApiImplementation : CoreHostApi {
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val snapshot = ref.get()
             callback(
-                Result.success(snapshot?.let { makeConversationSnapshot(it) })
+                Result.success(snapshot?.let { jsonFormat.encodeToString(it) })
             )
         }
     }
 
     override fun conversationSet(
-        handle: Long, data: SetConversationParams, callback: (Result<Unit>) -> Unit
+        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = conversations[handle]
         if (ref == null) {
@@ -879,22 +707,13 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(
-                com.talkjs.core.SetConversationParams(
-                    subject = data.subject,
-                    photoUrl = data.photoUrl,
-                    welcomeMessages = data.welcomeMessages,
-                    custom = data.custom,
-                    access = data.access?.let { makeConversationAccess(it) },
-                    notify = data.notify?.let { makeNotificationSettings(it) },
-                )
-            )
+            ref.set(jsonFormat.decodeFromString(dataJson))
             callback(Result.success(Unit))
         }
     }
 
     override fun conversationCreateIfNotExists(
-        handle: Long, data: CreateConversationParams, callback: (Result<Unit>) -> Unit
+        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = conversations[handle]
         if (ref == null) {
@@ -911,16 +730,7 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(
-                com.talkjs.core.CreateConversationParams(
-                    subject = data.subject,
-                    photoUrl = data.photoUrl,
-                    welcomeMessages = data.welcomeMessages,
-                    custom = data.custom,
-                    access = data.access?.let { makeConversationAccess(it) },
-                    notify = data.notify?.let { makeNotificationSettings(it) },
-                )
-            )
+            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
             callback(Result.success(Unit))
         }
     }
@@ -1052,7 +862,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSend(
-        handle: Long, params: String, callback: (Result<MessageRefParams>) -> Unit
+        handle: Long, params: String, callback: (Result<MessageRefBuildData>) -> Unit
     ) {
         val conversation = conversations[handle]
         if (conversation == null) {
@@ -1078,7 +888,7 @@ private class PigeonApiImplementation : CoreHostApi {
 
             callback(
                 Result.success(
-                    MessageRefParams(
+                    MessageRefBuildData(
                         handle = messageHandle,
                         id = ref.id,
                         conversationId = ref.conversationId,
@@ -1089,7 +899,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSendText(
-        handle: Long, params: SendTextMessageParams, callback: (Result<MessageRefParams>) -> Unit
+        handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit
     ) {
         val conversation = conversations[handle]
         if (conversation == null) {
@@ -1110,18 +920,14 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val ref = conversation.send(
-                com.talkjs.core.SendTextMessageParams(
-                    text = params.text,
-                    custom = params.custom,
-                    referencedMessage = params.referencedMessage,
-                )
+                jsonFormat.decodeFromString<SendTextMessageParams>(paramsJson)
             )
 
             messages[messageHandle] = ref
 
             callback(
                 Result.success(
-                    MessageRefParams(
+                    MessageRefBuildData(
                         handle = messageHandle,
                         id = ref.id,
                         conversationId = ref.conversationId,
@@ -1132,7 +938,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSendMessage(
-        handle: Long, params: SendMessageParamsJson, callback: (Result<MessageRefParams>) -> Unit
+        handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit
     ) {
         val conversation = conversations[handle]
         if (conversation == null) {
@@ -1153,18 +959,14 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val ref = conversation.send(
-                com.talkjs.core.SendMessageParams(
-                    content = deserializeContent(params.contentJson),
-                    custom = params.custom,
-                    referencedMessage = params.referencedMessage,
-                )
+                jsonFormat.decodeFromString<SendMessageParams>(paramsJson)
             )
 
             messages[messageHandle] = ref
 
             callback(
                 Result.success(
-                    MessageRefParams(
+                    MessageRefBuildData(
                         handle = messageHandle,
                         id = ref.id,
                         conversationId = ref.conversationId,
@@ -1188,7 +990,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newConversationSnapshot(
                     subscriptionHandle,
-                    snapshot?.let { makeConversationSnapshot(it) },
+                    snapshot?.let { jsonFormat.encodeToString(it) },
                 ) {}
             }
         }
@@ -1242,7 +1044,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newMessageSnapshot(
                     subscriptionHandle,
-                    snapshot?.map { makeMessageSnapshot(it) },
+                    snapshot?.let { jsonFormat.encodeToString(it) },
                     loadedAll,
                 ) {}
             }
@@ -1297,7 +1099,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newParticipantSnapshot(
                     subscriptionHandle,
-                    snapshot?.map { makeParticipantSnapshot(it) },
+                    snapshot?.let { jsonFormat.encodeToString(it) },
                     loadedAll,
                 ) {}
             }
@@ -1352,7 +1154,7 @@ private class PigeonApiImplementation : CoreHostApi {
             scope.launch(Dispatchers.Main) {
                 flutterApi?.newTypingSnapshot(
                     subscriptionHandle,
-                    snapshot?.let { makeTypingSnapshot(it) },
+                    snapshot?.let { jsonFormat.encodeToString(it) },
                 ) {}
             }
         }
@@ -1514,7 +1316,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun participantGet(
-        handle: Long, callback: (Result<ParticipantSnapshot?>) -> Unit
+        handle: Long, callback: (Result<String?>) -> Unit
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1533,13 +1335,13 @@ private class PigeonApiImplementation : CoreHostApi {
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val snapshot = ref.get()
             callback(
-                Result.success(snapshot?.let { makeParticipantSnapshot(it) })
+                Result.success(snapshot?.let { jsonFormat.encodeToString(it) })
             )
         }
     }
 
     override fun participantSet(
-        handle: Long, data: SetParticipantParams, callback: (Result<Unit>) -> Unit
+        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1556,18 +1358,13 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(
-                com.talkjs.core.SetParticipantParams(
-                    access = data.access?.let { makeConversationAccess(it) },
-                    notify = data.notify?.let { makeNotificationSettings(it) },
-                )
-            )
+            ref.set(jsonFormat.decodeFromString(dataJson))
             callback(Result.success(Unit))
         }
     }
 
     override fun participantEdit(
-        handle: Long, data: SetParticipantParams, callback: (Result<Unit>) -> Unit
+        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1584,18 +1381,13 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(
-                com.talkjs.core.SetParticipantParams(
-                    access = data.access?.let { makeConversationAccess(it) },
-                    notify = data.notify?.let { makeNotificationSettings(it) },
-                )
-            )
+            ref.edit(jsonFormat.decodeFromString(dataJson))
             callback(Result.success(Unit))
         }
     }
 
     override fun participantCreateIfNotExists(
-        handle: Long, data: CreateParticipantParams, callback: (Result<Unit>) -> Unit
+        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1612,12 +1404,7 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(
-                com.talkjs.core.CreateParticipantParams(
-                    access = data.access?.let { makeConversationAccess(it) },
-                    notify = data.notify?.let { makeNotificationSettings(it) },
-                )
-            )
+            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
             callback(Result.success(Unit))
         }
     }
@@ -1675,7 +1462,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun messageGet(
-        handle: Long, callback: (Result<MessageSnapshotJson?>) -> Unit
+        handle: Long, callback: (Result<String?>) -> Unit
     ) {
         val ref = messages[handle]
         if (ref == null) {
@@ -1694,7 +1481,7 @@ private class PigeonApiImplementation : CoreHostApi {
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val snapshot = ref.get()
             callback(
-                Result.success(snapshot?.let { makeMessageSnapshot(it) })
+                Result.success(snapshot?.let { jsonFormat.encodeToString(it) })
             )
         }
     }
@@ -1723,7 +1510,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun messageEditText(
-        handle: Long, params: EditTextMessageParams, callback: (Result<Unit>) -> Unit
+        handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = messages[handle]
         if (ref == null) {
@@ -1740,18 +1527,13 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(
-                com.talkjs.core.EditTextMessageParams(
-                    custom = params.custom,
-                    text = params.text,
-                )
-            )
+            ref.edit(jsonFormat.decodeFromString<EditTextMessageParams>(paramsJson))
             callback(Result.success(Unit))
         }
     }
 
     override fun messageEditMessage(
-        handle: Long, params: EditMessageParamsJson, callback: (Result<Unit>) -> Unit
+        handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit
     ) {
         val ref = messages[handle]
         if (ref == null) {
@@ -1768,12 +1550,7 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(
-                com.talkjs.core.EditMessageParams(
-                    custom = params.custom,
-                    content = params.contentJson?.let { deserializeContent(it) },
-                )
-            )
+            ref.edit(jsonFormat.decodeFromString<EditMessageParams>(paramsJson))
             callback(Result.success(Unit))
         }
     }
@@ -1894,7 +1671,7 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun testContentSerialization(contentJson: String): String {
-        val content = deserializeContent(contentJson)
+        val content = jsonFormat.decodeFromString<List<ContentBlock>>(contentJson)
 
         val expected = listOf(
             TextBlock(
@@ -1973,7 +1750,7 @@ private class PigeonApiImplementation : CoreHostApi {
             )
         }
 
-        return serializeContent(content)
+        return jsonFormat.encodeToString(content)
     }
 }
 
