@@ -1690,14 +1690,14 @@ class CoreHostApi {
     ;
   }
 
-  Future<void> participantCreateIfNotExists(int handle, String dataJson) async {
+  Future<void> participantCreateIfNotExists(int handle, String? accessJson, String? notifyJson) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.participantCreateIfNotExists$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[handle, dataJson]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[handle, accessJson, notifyJson]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

@@ -717,7 +717,7 @@ interface CoreHostApi {
   fun participantGet(handle: Long, callback: (Result<String?>) -> Unit)
   fun participantSet(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
   fun participantEdit(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun participantCreateIfNotExists(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
+  fun participantCreateIfNotExists(handle: Long, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
   fun participantDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun participantDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageDeleteHandle(handle: Long)
@@ -1856,8 +1856,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.participantCreateIfNotExists(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val accessJsonArg = args[1] as String?
+            val notifyJsonArg = args[2] as String?
+            api.participantCreateIfNotExists(handleArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

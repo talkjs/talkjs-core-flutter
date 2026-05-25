@@ -1423,7 +1423,10 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun participantCreateIfNotExists(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1440,7 +1443,12 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
+            ref.createIfNotExists(
+                com.talkjs.core.CreateParticipantParams(
+                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+                )
+            )
             callback(Result.success(Unit))
         }
     }

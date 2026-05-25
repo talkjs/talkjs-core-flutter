@@ -326,7 +326,11 @@ abstract class CoreHostApi {
   void participantEdit(int handle, String dataJson);
 
   @async
-  void participantCreateIfNotExists(int handle, String dataJson);
+  void participantCreateIfNotExists(
+    int handle,
+    String? accessJson,
+    String? notifyJson,
+  );
 
   @async
   void participantDeleteFields(int handle, List<String> fields);

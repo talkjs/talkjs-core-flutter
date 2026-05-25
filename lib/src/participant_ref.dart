@@ -67,14 +67,25 @@ class ParticipantRef {
 
   /// Adds the user as a participant, or does nothing if they are already a participant.
   ///
+  /// @param access - The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  ///
   /// @remarks
   /// If the participant already exists, this operation is still considered successful.
   ///
   /// The promise will reject if client-side conversation syncing is disabled and the user is not already a participant.
-  Future<void> createIfNotExists(CreateParticipantParams data) {
+  Future<void> createIfNotExists({
+    ConversationAccess? access,
+    NotificationSettings? notify,
+  }) {
     return _api.participantCreateIfNotExists(
       _handle,
-      jsonEncode(data.toJson()),
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
     );
   }
 
