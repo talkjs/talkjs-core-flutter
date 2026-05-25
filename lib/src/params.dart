@@ -153,32 +153,6 @@ class SetParticipantParams {
   };
 }
 
-/// Parameters you can pass when sending a message
-class SendTextMessageParams {
-  /// The text to send in the message.
-  final String text;
-
-  /// Custom metadata you have set on the user.
-  /// Default = no custom metadata
-  final Map<String, String>? custom;
-
-  /// The message that you are replying to.
-  /// Default = not a reply
-  final String? referencedMessage;
-
-  const SendTextMessageParams({
-    required this.text,
-    this.custom,
-    this.referencedMessage,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'text': text,
-    'custom': custom,
-    'referencedMessage': referencedMessage,
-  };
-}
-
 /// Parameters you can pass to [ConversationRef.sendMessage].
 ///
 /// @remarks

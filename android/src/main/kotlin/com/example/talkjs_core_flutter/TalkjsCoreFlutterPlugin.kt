@@ -26,7 +26,6 @@ import com.talkjs.core.ParticipantRef
 import com.talkjs.core.ParticipantSubscription
 import com.talkjs.core.ReactionRef
 import com.talkjs.core.SendMessageParams
-import com.talkjs.core.SendTextMessageParams
 import com.talkjs.core.Subscription
 import com.talkjs.core.TalkSession
 import com.talkjs.core.TextBlock
@@ -944,7 +943,11 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSendText(
-        handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit
+        handle: Long,
+        text: String,
+        custom: Map<String, String>?,
+        referencedMessage: String?,
+        callback: (Result<MessageRefBuildData>) -> Unit,
     ) {
         val conversation = conversations[handle]
         if (conversation == null) {
@@ -965,7 +968,11 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val ref = conversation.send(
-                jsonFormat.decodeFromString<SendTextMessageParams>(paramsJson)
+                com.talkjs.core.SendTextMessageParams(
+                    text = text,
+                    custom = custom,
+                    referencedMessage = referencedMessage,
+                )
             )
 
             messages[messageHandle] = ref

@@ -604,7 +604,7 @@ interface CoreHostApi {
   fun conversationParticipant(handle: Long, user: String): Long
   fun conversationMessage(handle: Long, messageId: String): Long
   fun conversationSend(handle: Long, params: String, callback: (Result<MessageRefBuildData>) -> Unit)
-  fun conversationSendText(handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit)
+  fun conversationSendText(handle: Long, text: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
   fun conversationSendMessage(handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit)
   fun conversationSubscribe(handle: Long): Long
   fun conversationSubscribeMessages(handle: Long): Long
@@ -1398,8 +1398,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsJsonArg = args[1] as String
-            api.conversationSendText(handleArg, paramsJsonArg) { result: Result<MessageRefBuildData> ->
+            val textArg = args[1] as String
+            val customArg = args[2] as Map<String, String>?
+            val referencedMessageArg = args[3] as String?
+            api.conversationSendText(handleArg, textArg, customArg, referencedMessageArg) { result: Result<MessageRefBuildData> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

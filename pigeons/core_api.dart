@@ -239,7 +239,12 @@ abstract class CoreHostApi {
   MessageRefBuildData conversationSend(int handle, String params);
 
   @async
-  MessageRefBuildData conversationSendText(int handle, String paramsJson);
+  MessageRefBuildData conversationSendText(
+    int handle,
+    String text,
+    Map<String, String>? custom,
+    String? referencedMessage,
+  );
 
   @async
   MessageRefBuildData conversationSendMessage(int handle, String paramsJson);
