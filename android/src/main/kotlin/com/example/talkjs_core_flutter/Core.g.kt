@@ -689,7 +689,7 @@ interface CoreHostApi {
   fun conversationDeleteHandle(handle: Long)
   fun conversationGet(handle: Long, callback: (Result<String?>) -> Unit)
   fun conversationSet(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun conversationCreateIfNotExists(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
+  fun conversationCreateIfNotExists(handle: Long, subject: String?, photoUrl: String?, welcomeMessages: List<String>?, custom: Map<String, String>?, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
   fun conversationDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun conversationMarkAsRead(handle: Long, callback: (Result<Unit>) -> Unit)
   fun conversationMarkAsUnread(handle: Long, callback: (Result<Unit>) -> Unit)
@@ -1325,8 +1325,13 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.conversationCreateIfNotExists(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val subjectArg = args[1] as String?
+            val photoUrlArg = args[2] as String?
+            val welcomeMessagesArg = args[3] as List<String>?
+            val customArg = args[4] as Map<String, String>?
+            val accessJsonArg = args[5] as String?
+            val notifyJsonArg = args[6] as String?
+            api.conversationCreateIfNotExists(handleArg, subjectArg, photoUrlArg, welcomeMessagesArg, customArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

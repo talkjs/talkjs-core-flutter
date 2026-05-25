@@ -81,53 +81,6 @@ class SetUserParams {
   };
 }
 
-/// Parameters you can pass when creating a conversation.
-///
-/// Properties that are `null` will be set to the default
-class CreateConversationParams {
-  /// The conversation subject to display in the chat header.
-  /// Default = no subject, list participant names instead
-  final String? subject;
-
-  /// The URL for the conversation photo to display in the chat header.
-  /// Default = no photo, show a placeholder image.
-  final String? photoUrl;
-
-  /// System messages which are sent at the beginning of a conversation.
-  /// Default = no messages.
-  final List<String>? welcomeMessages;
-
-  /// Custom metadata you have set on the conversation.
-  /// Default = no custom metadata
-  final Map<String, String>? custom;
-
-  /// Your access to the conversation.
-  /// Default = `READ_WRITE` access.
-  final ConversationAccess? access;
-
-  /// Your notification settings.
-  /// Default = `TRUE`
-  final NotificationSettings? notify;
-
-  const CreateConversationParams({
-    this.subject,
-    this.photoUrl,
-    this.welcomeMessages,
-    this.custom,
-    this.access,
-    this.notify,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'subject': subject,
-    'photoUrl': photoUrl,
-    'welcomeMessages': welcomeMessages,
-    'custom': custom,
-    'access': access?.name,
-    'notify': notify == null ? null : notificationSettingsToJson(notify!),
-  };
-}
-
 /// Parameters you can pass when updating a conversation.
 ///
 /// Properties that are `null` will not be changed.

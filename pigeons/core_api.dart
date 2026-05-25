@@ -250,7 +250,15 @@ abstract class CoreHostApi {
   void conversationSet(int handle, String dataJson);
 
   @async
-  void conversationCreateIfNotExists(int handle, String dataJson);
+  void conversationCreateIfNotExists(
+    int handle,
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String>? custom,
+    String? accessJson,
+    String? notifyJson,
+  );
 
   @async
   void conversationDeleteFields(int handle, List<String> fields);

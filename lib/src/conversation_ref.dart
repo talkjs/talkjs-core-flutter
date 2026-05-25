@@ -291,15 +291,42 @@ class ConversationRef {
 
   /// Creates this conversation if it does not already exist.
   ///
+  /// @param subject - The conversation subject to display in the chat header.
+  /// Default = no subject, list participant names instead
+  /// @param photoUrl - The URL for the conversation photo to display in the chat header.
+  /// Default = no photo, show a placeholder image.
+  /// @param welcomeMessages - System messages which are sent at the beginning of a conversation.
+  /// Default = no messages.
+  /// @param custom - Custom metadata you have set on the conversation.
+  /// Default = no custom metadata
+  /// @param access - Your access to the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - Your notification settings.
+  /// Default = `TRUE`
+  ///
   /// @remarks
+  /// Properties that are `null` will be set to the default
+  ///
   /// Adds you as a participant in this conversation, if you are not already a participant.
   ///
   /// If the conversation already exists or you are already a participant, this operation is still considered successful.
   /// The promise rejects if you are not already a participant and client-side conversation syncing is disabled.
-  Future<void> createIfNotExists(CreateConversationParams data) {
+  Future<void> createIfNotExists({
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String>? custom,
+    ConversationAccess? access,
+    NotificationSettings? notify,
+  }) {
     return _api.conversationCreateIfNotExists(
       _handle,
-      jsonEncode(data.toJson()),
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
     );
   }
 
