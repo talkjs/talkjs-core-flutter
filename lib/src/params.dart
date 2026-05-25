@@ -153,43 +153,6 @@ class SetParticipantParams {
   };
 }
 
-/// Parameters you can pass to [ConversationRef.sendMessage].
-///
-/// @remarks
-/// Properties that are `null` will be set to the default.
-///
-/// This is the more advanced method for editing a message, giving full control over the message content.
-/// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
-///
-/// @public
-class SendMessageParams {
-  /// The most important part of the message, either some text, a file attachment, or a location.
-  ///
-  /// @remarks
-  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
-  final List<SendContentBlock> content;
-
-  /// Custom metadata you have set on the user.
-  /// Default = no custom metadata
-  final Map<String, String>? custom;
-
-  /// The message that you are replying to.
-  /// Default = not a reply
-  final String? referencedMessage;
-
-  const SendMessageParams({
-    required this.content,
-    this.custom,
-    this.referencedMessage,
-  });
-
-  Map<String, dynamic> toJson() => {
-    'content': jsonDecode(serializeContent(content)),
-    'custom': custom,
-    'referencedMessage': referencedMessage,
-  };
-}
-
 /// Parameters you can pass when editing a message.
 ///
 /// @remarks

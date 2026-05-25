@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'core.g.dart';
 import 'api.dart';
+import 'entity_tree.dart';
 import 'snapshots.dart';
 import 'params.dart';
 import 'participant_ref.dart';
@@ -415,11 +416,34 @@ class ConversationRef {
 
   /// Sends a message in the conversation
   ///
+  /// @param content - The most important part of the message, either some text, a file attachment, or a location.
+  ///
+  /// @remarks
+  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
+  /// @param custom - Custom metadata you have set on the user.
+  /// Default = no custom metadata
+  /// @param referencedMessage - The message that you are replying to.
+  /// Default = not a reply
+  ///
   /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
-  Future<MessageRef> sendMessage(SendMessageParams params) async {
+  ///
+  /// @remarks
+  /// Properties that are `null` will be set to the default.
+  ///
+  /// This is the more advanced method for editing a message, giving full control over the message content.
+  /// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
+  ///
+  /// @public
+  Future<MessageRef> sendMessage({
+    required List<SendContentBlock> content,
+    Map<String, String>? custom,
+    String? referencedMessage,
+  }) async {
     final refParams = await _api.conversationSendMessage(
       _handle,
-      jsonEncode(params.toJson()),
+      serializeContent(content),
+      custom,
+      referencedMessage,
     );
 
     return makeMessageRef(
