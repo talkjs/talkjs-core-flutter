@@ -631,7 +631,7 @@ interface CoreHostApi {
   fun messageGet(handle: Long, callback: (Result<String?>) -> Unit)
   fun messageEdit(handle: Long, params: String, callback: (Result<Unit>) -> Unit)
   fun messageEditText(handle: Long, text: String?, custom: Map<String, String?>?, callback: (Result<Unit>) -> Unit)
-  fun messageEditMessage(handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit)
+  fun messageEditMessage(handle: Long, contentJson: String, custom: Map<String, String?>?, callback: (Result<Unit>) -> Unit)
   fun messageDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun messageDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageReaction(handle: Long, emoji: String): Long
@@ -1913,8 +1913,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsJsonArg = args[1] as String
-            api.messageEditMessage(handleArg, paramsJsonArg) { result: Result<Unit> ->
+            val contentJsonArg = args[1] as String
+            val customArg = args[2] as Map<String, String?>?
+            api.messageEditMessage(handleArg, contentJsonArg, customArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

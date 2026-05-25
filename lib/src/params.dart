@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'snapshots.dart';
-import 'entity_tree.dart';
 
 /// Parameters you can pass when updating a user.
 ///
@@ -153,34 +150,3 @@ class SetParticipantParams {
   };
 }
 
-/// Parameters you can pass to [MessageRef.editMessage].
-///
-/// @remarks
-/// Properties that are `null` will not be changed.
-/// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
-///
-/// This is the more advanced method for editing a message. It gives you full control over the message content.
-/// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
-///
-/// @public
-class EditMessageParams {
-  /// Custom metadata you have set on the message.
-  /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
-  /// Default = no custom metadata
-  final Map<String, String?>? custom;
-
-  /// The new content for the message.
-  ///
-  /// @remarks
-  /// Any value provided here will overwrite the existing message content.
-  ///
-  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
-  final List<SendContentBlock>? content;
-
-  const EditMessageParams({this.custom, this.content});
-
-  Map<String, dynamic> toJson() => {
-    'custom': custom,
-    'content': content == null ? null : jsonDecode(serializeContent(content!)),
-  };
-}

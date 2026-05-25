@@ -325,7 +325,11 @@ abstract class CoreHostApi {
   );
 
   @async
-  void messageEditMessage(int handle, String paramsJson);
+  void messageEditMessage(
+    int handle,
+    String contentJson,
+    Map<String, String?>? custom,
+  );
 
   @async
   void messageDeleteFields(int handle, List<String> fields);
