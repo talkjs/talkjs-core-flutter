@@ -318,7 +318,11 @@ abstract class CoreHostApi {
   void messageEdit(int handle, String params);
 
   @async
-  void messageEditText(int handle, String paramsJson);
+  void messageEditText(
+    int handle,
+    String? text,
+    Map<String, String?>? custom,
+  );
 
   @async
   void messageEditMessage(int handle, String paramsJson);

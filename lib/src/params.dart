@@ -153,26 +153,6 @@ class SetParticipantParams {
   };
 }
 
-/// Parameters you can pass when editing a message.
-///
-/// @remarks
-/// Properties that are `null` will not be changed.
-/// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
-///
-class EditTextMessageParams {
-  /// Custom metadata you have set on the user.
-  /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
-  /// Default = no custom metadata
-  final Map<String, String?>? custom;
-
-  /// The new text to set as the message body
-  final String? text;
-
-  const EditTextMessageParams({this.custom, this.text});
-
-  Map<String, dynamic> toJson() => {'custom': custom, 'text': text};
-}
-
 /// Parameters you can pass to [MessageRef.editMessage].
 ///
 /// @remarks

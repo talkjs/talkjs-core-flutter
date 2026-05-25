@@ -17,7 +17,6 @@ import com.talkjs.core.ConversationListSubscription
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
 import com.talkjs.core.EditMessageParams
-import com.talkjs.core.EditTextMessageParams
 import com.talkjs.core.Link
 import com.talkjs.core.Markup
 import com.talkjs.core.MessageRef
@@ -1577,7 +1576,10 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun messageEditText(
-        handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        text: String?,
+        custom: Map<String, String?>?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = messages[handle]
         if (ref == null) {
@@ -1594,7 +1596,12 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(jsonFormat.decodeFromString<EditTextMessageParams>(paramsJson))
+            ref.edit(
+                com.talkjs.core.EditTextMessageParams(
+                    text = text,
+                    custom = custom,
+                )
+            )
             callback(Result.success(Unit))
         }
     }
