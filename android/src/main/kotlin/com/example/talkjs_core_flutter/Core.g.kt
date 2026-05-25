@@ -678,7 +678,7 @@ interface CoreHostApi {
   fun userDeleteHandle(handle: Long)
   fun userGet(handle: Long, callback: (Result<String?>) -> Unit)
   fun userSet(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun userCreateIfNotExists(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
+  fun userCreateIfNotExists(handle: Long, name: String, custom: Map<String, String>?, locale: String?, photoUrl: String?, role: String?, welcomeMessage: String?, email: List<String>?, phone: List<String>?, pushTokens: Map<String, Boolean>?, callback: (Result<Unit>) -> Unit)
   fun userDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun userSubscribe(handle: Long): Long
   fun userSubscribeOnline(handle: Long): Long
@@ -1113,8 +1113,16 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.userCreateIfNotExists(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val nameArg = args[1] as String
+            val customArg = args[2] as Map<String, String>?
+            val localeArg = args[3] as String?
+            val photoUrlArg = args[4] as String?
+            val roleArg = args[5] as String?
+            val welcomeMessageArg = args[6] as String?
+            val emailArg = args[7] as List<String>?
+            val phoneArg = args[8] as List<String>?
+            val pushTokensArg = args[9] as Map<String, Boolean>?
+            api.userCreateIfNotExists(handleArg, nameArg, customArg, localeArg, photoUrlArg, roleArg, welcomeMessageArg, emailArg, phoneArg, pushTokensArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

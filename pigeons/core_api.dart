@@ -213,7 +213,18 @@ abstract class CoreHostApi {
   void userSet(int handle, String dataJson);
 
   @async
-  void userCreateIfNotExists(int handle, String dataJson);
+  void userCreateIfNotExists(
+    int handle,
+    String name,
+    Map<String, String>? custom,
+    String? locale,
+    String? photoUrl,
+    String? role,
+    String? welcomeMessage,
+    List<String>? email,
+    List<String>? phone,
+    Map<String, bool>? pushTokens,
+  );
 
   @async
   void userDeleteFields(int handle, List<String> fields);

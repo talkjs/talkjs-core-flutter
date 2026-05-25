@@ -469,7 +469,15 @@ private class PigeonApiImplementation : CoreHostApi {
 
     override fun userCreateIfNotExists(
         handle: Long,
-        dataJson: String,
+        name: String,
+        custom: Map<String, String>?,
+        locale: String?,
+        photoUrl: String?,
+        role: String?,
+        welcomeMessage: String?,
+        email: List<String>?,
+        phone: List<String>?,
+        pushTokens: Map<String, Boolean>?,
         callback: (Result<Unit>) -> Unit,
     ) {
         val ref = users[handle]
@@ -487,7 +495,19 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
+            ref.createIfNotExists(
+                com.talkjs.core.CreateUserParams(
+                    name = name,
+                    custom = custom,
+                    locale = locale,
+                    photoUrl = photoUrl,
+                    role = role,
+                    welcomeMessage = welcomeMessage,
+                    email = email,
+                    phone = phone,
+                    pushTokens = pushTokens,
+                )
+            )
             callback(Result.success(Unit))
         }
     }
