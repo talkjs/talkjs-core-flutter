@@ -207,99 +207,6 @@ class ApiUrlOptions {
   int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
 }
 
-class TalkSessionOptions {
-  TalkSessionOptions({
-    required this.appId,
-    required this.userId,
-    this.token,
-    this.forceCreateNew,
-    this.signature,
-    this.apiUrls,
-    this.host,
-    this.clientBuild,
-  });
-
-  /// Your app's unique TalkJS ID. Get it from the **Settings** page of the [dashboard](https://talkjs.com/dashboard).
-  String appId;
-
-  /// The `id` of the user you want to connect and act as. Any messages you send will be sent as this user.
-  String userId;
-
-  /// A token to authenticate the session with. Ignored if a TalkSession object already exists for this appId + userId.
-  String? token;
-
-  /// A callback that fetches a new token from your backend and returns it. If this callback throws an error, the session will terminate. Your callback should retry failed requests. Ignored if a TalkSession object already exists for this appId + userId.
-  /// @suppress
-  /// If set to true, then `getTalkSession` will bypass the registry and create a new session
-  /// This option is the only way to have two sessions for the same user with different auth tokens.
-  ///
-  /// IE it's an undocumented, secret escape hatch for that specific weird niche use case.
-  /// It *is* designed to be used by customers, but it's undocumented so they'd only find out about it
-  /// if they contacted live support and we told them about it.
-  bool? forceCreateNew;
-
-  /// @suppress
-  String? signature;
-
-  /// @suppress
-  ApiUrlOptions? apiUrls;
-
-  /// @suppress
-  ///
-  /// note: it makes little sense to have both `host` and `apiUrls`. I intend to
-  /// remove `apiUrls` in the future in favour of just `host`.
-  String? host;
-
-  /// @suppress
-  String? clientBuild;
-
-  List<Object?> _toList() {
-    return <Object?>[
-      appId,
-      userId,
-      token,
-      forceCreateNew,
-      signature,
-      apiUrls,
-      host,
-      clientBuild,
-    ];
-  }
-
-  Object encode() {
-    return _toList();  }
-
-  static TalkSessionOptions decode(Object result) {
-    result as List<Object?>;
-    return TalkSessionOptions(
-      appId: result[0]! as String,
-      userId: result[1]! as String,
-      token: result[2] as String?,
-      forceCreateNew: result[3] as bool?,
-      signature: result[4] as String?,
-      apiUrls: result[5] as ApiUrlOptions?,
-      host: result[6] as String?,
-      clientBuild: result[7] as String?,
-    );
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  bool operator ==(Object other) {
-    if (other is! TalkSessionOptions || other.runtimeType != runtimeType) {
-      return false;
-    }
-    if (identical(this, other)) {
-      return true;
-    }
-    return _deepEquals(appId, other.appId) && _deepEquals(userId, other.userId) && _deepEquals(token, other.token) && _deepEquals(forceCreateNew, other.forceCreateNew) && _deepEquals(signature, other.signature) && _deepEquals(apiUrls, other.apiUrls) && _deepEquals(host, other.host) && _deepEquals(clientBuild, other.clientBuild);
-  }
-
-  @override
-  // ignore: avoid_equals_and_hash_code_on_mutable_classes
-  int get hashCode => _deepHash(<Object?>[runtimeType, ..._toList()]);
-}
-
 class GenericFileMetadata {
   GenericFileMetadata({
     required this.filename,
@@ -561,23 +468,20 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is ApiUrlOptions) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    }    else if (value is TalkSessionOptions) {
+    }    else if (value is GenericFileMetadata) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    }    else if (value is GenericFileMetadata) {
+    }    else if (value is ImageFileMetadata) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    }    else if (value is ImageFileMetadata) {
+    }    else if (value is VideoFileMetadata) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    }    else if (value is VideoFileMetadata) {
+    }    else if (value is AudioFileMetadata) {
       buffer.putUint8(134);
       writeValue(buffer, value.encode());
-    }    else if (value is AudioFileMetadata) {
-      buffer.putUint8(135);
-      writeValue(buffer, value.encode());
     }    else if (value is VoiceRecordingFileMetadata) {
-      buffer.putUint8(136);
+      buffer.putUint8(135);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -592,16 +496,14 @@ class _PigeonCodec extends StandardMessageCodec {
       case 130:
         return ApiUrlOptions.decode(readValue(buffer)!);
       case 131:
-        return TalkSessionOptions.decode(readValue(buffer)!);
-      case 132:
         return GenericFileMetadata.decode(readValue(buffer)!);
-      case 133:
+      case 132:
         return ImageFileMetadata.decode(readValue(buffer)!);
-      case 134:
+      case 133:
         return VideoFileMetadata.decode(readValue(buffer)!);
-      case 135:
+      case 134:
         return AudioFileMetadata.decode(readValue(buffer)!);
-      case 136:
+      case 135:
         return VoiceRecordingFileMetadata.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
@@ -622,14 +524,14 @@ class CoreHostApi {
 
   final String pigeonVar_messageChannelSuffix;
 
-  Future<int> getTalkSession(TalkSessionOptions options) async {
+  Future<int> getTalkSession(String appId, String userId, String? token, bool? forceCreateNew, String? signature, ApiUrlOptions? apiUrls, String? host, String? clientBuild) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.getTalkSession$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[options]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[appId, userId, token, forceCreateNew, signature, apiUrls, host, clientBuild]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(

@@ -7,7 +7,7 @@ import FlutterError
 import GenericFileMetadata
 import ImageFileMetadata
 import MessageRefBuildData
-import TalkSessionOptions
+import ApiUrlOptions
 import VideoFileMetadata
 import VoiceRecordingFileMetadata
 import com.talkjs.core.AutoLink
@@ -66,22 +66,31 @@ private class PigeonApiImplementation : CoreHostApi {
     private val reactions: MutableMap<Long, ReactionRef> = mutableMapOf()
 
     // Session
-    override fun getTalkSession(options: TalkSessionOptions): Long {
+    override fun getTalkSession(
+        appId: String,
+        userId: String,
+        token: String?,
+        forceCreateNew: Boolean?,
+        signature: String?,
+        apiUrls: ApiUrlOptions?,
+        host: String?,
+        clientBuild: String?,
+    ): Long {
         val sessionOptions = com.talkjs.core.TalkSessionOptions(
-            appId = options.appId,
-            userId = options.userId,
-            token = options.token,
-            forceCreateNew = options.forceCreateNew == true,
-            signature = options.signature,
-            apiUrls = options.apiUrls?.let {
+            appId = appId,
+            userId = userId,
+            token = token,
+            forceCreateNew = forceCreateNew == true,
+            signature = signature,
+            apiUrls = apiUrls?.let {
                 com.talkjs.core.ApiUrlOptions(
                     realtimeWsApiUrl = it.realtimeWsApiUrl,
                     internalHttpApiUrl = it.internalHttpApiUrl,
                     restApiHttpUrl = it.restApiHttpUrl,
                 )
             },
-            host = options.host,
-            clientBuild = options.clientBuild,
+            host = host,
+            clientBuild = clientBuild,
         )
 
         val session = com.talkjs.core.getTalkSession(sessionOptions)

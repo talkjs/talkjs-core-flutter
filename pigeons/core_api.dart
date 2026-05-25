@@ -36,55 +36,6 @@ class ApiUrlOptions {
   });
 }
 
-class TalkSessionOptions {
-  /// Your app's unique TalkJS ID. Get it from the **Settings** page of the [dashboard](https://talkjs.com/dashboard).
-  String appId;
-
-  /// The `id` of the user you want to connect and act as. Any messages you send will be sent as this user.
-  String userId;
-
-  /// A token to authenticate the session with. Ignored if a TalkSession object already exists for this appId + userId.
-  String? token;
-
-  /// A callback that fetches a new token from your backend and returns it. If this callback throws an error, the session will terminate. Your callback should retry failed requests. Ignored if a TalkSession object already exists for this appId + userId.
-  //val tokenFetcher: (suspend () -> String)? = null,
-
-  /// @suppress
-  /// If set to true, then `getTalkSession` will bypass the registry and create a new session
-  /// This option is the only way to have two sessions for the same user with different auth tokens.
-  ///
-  /// IE it's an undocumented, secret escape hatch for that specific weird niche use case.
-  /// It *is* designed to be used by customers, but it's undocumented so they'd only find out about it
-  /// if they contacted live support and we told them about it.
-  bool? forceCreateNew;
-
-  /// @suppress
-  String? signature;
-
-  /// @suppress
-  ApiUrlOptions? apiUrls;
-
-  /// @suppress
-  ///
-  /// note: it makes little sense to have both `host` and `apiUrls`. I intend to
-  /// remove `apiUrls` in the future in favour of just `host`.
-  String? host;
-
-  /// @suppress
-  String? clientBuild;
-
-  TalkSessionOptions({
-    required this.appId,
-    required this.userId,
-    this.token,
-    this.forceCreateNew,
-    this.signature,
-    this.apiUrls,
-    this.host,
-    this.clientBuild,
-  });
-}
-
 class GenericFileMetadata {
   /// The name of the file including extension.
   String filename;
@@ -149,7 +100,16 @@ class VoiceRecordingFileMetadata {
 @HostApi()
 abstract class CoreHostApi {
   // Session
-  int getTalkSession(TalkSessionOptions options);
+  int getTalkSession(
+    String appId,
+    String userId,
+    String? token,
+    bool? forceCreateNew,
+    String? signature,
+    ApiUrlOptions? apiUrls,
+    String? host,
+    String? clientBuild,
+  );
   void sessionDeleteHandle(int handle);
   int sessionUser(int handle, String id);
   int sessionConversation(int handle, String id);
