@@ -450,7 +450,17 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun userSet(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        name: String?,
+        custom: Map<String, String?>?,
+        locale: String?,
+        photoUrl: String?,
+        role: String?,
+        welcomeMessage: String?,
+        email: List<String>?,
+        phone: List<String>?,
+        pushTokens: Map<String, Boolean?>?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = users[handle]
         if (ref == null) {
@@ -467,7 +477,19 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(jsonFormat.decodeFromString(dataJson))
+            ref.set(
+                com.talkjs.core.SetUserParams(
+                    name = name,
+                    custom = custom,
+                    locale = locale,
+                    photoUrl = photoUrl,
+                    role = role,
+                    welcomeMessage = welcomeMessage,
+                    email = email,
+                    phone = phone,
+                    pushTokens = pushTokens,
+                )
+            )
             callback(Result.success(Unit))
         }
     }

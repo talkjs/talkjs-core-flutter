@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'core.g.dart';
 import 'api.dart';
 import 'snapshots.dart';
-import 'params.dart';
 
 final Finalizer<int> _userSubscriptionFinalizer = Finalizer((handle) async {
   await hostApi?.userSubscriptionDeleteHandle(handle);
@@ -139,10 +138,65 @@ class UserRef {
 
   /// Sets properties of this user. The user is created if a user with this ID doesn't already exist.
   ///
+  /// @param name - The user's name which will be displayed on the TalkJS UI
+  /// @param custom - Custom metadata you have set on the user.
+  /// This value acts as a patch. Remove specific properties by calling [UserRef.deleteFields]
+  /// Default = no custom metadata
+  /// @param locale - An [IETF language tag](https://www.w3.org/International/articles/language-tags/)
+  /// See the [localization documentation](https://talkjs.com/docs/Features/Language_Support/Localization.html)
+  /// Default = the locale selected on the dashboard
+  /// @param photoUrl - An optional URL to a photo which will be displayed as the user's avatar.
+  /// Default = no photo
+  /// @param role - TalkJS supports multiple sets of settings, called "roles". These allow you to change the behaviour of TalkJS for
+  /// different users.
+  /// You have full control over which user gets which configuration.
+  /// Default = the `default` role
+  /// @param welcomeMessage - The default message a person sees when starting a chat with this user.
+  /// Default = no welcome message
+  /// @param email - An array of email addresses associated with the user.
+  /// Default = no email addresses
+  /// @param phone - An array of phone numbers associated with the user.
+  /// Default = no phone numbers
+  /// @param pushTokens - A Map of push registration tokens to use when notifying this user.
+  ///
+  /// Keys in the Map have the format `'provider:token_id'`, where `provider` is either
+  /// `"fcm"` for Firebase Cloud Messaging or `"apns"` for Apple Push Notification Service
+  ///
+  /// The value for each key must be `true` to register the device for push notifications.
+  /// To unregister that device call [UserRef.deleteFields]
+  ///
+  /// Calling [UserRef.deleteFields] with the string `pushTokens` unregisters all the previously registered devices.
+  ///
+  /// Default = no push tokens
+  ///
   /// @remarks
+  /// Properties that are `null` will not be changed.
+  /// To clear / reset a property to the default, call [UserRef.deleteFields] instead.
+  ///
   /// `name` is required when creating a user. The promise will reject if you don't provide a `name` and the user does not exist yet.
-  Future<void> set(SetUserParams data) {
-    return _api.userSet(_handle, jsonEncode(data.toJson()));
+  Future<void> set({
+    String? name,
+    Map<String, String?>? custom,
+    String? locale,
+    String? photoUrl,
+    String? role,
+    String? welcomeMessage,
+    List<String>? email,
+    List<String>? phone,
+    Map<String, bool?>? pushTokens,
+  }) {
+    return _api.userSet(
+      _handle,
+      name,
+      custom,
+      locale,
+      photoUrl,
+      role,
+      welcomeMessage,
+      email,
+      phone,
+      pushTokens,
+    );
   }
 
   /// Creates a user with this ID, or does nothing if a user with this ID already exists.

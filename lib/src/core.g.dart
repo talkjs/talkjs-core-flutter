@@ -859,14 +859,14 @@ class CoreHostApi {
     return pigeonVar_replyValue as String?;
   }
 
-  Future<void> userSet(int handle, String dataJson) async {
+  Future<void> userSet(int handle, String? name, Map<String, String?>? custom, String? locale, String? photoUrl, String? role, String? welcomeMessage, List<String>? email, List<String>? phone, Map<String, bool?>? pushTokens) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.userSet$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[handle, dataJson]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[handle, name, custom, locale, photoUrl, role, welcomeMessage, email, phone, pushTokens]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
