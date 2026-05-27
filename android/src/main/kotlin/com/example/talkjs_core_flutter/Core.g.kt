@@ -622,8 +622,8 @@ interface CoreHostApi {
   fun typingSubscriptionUnsubscribe(handle: Long)
   fun participantDeleteHandle(handle: Long)
   fun participantGet(handle: Long, callback: (Result<String?>) -> Unit)
-  fun participantSet(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun participantEdit(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
+  fun participantSet(handle: Long, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
+  fun participantEdit(handle: Long, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
   fun participantCreateIfNotExists(handle: Long, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
   fun participantDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun participantDelete(handle: Long, callback: (Result<Unit>) -> Unit)
@@ -1747,8 +1747,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.participantSet(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val accessJsonArg = args[1] as String?
+            val notifyJsonArg = args[2] as String?
+            api.participantSet(handleArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1767,8 +1768,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.participantEdit(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val accessJsonArg = args[1] as String?
+            val notifyJsonArg = args[2] as String?
+            api.participantEdit(handleArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

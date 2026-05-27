@@ -1436,7 +1436,10 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun participantSet(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1453,13 +1456,21 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(jsonFormat.decodeFromString(dataJson))
+            ref.set(
+                com.talkjs.core.SetParticipantParams(
+                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+                )
+            )
             callback(Result.success(Unit))
         }
     }
 
     override fun participantEdit(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1476,7 +1487,12 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(jsonFormat.decodeFromString(dataJson))
+            ref.edit(
+                com.talkjs.core.SetParticipantParams(
+                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+                )
+            )
             callback(Result.success(Unit))
         }
     }
