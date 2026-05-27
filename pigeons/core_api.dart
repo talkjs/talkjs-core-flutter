@@ -218,7 +218,15 @@ abstract class CoreHostApi {
   String? conversationGet(int handle);
 
   @async
-  void conversationSet(int handle, String dataJson);
+  void conversationSet(
+    int handle,
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String?>? custom,
+    String? accessJson,
+    String? notifyJson,
+  );
 
   @async
   void conversationCreateIfNotExists(

@@ -737,7 +737,14 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSet(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        subject: String?,
+        photoUrl: String?,
+        welcomeMessages: List<String>?,
+        custom: Map<String, String?>?,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = conversations[handle]
         if (ref == null) {
@@ -754,7 +761,16 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(jsonFormat.decodeFromString(dataJson))
+            ref.set(
+                com.talkjs.core.SetConversationParams(
+                    subject = subject,
+                    photoUrl = photoUrl,
+                    welcomeMessages = welcomeMessages,
+                    custom = custom,
+                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+                )
+            )
             callback(Result.success(Unit))
         }
     }

@@ -1060,14 +1060,14 @@ class CoreHostApi {
     return pigeonVar_replyValue as String?;
   }
 
-  Future<void> conversationSet(int handle, String dataJson) async {
+  Future<void> conversationSet(int handle, String? subject, String? photoUrl, List<String>? welcomeMessages, Map<String, String?>? custom, String? accessJson, String? notifyJson) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSet$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[handle, dataJson]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[handle, subject, photoUrl, welcomeMessages, custom, accessJson, notifyJson]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(

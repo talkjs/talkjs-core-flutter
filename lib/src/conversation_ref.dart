@@ -5,7 +5,6 @@ import 'core.g.dart';
 import 'api.dart';
 import 'entity_tree.dart';
 import 'snapshots.dart';
-import 'params.dart';
 import 'participant_ref.dart';
 import 'message_ref.dart';
 
@@ -279,15 +278,45 @@ class ConversationRef {
 
   /// Sets properties of this conversation and your participation in it.
   ///
+  /// @param subject - The conversation subject to display in the chat header.
+  /// Default = no subject, list participant names instead.
+  /// @param photoUrl - The URL for the conversation photo to display in the chat header.
+  /// Default = no photo, show a placeholder image.
+  /// @param welcomeMessages - System messages which are sent at the beginning of a conversation.
+  /// Default = no messages.
+  /// @param custom - Custom metadata you have set on the conversation.
+  /// This value acts as a patch. Remove specific properties by calling [ConversationRef.deleteFields]
+  /// Default = no custom metadata
+  /// @param access - Your access to the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - Your notification settings.
+  /// Default = `TRUE`
+  ///
   /// @remarks
+  /// Properties that are `null` will not be changed.
+  /// To clear / reset a property to the default, call [ConversationRef.deleteFields] instead.
+  ///
   /// The conversation is created if a conversation with this ID doesn't already exist.
   /// You are added as a participant if you are not already a participant in the conversation.
   /// When client-side conversation syncing is disabled, you may only set your `notify` property, when you are already a participant.
   /// Everything else requires client-side conversation syncing to be enabled, and will cause the function to throw.
-  ///
-  /// @param params Parameters you pass when updating a conversation
-  Future<void> set(SetConversationParams data) {
-    return _api.conversationSet(_handle, jsonEncode(data.toJson()));
+  Future<void> set({
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String?>? custom,
+    ConversationAccess? access,
+    NotificationSettings? notify,
+  }) {
+    return _api.conversationSet(
+      _handle,
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
+    );
   }
 
   /// Creates this conversation if it does not already exist.
