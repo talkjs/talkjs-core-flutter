@@ -1,15 +1,5 @@
 package com.example.talkjs_core_flutter
 
-import AudioFileMetadata
-import CoreFlutterApi
-import CoreHostApi
-import FlutterError
-import GenericFileMetadata
-import ImageFileMetadata
-import MessageRefBuildData
-import ApiUrlOptions
-import VideoFileMetadata
-import VoiceRecordingFileMetadata
 import com.talkjs.core.AutoLink
 import com.talkjs.core.CodeSpan
 import com.talkjs.core.ContentBlock

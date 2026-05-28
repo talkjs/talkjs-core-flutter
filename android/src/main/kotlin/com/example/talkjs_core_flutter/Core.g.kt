@@ -2,6 +2,7 @@
 // See also: https://pub.dev/packages/pigeon
 @file:Suppress("UNCHECKED_CAST", "ArrayInDataClass")
 
+package com.example.talkjs_core_flutter
 
 import android.util.Log
 import io.flutter.plugin.common.BasicMessageChannel
