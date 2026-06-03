@@ -118,6 +118,18 @@ class TalkSession {
   final CoreHostApi _api;
   final int _handle;
 
+  /// The unique TalkJS ID that you passed when calling [getTalkSession]
+  final String appId;
+
+  /// A reference to the user this session is connected as
+  ///
+  /// @remarks
+  /// This is immutable. If you want to connect as a different user,
+  /// call [getTalkSession] again to get a new session.
+  ///
+  /// Equivalent to calling [TalkSession.user] with the current user's ID.
+  ///
+  /// @see [TalkSession.user] which lets you get a reference to any user.
   final UserRef currentUser;
 
   /// Get a reference to a user
@@ -258,6 +270,7 @@ class TalkSession {
   TalkSession._({
     required CoreHostApi api,
     required int handle,
+    required this.appId,
     required String userId,
   }) : _api = api,
        _handle = handle,
@@ -322,6 +335,7 @@ Future<TalkSession> getTalkSession({
   final session = TalkSession._(
     api: hostApi!,
     handle: handle,
+    appId: appId,
     userId: userId,
   );
 
