@@ -61,10 +61,7 @@ class ParticipantRef {
   ///
   /// When client-side conversation syncing is disabled, you must already be a participant and you cannot set anything except the `notify` property.
   /// Everything else requires client-side conversation syncing to be enabled, and will cause the function to throw.
-  Future<void> set({
-    ConversationAccess? access,
-    NotificationSettings? notify,
-  }) {
+  Future<void> set({ConversationAccess? access, NotificationSettings? notify}) {
     return _api.participantSet(
       _handle,
       access == null ? null : jsonEncode(access.name),

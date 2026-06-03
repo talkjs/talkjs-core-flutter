@@ -309,18 +309,10 @@ abstract class CoreHostApi {
   String? participantGet(int handle);
 
   @async
-  void participantSet(
-    int handle,
-    String? accessJson,
-    String? notifyJson,
-  );
+  void participantSet(int handle, String? accessJson, String? notifyJson);
 
   @async
-  void participantEdit(
-    int handle,
-    String? accessJson,
-    String? notifyJson,
-  );
+  void participantEdit(int handle, String? accessJson, String? notifyJson);
 
   @async
   void participantCreateIfNotExists(
@@ -345,11 +337,7 @@ abstract class CoreHostApi {
   void messageEdit(int handle, String params);
 
   @async
-  void messageEditText(
-    int handle,
-    String? text,
-    Map<String, String?>? custom,
-  );
+  void messageEditText(int handle, String? text, Map<String, String?>? custom);
 
   @async
   void messageEditMessage(

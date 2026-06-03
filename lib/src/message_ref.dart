@@ -65,10 +65,7 @@ class MessageRef {
   /// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
   ///
   /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
-  Future<void> editText({
-    String? text,
-    Map<String, String?>? custom,
-  }) {
+  Future<void> editText({String? text, Map<String, String?>? custom}) {
     return _api.messageEditText(_handle, text, custom);
   }
 
