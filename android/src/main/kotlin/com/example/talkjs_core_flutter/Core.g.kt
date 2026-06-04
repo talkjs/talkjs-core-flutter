@@ -604,8 +604,7 @@ interface CoreHostApi {
   fun conversationMarkAsTyping(handle: Long, callback: (Result<Unit>) -> Unit)
   fun conversationParticipant(handle: Long, user: String): Long
   fun conversationMessage(handle: Long, messageId: String): Long
-  fun conversationSend(handle: Long, params: String, callback: (Result<MessageRefBuildData>) -> Unit)
-  fun conversationSendText(handle: Long, text: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
+  fun conversationSend(handle: Long, text: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
   fun conversationSendMessage(handle: Long, contentJson: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
   fun conversationSubscribe(handle: Long): Long
   fun conversationSubscribeMessages(handle: Long): Long
@@ -630,8 +629,7 @@ interface CoreHostApi {
   fun participantDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageDeleteHandle(handle: Long)
   fun messageGet(handle: Long, callback: (Result<String?>) -> Unit)
-  fun messageEdit(handle: Long, params: String, callback: (Result<Unit>) -> Unit)
-  fun messageEditText(handle: Long, text: String?, custom: Map<String, String?>?, callback: (Result<Unit>) -> Unit)
+  fun messageEdit(handle: Long, text: String?, custom: Map<String, String?>?, callback: (Result<Unit>) -> Unit)
   fun messageEditMessage(handle: Long, contentJson: String, custom: Map<String, String?>?, callback: (Result<Unit>) -> Unit)
   fun messageDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun messageDelete(handle: Long, callback: (Result<Unit>) -> Unit)
@@ -1391,31 +1389,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsArg = args[1] as String
-            api.conversationSend(handleArg, paramsArg) { result: Result<MessageRefBuildData> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(CorePigeonUtils.wrapError(error))
-              } else {
-                val data = result.getOrNull()
-                reply.reply(CorePigeonUtils.wrapResult(data))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendText$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val handleArg = args[0] as Long
             val textArg = args[1] as String
             val customArg = args[2] as Map<String, String>?
             val referencedMessageArg = args[3] as String?
-            api.conversationSendText(handleArg, textArg, customArg, referencedMessageArg) { result: Result<MessageRefBuildData> ->
+            api.conversationSend(handleArg, textArg, customArg, referencedMessageArg) { result: Result<MessageRefBuildData> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1888,29 +1865,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsArg = args[1] as String
-            api.messageEdit(handleArg, paramsArg) { result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(CorePigeonUtils.wrapError(error))
-              } else {
-                reply.reply(CorePigeonUtils.wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditText$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val handleArg = args[0] as Long
             val textArg = args[1] as String?
             val customArg = args[2] as Map<String, String?>?
-            api.messageEditText(handleArg, textArg, customArg) { result: Result<Unit> ->
+            api.messageEdit(handleArg, textArg, customArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

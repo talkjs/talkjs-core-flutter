@@ -47,14 +47,6 @@ class MessageRef {
 
   /// Edits this message.
   ///
-  /// @remarks
-  /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
-  Future<void> edit(String params) {
-    return _api.messageEdit(_handle, params);
-  }
-
-  /// Edits this message.
-  ///
   /// @param text - The new text to set as the message body
   /// @param custom - Custom metadata you have set on the user.
   /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
@@ -65,8 +57,8 @@ class MessageRef {
   /// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
   ///
   /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
-  Future<void> editText({String? text, Map<String, String?>? custom}) {
-    return _api.messageEditText(_handle, text, custom);
+  Future<void> edit({String? text, Map<String, String?>? custom}) {
+    return _api.messageEdit(_handle, text, custom);
   }
 
   /// Edits this message.

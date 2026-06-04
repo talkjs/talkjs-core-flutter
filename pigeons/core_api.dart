@@ -255,10 +255,7 @@ abstract class CoreHostApi {
   int conversationMessage(int handle, String messageId);
 
   @async
-  MessageRefBuildData conversationSend(int handle, String params);
-
-  @async
-  MessageRefBuildData conversationSendText(
+  MessageRefBuildData conversationSend(
     int handle,
     String text,
     Map<String, String>? custom,
@@ -334,10 +331,7 @@ abstract class CoreHostApi {
   String? messageGet(int handle);
 
   @async
-  void messageEdit(int handle, String params);
-
-  @async
-  void messageEditText(int handle, String? text, Map<String, String?>? custom);
+  void messageEdit(int handle, String? text, Map<String, String?>? custom);
 
   @async
   void messageEditMessage(

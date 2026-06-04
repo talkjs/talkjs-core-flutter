@@ -431,9 +431,24 @@ class ConversationRef {
 
   /// Sends a message in the conversation
   ///
+  /// @param text - The text to send in the message.
+  /// @param custom - Custom metadata you have set on the user.
+  /// Default = no custom metadata
+  /// @param referencedMessage - The message that you are replying to.
+  /// Default = not a reply
+  ///
   /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
-  Future<MessageRef> send(String params) async {
-    final refParams = await _api.conversationSend(_handle, params);
+  Future<MessageRef> send(
+    String text, {
+    Map<String, String>? custom,
+    String? referencedMessage,
+  }) async {
+    final refParams = await _api.conversationSend(
+      _handle,
+      text,
+      custom,
+      referencedMessage,
+    );
 
     return makeMessageRef(
       api: _api,
@@ -463,43 +478,14 @@ class ConversationRef {
   /// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
   ///
   /// @public
-  Future<MessageRef> sendMessage({
-    required List<SendContentBlock> content,
+  Future<MessageRef> sendMessage(
+    List<SendContentBlock> content, {
     Map<String, String>? custom,
     String? referencedMessage,
   }) async {
     final refParams = await _api.conversationSendMessage(
       _handle,
       serializeContent(content),
-      custom,
-      referencedMessage,
-    );
-
-    return makeMessageRef(
-      api: _api,
-      handle: refParams.handle,
-      id: refParams.id,
-      conversationId: refParams.conversationId,
-    );
-  }
-
-  /// Sends a message in the conversation
-  ///
-  /// @param text - The text to send in the message.
-  /// @param custom - Custom metadata you have set on the user.
-  /// Default = no custom metadata
-  /// @param referencedMessage - The message that you are replying to.
-  /// Default = not a reply
-  ///
-  /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
-  Future<MessageRef> sendText({
-    required String text,
-    Map<String, String>? custom,
-    String? referencedMessage,
-  }) async {
-    final refParams = await _api.conversationSendText(
-      _handle,
-      text,
       custom,
       referencedMessage,
     );

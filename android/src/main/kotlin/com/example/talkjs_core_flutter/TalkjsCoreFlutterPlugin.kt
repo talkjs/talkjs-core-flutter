@@ -921,43 +921,6 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSend(
-        handle: Long, params: String, callback: (Result<MessageRefBuildData>) -> Unit
-    ) {
-        val conversation = conversations[handle]
-        if (conversation == null) {
-            callback(
-                Result.failure(
-                    FlutterError(
-                        "null-error",
-                        "Invalid conversation handle $handle",
-                        "",
-                    )
-                )
-            )
-            return
-        }
-
-        val messageHandle = nextId
-        nextId += 1
-
-        scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            val ref = conversation.send(params)
-
-            messages[messageHandle] = ref
-
-            callback(
-                Result.success(
-                    MessageRefBuildData(
-                        handle = messageHandle,
-                        id = ref.id,
-                        conversationId = ref.conversationId,
-                    )
-                )
-            )
-        }
-    }
-
-    override fun conversationSendText(
         handle: Long,
         text: String,
         custom: Map<String, String>?,
@@ -1576,29 +1539,6 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun messageEdit(
-        handle: Long, params: String, callback: (Result<Unit>) -> Unit
-    ) {
-        val ref = messages[handle]
-        if (ref == null) {
-            callback(
-                Result.failure(
-                    FlutterError(
-                        "null-error",
-                        "Invalid message handle $handle",
-                        "",
-                    )
-                )
-            )
-            return
-        }
-
-        scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(params)
-            callback(Result.success(Unit))
-        }
-    }
-
-    override fun messageEditText(
         handle: Long,
         text: String?,
         custom: Map<String, String?>?,

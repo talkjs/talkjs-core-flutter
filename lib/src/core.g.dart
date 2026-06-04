@@ -1386,36 +1386,12 @@ class CoreHostApi {
 
   Future<MessageRefBuildData> conversationSend(
     int handle,
-    String params,
-  ) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSend$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[handle, params],
-    );
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: false,
-    );
-    return pigeonVar_replyValue! as MessageRefBuildData;
-  }
-
-  Future<MessageRefBuildData> conversationSendText(
-    int handle,
     String text,
     Map<String, String>? custom,
     String? referencedMessage,
   ) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendText$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSend$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
@@ -1938,33 +1914,13 @@ class CoreHostApi {
     return pigeonVar_replyValue as String?;
   }
 
-  Future<void> messageEdit(int handle, String params) async {
-    final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEdit$pigeonVar_messageChannelSuffix';
-    final pigeonVar_channel = BasicMessageChannel<Object?>(
-      pigeonVar_channelName,
-      pigeonChannelCodec,
-      binaryMessenger: pigeonVar_binaryMessenger,
-    );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(
-      <Object?>[handle, params],
-    );
-    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
-
-    _extractReplyValueOrThrow(
-      pigeonVar_replyList,
-      pigeonVar_channelName,
-      isNullValid: true,
-    );
-  }
-
-  Future<void> messageEditText(
+  Future<void> messageEdit(
     int handle,
     String? text,
     Map<String, String?>? custom,
   ) async {
     final pigeonVar_channelName =
-        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditText$pigeonVar_messageChannelSuffix';
+        'dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEdit$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
