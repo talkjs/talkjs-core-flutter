@@ -62,7 +62,7 @@ private class PigeonApiImplementation : CoreHostApi {
         host: String?,
         clientBuild: String?,
     ): Long {
-        val sessionOptions = com.talkjs.core.TalkSessionOptions(
+        val session = com.talkjs.core.getTalkSession(
             appId = appId,
             userId = userId,
             token = token,
@@ -78,8 +78,6 @@ private class PigeonApiImplementation : CoreHostApi {
             host = host,
             clientBuild = clientBuild,
         )
-
-        val session = com.talkjs.core.getTalkSession(sessionOptions)
 
         val handle = nextId
         nextId += 1
@@ -468,17 +466,15 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.set(
-                com.talkjs.core.SetUserParams(
-                    name = name,
-                    custom = custom,
-                    locale = locale,
-                    photoUrl = photoUrl,
-                    role = role,
-                    welcomeMessage = welcomeMessage,
-                    email = email,
-                    phone = phone,
-                    pushTokens = pushTokens,
-                )
+                name = name,
+                custom = custom,
+                locale = locale,
+                photoUrl = photoUrl,
+                role = role,
+                welcomeMessage = welcomeMessage,
+                email = email,
+                phone = phone,
+                pushTokens = pushTokens,
             )
             callback(Result.success(Unit))
         }
@@ -513,17 +509,15 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.createIfNotExists(
-                com.talkjs.core.CreateUserParams(
-                    name = name,
-                    custom = custom,
-                    locale = locale,
-                    photoUrl = photoUrl,
-                    role = role,
-                    welcomeMessage = welcomeMessage,
-                    email = email,
-                    phone = phone,
-                    pushTokens = pushTokens,
-                )
+                name = name,
+                custom = custom,
+                locale = locale,
+                photoUrl = photoUrl,
+                role = role,
+                welcomeMessage = welcomeMessage,
+                email = email,
+                phone = phone,
+                pushTokens = pushTokens,
             )
             callback(Result.success(Unit))
         }
@@ -752,14 +746,12 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.set(
-                com.talkjs.core.SetConversationParams(
-                    subject = subject,
-                    photoUrl = photoUrl,
-                    welcomeMessages = welcomeMessages,
-                    custom = custom,
-                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
-                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
-                )
+                subject = subject,
+                photoUrl = photoUrl,
+                welcomeMessages = welcomeMessages,
+                custom = custom,
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
             )
             callback(Result.success(Unit))
         }
@@ -791,14 +783,12 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.createIfNotExists(
-                com.talkjs.core.CreateConversationParams(
-                    subject = subject,
-                    photoUrl = photoUrl,
-                    welcomeMessages = welcomeMessages,
-                    custom = custom,
-                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
-                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
-                )
+                subject = subject,
+                photoUrl = photoUrl,
+                welcomeMessages = welcomeMessages,
+                custom = custom,
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
             )
             callback(Result.success(Unit))
         }
@@ -993,11 +983,9 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val ref = conversation.send(
-                com.talkjs.core.SendTextMessageParams(
-                    text = text,
-                    custom = custom,
-                    referencedMessage = referencedMessage,
-                )
+                text = text,
+                custom = custom,
+                referencedMessage = referencedMessage,
             )
 
             messages[messageHandle] = ref
@@ -1040,11 +1028,9 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val ref = conversation.send(
-                com.talkjs.core.SendMessageParams(
-                    content = jsonFormat.decodeFromString(contentJson),
-                    custom = custom,
-                    referencedMessage = referencedMessage,
-                )
+                content = jsonFormat.decodeFromString(contentJson),
+                custom = custom,
+                referencedMessage = referencedMessage,
             )
 
             messages[messageHandle] = ref
@@ -1447,10 +1433,8 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.set(
-                com.talkjs.core.SetParticipantParams(
-                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
-                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
-                )
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
             )
             callback(Result.success(Unit))
         }
@@ -1478,10 +1462,8 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.edit(
-                com.talkjs.core.SetParticipantParams(
-                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
-                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
-                )
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
             )
             callback(Result.success(Unit))
         }
@@ -1509,10 +1491,8 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.createIfNotExists(
-                com.talkjs.core.CreateParticipantParams(
-                    access = accessJson?.let { jsonFormat.decodeFromString(it) },
-                    notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
-                )
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
             )
             callback(Result.success(Unit))
         }
@@ -1640,10 +1620,8 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.edit(
-                com.talkjs.core.EditTextMessageParams(
-                    text = text,
-                    custom = custom,
-                )
+                text = text,
+                custom = custom,
             )
             callback(Result.success(Unit))
         }
@@ -1671,10 +1649,8 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             ref.edit(
-                com.talkjs.core.EditMessageParams(
-                    content = jsonFormat.decodeFromString(contentJson),
-                    custom = custom,
-                )
+                content = jsonFormat.decodeFromString(contentJson),
+                custom = custom,
             )
             callback(Result.success(Unit))
         }
