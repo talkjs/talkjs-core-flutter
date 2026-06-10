@@ -129,15 +129,12 @@ private class PigeonApiImplementation : CoreHostApi {
         return conversationHandle
     }
 
-    override fun sessionSubscribeConversations(handle: Long): Long {
+    override fun sessionSubscribeConversations(handle: Long, subscriptionHandle: Long) {
         val ref = sessions[handle] ?: throw FlutterError(
             "null-error",
             "Invalid session handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = ref.subscribeConversations { snapshot, loadedAll ->
             scope.launch(Dispatchers.Main) {
@@ -180,19 +177,14 @@ private class PigeonApiImplementation : CoreHostApi {
                 }
             }
         }
-
-        return subscriptionHandle
     }
 
-    override fun sessionOnError(handle: Long): Long {
+    override fun sessionOnError(handle: Long, subscriptionHandle: Long) {
         val session = sessions[handle] ?: throw FlutterError(
             "null-error",
             "Invalid session handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = session.onError { error ->
             scope.launch(Dispatchers.Main) {
@@ -201,8 +193,6 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         sessionOnErrorSubscriptions[subscriptionHandle] = subscription
-
-        return subscriptionHandle
     }
 
     override fun sessionUploadFile(
@@ -546,15 +536,12 @@ private class PigeonApiImplementation : CoreHostApi {
         }
     }
 
-    override fun userSubscribe(handle: Long): Long {
+    override fun userSubscribe(handle: Long, subscriptionHandle: Long) {
         val ref = users[handle] ?: throw FlutterError(
             "null-error",
             "Invalid user handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = ref.subscribe { snapshot ->
             scope.launch(Dispatchers.Main) {
@@ -596,19 +583,14 @@ private class PigeonApiImplementation : CoreHostApi {
                 }
             }
         }
-
-        return subscriptionHandle
     }
 
-    override fun userSubscribeOnline(handle: Long): Long {
+    override fun userSubscribeOnline(handle: Long, subscriptionHandle: Long) {
         val ref = users[handle] ?: throw FlutterError(
             "null-error",
             "Invalid user handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = ref.subscribeOnline { snapshot ->
             scope.launch(Dispatchers.Main) {
@@ -650,8 +632,6 @@ private class PigeonApiImplementation : CoreHostApi {
                 }
             }
         }
-
-        return subscriptionHandle
     }
 
     // UserSubscription
@@ -1010,15 +990,12 @@ private class PigeonApiImplementation : CoreHostApi {
         }
     }
 
-    override fun conversationSubscribe(handle: Long): Long {
+    override fun conversationSubscribe(handle: Long, subscriptionHandle: Long) {
         val ref = conversations[handle] ?: throw FlutterError(
             "null-error",
             "Invalid conversation handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = ref.subscribe { snapshot ->
             scope.launch(Dispatchers.Main) {
@@ -1060,19 +1037,14 @@ private class PigeonApiImplementation : CoreHostApi {
                 }
             }
         }
-
-        return subscriptionHandle
     }
 
-    override fun conversationSubscribeMessages(handle: Long): Long {
+    override fun conversationSubscribeMessages(handle: Long, subscriptionHandle: Long) {
         val ref = conversations[handle] ?: throw FlutterError(
             "null-error",
             "Invalid conversation handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = ref.subscribeMessages { snapshot, loadedAll ->
             scope.launch(Dispatchers.Main) {
@@ -1115,19 +1087,14 @@ private class PigeonApiImplementation : CoreHostApi {
                 }
             }
         }
-
-        return subscriptionHandle
     }
 
-    override fun conversationSubscribeParticipants(handle: Long): Long {
+    override fun conversationSubscribeParticipants(handle: Long, subscriptionHandle: Long) {
         val ref = conversations[handle] ?: throw FlutterError(
             "null-error",
             "Invalid conversation handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = ref.subscribeParticipants { snapshot, loadedAll ->
             scope.launch(Dispatchers.Main) {
@@ -1170,19 +1137,14 @@ private class PigeonApiImplementation : CoreHostApi {
                 }
             }
         }
-
-        return subscriptionHandle
     }
 
-    override fun conversationSubscribeTyping(handle: Long): Long {
+    override fun conversationSubscribeTyping(handle: Long, subscriptionHandle: Long) {
         val ref = conversations[handle] ?: throw FlutterError(
             "null-error",
             "Invalid conversation handle $handle",
             "",
         )
-
-        val subscriptionHandle = nextId
-        nextId += 1
 
         val subscription = ref.subscribeTyping { snapshot ->
             scope.launch(Dispatchers.Main) {
@@ -1224,8 +1186,6 @@ private class PigeonApiImplementation : CoreHostApi {
                 }
             }
         }
-
-        return subscriptionHandle
     }
 
     // ConversationSubscription

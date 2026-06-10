@@ -113,8 +113,8 @@ abstract class CoreHostApi {
   void sessionDeleteHandle(int handle);
   int sessionUser(int handle, String id);
   int sessionConversation(int handle, String id);
-  int sessionSubscribeConversations(int handle);
-  int sessionOnError(int handle);
+  void sessionSubscribeConversations(int handle, int subscriptionHandle);
+  void sessionOnError(int handle, int subscriptionHandle);
 
   @async
   String sessionUploadFile(
@@ -200,8 +200,8 @@ abstract class CoreHostApi {
   @async
   void userDeleteFields(int handle, List<String> fields);
 
-  int userSubscribe(int handle);
-  int userSubscribeOnline(int handle);
+  void userSubscribe(int handle, int subscriptionHandle);
+  void userSubscribeOnline(int handle, int subscriptionHandle);
 
   // UserSubscription
   void userSubscriptionDeleteHandle(int handle);
@@ -270,10 +270,10 @@ abstract class CoreHostApi {
     String? referencedMessage,
   );
 
-  int conversationSubscribe(int handle);
-  int conversationSubscribeMessages(int handle);
-  int conversationSubscribeParticipants(int handle);
-  int conversationSubscribeTyping(int handle);
+  void conversationSubscribe(int handle, int subscriptionHandle);
+  void conversationSubscribeMessages(int handle, int subscriptionHandle);
+  void conversationSubscribeParticipants(int handle, int subscriptionHandle);
+  void conversationSubscribeTyping(int handle, int subscriptionHandle);
 
   // ConversationSubscription
   void conversationSubscriptionDeleteHandle(int handle);

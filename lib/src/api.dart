@@ -6,6 +6,8 @@ import 'snapshots.dart';
 
 CoreHostApi? hostApi;
 
+int nextId = 0;
+
 Map<int, Function(UserSnapshot? snapshot)?> userSubscriptionOnSnapshots = {};
 Map<int, Function(UserOnlineSnapshot? snapshot)?>
 userOnlineSubscriptionOnSnapshots = {};

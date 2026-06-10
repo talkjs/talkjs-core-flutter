@@ -571,8 +571,8 @@ interface CoreHostApi {
   fun sessionDeleteHandle(handle: Long)
   fun sessionUser(handle: Long, id: String): Long
   fun sessionConversation(handle: Long, id: String): Long
-  fun sessionSubscribeConversations(handle: Long): Long
-  fun sessionOnError(handle: Long): Long
+  fun sessionSubscribeConversations(handle: Long, subscriptionHandle: Long)
+  fun sessionOnError(handle: Long, subscriptionHandle: Long)
   fun sessionUploadFile(handle: Long, data: ByteArray, metadata: GenericFileMetadata, callback: (Result<String>) -> Unit)
   fun sessionUploadImage(handle: Long, data: ByteArray, metadata: ImageFileMetadata, callback: (Result<String>) -> Unit)
   fun sessionUploadVideo(handle: Long, data: ByteArray, metadata: VideoFileMetadata, callback: (Result<String>) -> Unit)
@@ -588,8 +588,8 @@ interface CoreHostApi {
   fun userSet(handle: Long, name: String?, custom: Map<String, String?>?, locale: String?, photoUrl: String?, role: String?, welcomeMessage: String?, email: List<String>?, phone: List<String>?, pushTokens: Map<String, Boolean?>?, callback: (Result<Unit>) -> Unit)
   fun userCreateIfNotExists(handle: Long, name: String, custom: Map<String, String>?, locale: String?, photoUrl: String?, role: String?, welcomeMessage: String?, email: List<String>?, phone: List<String>?, pushTokens: Map<String, Boolean>?, callback: (Result<Unit>) -> Unit)
   fun userDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
-  fun userSubscribe(handle: Long): Long
-  fun userSubscribeOnline(handle: Long): Long
+  fun userSubscribe(handle: Long, subscriptionHandle: Long)
+  fun userSubscribeOnline(handle: Long, subscriptionHandle: Long)
   fun userSubscriptionDeleteHandle(handle: Long)
   fun userSubscriptionUnsubscribe(handle: Long)
   fun userOnlineSubscriptionDeleteHandle(handle: Long)
@@ -606,10 +606,10 @@ interface CoreHostApi {
   fun conversationMessage(handle: Long, messageId: String): Long
   fun conversationSend(handle: Long, text: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
   fun conversationSendMessage(handle: Long, contentJson: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
-  fun conversationSubscribe(handle: Long): Long
-  fun conversationSubscribeMessages(handle: Long): Long
-  fun conversationSubscribeParticipants(handle: Long): Long
-  fun conversationSubscribeTyping(handle: Long): Long
+  fun conversationSubscribe(handle: Long, subscriptionHandle: Long)
+  fun conversationSubscribeMessages(handle: Long, subscriptionHandle: Long)
+  fun conversationSubscribeParticipants(handle: Long, subscriptionHandle: Long)
+  fun conversationSubscribeTyping(handle: Long, subscriptionHandle: Long)
   fun conversationSubscriptionDeleteHandle(handle: Long)
   fun conversationSubscriptionUnsubscribe(handle: Long)
   fun messageSubscriptionDeleteHandle(handle: Long)
@@ -732,8 +732,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.sessionSubscribeConversations(handleArg))
+              api.sessionSubscribeConversations(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -749,8 +751,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.sessionOnError(handleArg))
+              api.sessionOnError(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1082,8 +1086,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.userSubscribe(handleArg))
+              api.userSubscribe(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1099,8 +1105,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.userSubscribeOnline(handleArg))
+              api.userSubscribeOnline(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1435,8 +1443,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.conversationSubscribe(handleArg))
+              api.conversationSubscribe(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1452,8 +1462,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.conversationSubscribeMessages(handleArg))
+              api.conversationSubscribeMessages(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1469,8 +1481,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.conversationSubscribeParticipants(handleArg))
+              api.conversationSubscribeParticipants(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1486,8 +1500,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
+            val subscriptionHandleArg = args[1] as Long
             val wrapped: List<Any?> = try {
-              listOf(api.conversationSubscribeTyping(handleArg))
+              api.conversationSubscribeTyping(handleArg, subscriptionHandleArg)
+              listOf(null)
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
