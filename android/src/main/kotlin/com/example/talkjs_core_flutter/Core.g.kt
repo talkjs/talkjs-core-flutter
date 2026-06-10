@@ -2,6 +2,7 @@
 // See also: https://pub.dev/packages/pigeon
 @file:Suppress("UNCHECKED_CAST", "ArrayInDataClass")
 
+package com.example.talkjs_core_flutter
 
 import android.util.Log
 import io.flutter.plugin.common.BasicMessageChannel
@@ -279,90 +280,6 @@ data class ApiUrlOptions (
 }
 
 /** Generated class from Pigeon that represents data sent in messages. */
-data class TalkSessionOptions (
-  /** Your app's unique TalkJS ID. Get it from the **Settings** page of the [dashboard](https://talkjs.com/dashboard). */
-  val appId: String,
-  /** The `id` of the user you want to connect and act as. Any messages you send will be sent as this user. */
-  val userId: String,
-  /** A token to authenticate the session with. Ignored if a TalkSession object already exists for this appId + userId. */
-  val token: String? = null,
-  /**
-   * A callback that fetches a new token from your backend and returns it. If this callback throws an error, the session will terminate. Your callback should retry failed requests. Ignored if a TalkSession object already exists for this appId + userId.
-   * @suppress
-   * If set to true, then `getTalkSession` will bypass the registry and create a new session
-   * This option is the only way to have two sessions for the same user with different auth tokens.
-   *
-   * IE it's an undocumented, secret escape hatch for that specific weird niche use case.
-   * It *is* designed to be used by customers, but it's undocumented so they'd only find out about it
-   * if they contacted live support and we told them about it.
-   */
-  val forceCreateNew: Boolean? = null,
-  /** @suppress */
-  val signature: String? = null,
-  /** @suppress */
-  val apiUrls: ApiUrlOptions? = null,
-  /**
-   * @suppress
-   *
-   * note: it makes little sense to have both `host` and `apiUrls`. I intend to
-   * remove `apiUrls` in the future in favour of just `host`.
-   */
-  val host: String? = null,
-  /** @suppress */
-  val clientBuild: String? = null
-)
- {
-  companion object {
-    fun fromList(pigeonVar_list: List<Any?>): TalkSessionOptions {
-      val appId = pigeonVar_list[0] as String
-      val userId = pigeonVar_list[1] as String
-      val token = pigeonVar_list[2] as String?
-      val forceCreateNew = pigeonVar_list[3] as Boolean?
-      val signature = pigeonVar_list[4] as String?
-      val apiUrls = pigeonVar_list[5] as ApiUrlOptions?
-      val host = pigeonVar_list[6] as String?
-      val clientBuild = pigeonVar_list[7] as String?
-      return TalkSessionOptions(appId, userId, token, forceCreateNew, signature, apiUrls, host, clientBuild)
-    }
-  }
-  fun toList(): List<Any?> {
-    return listOf(
-      appId,
-      userId,
-      token,
-      forceCreateNew,
-      signature,
-      apiUrls,
-      host,
-      clientBuild,
-    )
-  }
-  override fun equals(other: Any?): Boolean {
-    if (other == null || other.javaClass != javaClass) {
-      return false
-    }
-    if (this === other) {
-      return true
-    }
-    val other = other as TalkSessionOptions
-    return CorePigeonUtils.deepEquals(this.appId, other.appId) && CorePigeonUtils.deepEquals(this.userId, other.userId) && CorePigeonUtils.deepEquals(this.token, other.token) && CorePigeonUtils.deepEquals(this.forceCreateNew, other.forceCreateNew) && CorePigeonUtils.deepEquals(this.signature, other.signature) && CorePigeonUtils.deepEquals(this.apiUrls, other.apiUrls) && CorePigeonUtils.deepEquals(this.host, other.host) && CorePigeonUtils.deepEquals(this.clientBuild, other.clientBuild)
-  }
-
-  override fun hashCode(): Int {
-    var result = javaClass.hashCode()
-    result = 31 * result + CorePigeonUtils.deepHash(this.appId)
-    result = 31 * result + CorePigeonUtils.deepHash(this.userId)
-    result = 31 * result + CorePigeonUtils.deepHash(this.token)
-    result = 31 * result + CorePigeonUtils.deepHash(this.forceCreateNew)
-    result = 31 * result + CorePigeonUtils.deepHash(this.signature)
-    result = 31 * result + CorePigeonUtils.deepHash(this.apiUrls)
-    result = 31 * result + CorePigeonUtils.deepHash(this.host)
-    result = 31 * result + CorePigeonUtils.deepHash(this.clientBuild)
-    return result
-  }
-}
-
-/** Generated class from Pigeon that represents data sent in messages. */
 data class GenericFileMetadata (
   /** The name of the file including extension. */
   val filename: String
@@ -586,30 +503,25 @@ private open class CorePigeonCodec : StandardMessageCodec() {
       }
       131.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          TalkSessionOptions.fromList(it)
+          GenericFileMetadata.fromList(it)
         }
       }
       132.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          GenericFileMetadata.fromList(it)
+          ImageFileMetadata.fromList(it)
         }
       }
       133.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          ImageFileMetadata.fromList(it)
+          VideoFileMetadata.fromList(it)
         }
       }
       134.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          VideoFileMetadata.fromList(it)
-        }
-      }
-      135.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
           AudioFileMetadata.fromList(it)
         }
       }
-      136.toByte() -> {
+      135.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
           VoiceRecordingFileMetadata.fromList(it)
         }
@@ -627,28 +539,24 @@ private open class CorePigeonCodec : StandardMessageCodec() {
         stream.write(130)
         writeValue(stream, value.toList())
       }
-      is TalkSessionOptions -> {
+      is GenericFileMetadata -> {
         stream.write(131)
         writeValue(stream, value.toList())
       }
-      is GenericFileMetadata -> {
+      is ImageFileMetadata -> {
         stream.write(132)
         writeValue(stream, value.toList())
       }
-      is ImageFileMetadata -> {
+      is VideoFileMetadata -> {
         stream.write(133)
         writeValue(stream, value.toList())
       }
-      is VideoFileMetadata -> {
+      is AudioFileMetadata -> {
         stream.write(134)
         writeValue(stream, value.toList())
       }
-      is AudioFileMetadata -> {
-        stream.write(135)
-        writeValue(stream, value.toList())
-      }
       is VoiceRecordingFileMetadata -> {
-        stream.write(136)
+        stream.write(135)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -659,7 +567,7 @@ private open class CorePigeonCodec : StandardMessageCodec() {
 
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface CoreHostApi {
-  fun getTalkSession(options: TalkSessionOptions): Long
+  fun getTalkSession(appId: String, userId: String, token: String?, forceCreateNew: Boolean?, signature: String?, apiUrls: ApiUrlOptions?, host: String?, clientBuild: String?): Long
   fun sessionDeleteHandle(handle: Long)
   fun sessionUser(handle: Long, id: String): Long
   fun sessionConversation(handle: Long, id: String): Long
@@ -677,8 +585,8 @@ interface CoreHostApi {
   fun sessionOnErrorUnsubscribe(handle: Long)
   fun userDeleteHandle(handle: Long)
   fun userGet(handle: Long, callback: (Result<String?>) -> Unit)
-  fun userSet(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun userCreateIfNotExists(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
+  fun userSet(handle: Long, name: String?, custom: Map<String, String?>?, locale: String?, photoUrl: String?, role: String?, welcomeMessage: String?, email: List<String>?, phone: List<String>?, pushTokens: Map<String, Boolean?>?, callback: (Result<Unit>) -> Unit)
+  fun userCreateIfNotExists(handle: Long, name: String, custom: Map<String, String>?, locale: String?, photoUrl: String?, role: String?, welcomeMessage: String?, email: List<String>?, phone: List<String>?, pushTokens: Map<String, Boolean>?, callback: (Result<Unit>) -> Unit)
   fun userDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun userSubscribe(handle: Long): Long
   fun userSubscribeOnline(handle: Long): Long
@@ -688,17 +596,16 @@ interface CoreHostApi {
   fun userOnlineSubscriptionUnsubscribe(handle: Long)
   fun conversationDeleteHandle(handle: Long)
   fun conversationGet(handle: Long, callback: (Result<String?>) -> Unit)
-  fun conversationSet(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun conversationCreateIfNotExists(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
+  fun conversationSet(handle: Long, subject: String?, photoUrl: String?, welcomeMessages: List<String>?, custom: Map<String, String?>?, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
+  fun conversationCreateIfNotExists(handle: Long, subject: String?, photoUrl: String?, welcomeMessages: List<String>?, custom: Map<String, String>?, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
   fun conversationDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun conversationMarkAsRead(handle: Long, callback: (Result<Unit>) -> Unit)
   fun conversationMarkAsUnread(handle: Long, callback: (Result<Unit>) -> Unit)
   fun conversationMarkAsTyping(handle: Long, callback: (Result<Unit>) -> Unit)
   fun conversationParticipant(handle: Long, user: String): Long
   fun conversationMessage(handle: Long, messageId: String): Long
-  fun conversationSend(handle: Long, params: String, callback: (Result<MessageRefBuildData>) -> Unit)
-  fun conversationSendText(handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit)
-  fun conversationSendMessage(handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit)
+  fun conversationSend(handle: Long, text: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
+  fun conversationSendMessage(handle: Long, contentJson: String, custom: Map<String, String>?, referencedMessage: String?, callback: (Result<MessageRefBuildData>) -> Unit)
   fun conversationSubscribe(handle: Long): Long
   fun conversationSubscribeMessages(handle: Long): Long
   fun conversationSubscribeParticipants(handle: Long): Long
@@ -715,16 +622,15 @@ interface CoreHostApi {
   fun typingSubscriptionUnsubscribe(handle: Long)
   fun participantDeleteHandle(handle: Long)
   fun participantGet(handle: Long, callback: (Result<String?>) -> Unit)
-  fun participantSet(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun participantEdit(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
-  fun participantCreateIfNotExists(handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit)
+  fun participantSet(handle: Long, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
+  fun participantEdit(handle: Long, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
+  fun participantCreateIfNotExists(handle: Long, accessJson: String?, notifyJson: String?, callback: (Result<Unit>) -> Unit)
   fun participantDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun participantDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageDeleteHandle(handle: Long)
   fun messageGet(handle: Long, callback: (Result<String?>) -> Unit)
-  fun messageEdit(handle: Long, params: String, callback: (Result<Unit>) -> Unit)
-  fun messageEditText(handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit)
-  fun messageEditMessage(handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit)
+  fun messageEdit(handle: Long, text: String?, custom: Map<String, String?>?, callback: (Result<Unit>) -> Unit)
+  fun messageEditMessage(handle: Long, contentJson: String, custom: Map<String, String?>?, callback: (Result<Unit>) -> Unit)
   fun messageDeleteFields(handle: Long, fields: List<String>, callback: (Result<Unit>) -> Unit)
   fun messageDelete(handle: Long, callback: (Result<Unit>) -> Unit)
   fun messageReaction(handle: Long, emoji: String): Long
@@ -747,9 +653,16 @@ interface CoreHostApi {
         if (api != null) {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
-            val optionsArg = args[0] as TalkSessionOptions
+            val appIdArg = args[0] as String
+            val userIdArg = args[1] as String
+            val tokenArg = args[2] as String?
+            val forceCreateNewArg = args[3] as Boolean?
+            val signatureArg = args[4] as String?
+            val apiUrlsArg = args[5] as ApiUrlOptions?
+            val hostArg = args[6] as String?
+            val clientBuildArg = args[7] as String?
             val wrapped: List<Any?> = try {
-              listOf(api.getTalkSession(optionsArg))
+              listOf(api.getTalkSession(appIdArg, userIdArg, tokenArg, forceCreateNewArg, signatureArg, apiUrlsArg, hostArg, clientBuildArg))
             } catch (exception: Throwable) {
               CorePigeonUtils.wrapError(exception)
             }
@@ -1093,8 +1006,16 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.userSet(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val nameArg = args[1] as String?
+            val customArg = args[2] as Map<String, String?>?
+            val localeArg = args[3] as String?
+            val photoUrlArg = args[4] as String?
+            val roleArg = args[5] as String?
+            val welcomeMessageArg = args[6] as String?
+            val emailArg = args[7] as List<String>?
+            val phoneArg = args[8] as List<String>?
+            val pushTokensArg = args[9] as Map<String, Boolean?>?
+            api.userSet(handleArg, nameArg, customArg, localeArg, photoUrlArg, roleArg, welcomeMessageArg, emailArg, phoneArg, pushTokensArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1113,8 +1034,16 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.userCreateIfNotExists(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val nameArg = args[1] as String
+            val customArg = args[2] as Map<String, String>?
+            val localeArg = args[3] as String?
+            val photoUrlArg = args[4] as String?
+            val roleArg = args[5] as String?
+            val welcomeMessageArg = args[6] as String?
+            val emailArg = args[7] as List<String>?
+            val phoneArg = args[8] as List<String>?
+            val pushTokensArg = args[9] as Map<String, Boolean>?
+            api.userCreateIfNotExists(handleArg, nameArg, customArg, localeArg, photoUrlArg, roleArg, welcomeMessageArg, emailArg, phoneArg, pushTokensArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1297,8 +1226,13 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.conversationSet(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val subjectArg = args[1] as String?
+            val photoUrlArg = args[2] as String?
+            val welcomeMessagesArg = args[3] as List<String>?
+            val customArg = args[4] as Map<String, String?>?
+            val accessJsonArg = args[5] as String?
+            val notifyJsonArg = args[6] as String?
+            api.conversationSet(handleArg, subjectArg, photoUrlArg, welcomeMessagesArg, customArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1317,8 +1251,13 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.conversationCreateIfNotExists(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val subjectArg = args[1] as String?
+            val photoUrlArg = args[2] as String?
+            val welcomeMessagesArg = args[3] as List<String>?
+            val customArg = args[4] as Map<String, String>?
+            val accessJsonArg = args[5] as String?
+            val notifyJsonArg = args[6] as String?
+            api.conversationCreateIfNotExists(handleArg, subjectArg, photoUrlArg, welcomeMessagesArg, customArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1450,29 +1389,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsArg = args[1] as String
-            api.conversationSend(handleArg, paramsArg) { result: Result<MessageRefBuildData> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(CorePigeonUtils.wrapError(error))
-              } else {
-                val data = result.getOrNull()
-                reply.reply(CorePigeonUtils.wrapResult(data))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.conversationSendText$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val handleArg = args[0] as Long
-            val paramsJsonArg = args[1] as String
-            api.conversationSendText(handleArg, paramsJsonArg) { result: Result<MessageRefBuildData> ->
+            val textArg = args[1] as String
+            val customArg = args[2] as Map<String, String>?
+            val referencedMessageArg = args[3] as String?
+            api.conversationSend(handleArg, textArg, customArg, referencedMessageArg) { result: Result<MessageRefBuildData> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1492,8 +1412,10 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsJsonArg = args[1] as String
-            api.conversationSendMessage(handleArg, paramsJsonArg) { result: Result<MessageRefBuildData> ->
+            val contentJsonArg = args[1] as String
+            val customArg = args[2] as Map<String, String>?
+            val referencedMessageArg = args[3] as String?
+            api.conversationSendMessage(handleArg, contentJsonArg, customArg, referencedMessageArg) { result: Result<MessageRefBuildData> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1803,8 +1725,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.participantSet(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val accessJsonArg = args[1] as String?
+            val notifyJsonArg = args[2] as String?
+            api.participantSet(handleArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1823,8 +1746,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.participantEdit(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val accessJsonArg = args[1] as String?
+            val notifyJsonArg = args[2] as String?
+            api.participantEdit(handleArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1843,8 +1767,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val dataJsonArg = args[1] as String
-            api.participantCreateIfNotExists(handleArg, dataJsonArg) { result: Result<Unit> ->
+            val accessJsonArg = args[1] as String?
+            val notifyJsonArg = args[2] as String?
+            api.participantCreateIfNotExists(handleArg, accessJsonArg, notifyJsonArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1940,28 +1865,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsArg = args[1] as String
-            api.messageEdit(handleArg, paramsArg) { result: Result<Unit> ->
-              val error = result.exceptionOrNull()
-              if (error != null) {
-                reply.reply(CorePigeonUtils.wrapError(error))
-              } else {
-                reply.reply(CorePigeonUtils.wrapResult(null))
-              }
-            }
-          }
-        } else {
-          channel.setMessageHandler(null)
-        }
-      }
-      run {
-        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.talkjs_core_flutter.CoreHostApi.messageEditText$separatedMessageChannelSuffix", codec)
-        if (api != null) {
-          channel.setMessageHandler { message, reply ->
-            val args = message as List<Any?>
-            val handleArg = args[0] as Long
-            val paramsJsonArg = args[1] as String
-            api.messageEditText(handleArg, paramsJsonArg) { result: Result<Unit> ->
+            val textArg = args[1] as String?
+            val customArg = args[2] as Map<String, String?>?
+            api.messageEdit(handleArg, textArg, customArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))
@@ -1980,8 +1886,9 @@ interface CoreHostApi {
           channel.setMessageHandler { message, reply ->
             val args = message as List<Any?>
             val handleArg = args[0] as Long
-            val paramsJsonArg = args[1] as String
-            api.messageEditMessage(handleArg, paramsJsonArg) { result: Result<Unit> ->
+            val contentJsonArg = args[1] as String
+            val customArg = args[2] as Map<String, String?>?
+            api.messageEditMessage(handleArg, contentJsonArg, customArg) { result: Result<Unit> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(CorePigeonUtils.wrapError(error))

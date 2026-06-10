@@ -1,23 +1,11 @@
 package com.example.talkjs_core_flutter
 
-import AudioFileMetadata
-import CoreFlutterApi
-import CoreHostApi
-import FlutterError
-import GenericFileMetadata
-import ImageFileMetadata
-import MessageRefBuildData
-import TalkSessionOptions
-import VideoFileMetadata
-import VoiceRecordingFileMetadata
 import com.talkjs.core.AutoLink
 import com.talkjs.core.CodeSpan
 import com.talkjs.core.ContentBlock
 import com.talkjs.core.ConversationListSubscription
 import com.talkjs.core.ConversationRef
 import com.talkjs.core.ConversationSubscription
-import com.talkjs.core.EditMessageParams
-import com.talkjs.core.EditTextMessageParams
 import com.talkjs.core.Link
 import com.talkjs.core.Markup
 import com.talkjs.core.MessageRef
@@ -25,8 +13,6 @@ import com.talkjs.core.MessageSubscription
 import com.talkjs.core.ParticipantRef
 import com.talkjs.core.ParticipantSubscription
 import com.talkjs.core.ReactionRef
-import com.talkjs.core.SendMessageParams
-import com.talkjs.core.SendTextMessageParams
 import com.talkjs.core.Subscription
 import com.talkjs.core.TalkSession
 import com.talkjs.core.TextBlock
@@ -66,25 +52,32 @@ private class PigeonApiImplementation : CoreHostApi {
     private val reactions: MutableMap<Long, ReactionRef> = mutableMapOf()
 
     // Session
-    override fun getTalkSession(options: TalkSessionOptions): Long {
-        val sessionOptions = com.talkjs.core.TalkSessionOptions(
-            appId = options.appId,
-            userId = options.userId,
-            token = options.token,
-            forceCreateNew = options.forceCreateNew == true,
-            signature = options.signature,
-            apiUrls = options.apiUrls?.let {
+    override fun getTalkSession(
+        appId: String,
+        userId: String,
+        token: String?,
+        forceCreateNew: Boolean?,
+        signature: String?,
+        apiUrls: ApiUrlOptions?,
+        host: String?,
+        clientBuild: String?,
+    ): Long {
+        val session = com.talkjs.core.getTalkSession(
+            appId = appId,
+            userId = userId,
+            token = token,
+            forceCreateNew = forceCreateNew == true,
+            signature = signature,
+            apiUrls = apiUrls?.let {
                 com.talkjs.core.ApiUrlOptions(
                     realtimeWsApiUrl = it.realtimeWsApiUrl,
                     internalHttpApiUrl = it.internalHttpApiUrl,
                     restApiHttpUrl = it.restApiHttpUrl,
                 )
             },
-            host = options.host,
-            clientBuild = options.clientBuild,
+            host = host,
+            clientBuild = clientBuild,
         )
-
-        val session = com.talkjs.core.getTalkSession(sessionOptions)
 
         val handle = nextId
         nextId += 1
@@ -445,31 +438,16 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun userSet(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
-    ) {
-        val ref = users[handle]
-        if (ref == null) {
-            callback(
-                Result.failure(
-                    FlutterError(
-                        "null-error",
-                        "Invalid user handle $handle",
-                        "",
-                    )
-                )
-            )
-            return
-        }
-
-        scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(jsonFormat.decodeFromString(dataJson))
-            callback(Result.success(Unit))
-        }
-    }
-
-    override fun userCreateIfNotExists(
         handle: Long,
-        dataJson: String,
+        name: String?,
+        custom: Map<String, String?>?,
+        locale: String?,
+        photoUrl: String?,
+        role: String?,
+        welcomeMessage: String?,
+        email: List<String>?,
+        phone: List<String>?,
+        pushTokens: Map<String, Boolean?>?,
         callback: (Result<Unit>) -> Unit,
     ) {
         val ref = users[handle]
@@ -487,7 +465,60 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
+            ref.set(
+                name = name,
+                custom = custom,
+                locale = locale,
+                photoUrl = photoUrl,
+                role = role,
+                welcomeMessage = welcomeMessage,
+                email = email,
+                phone = phone,
+                pushTokens = pushTokens,
+            )
+            callback(Result.success(Unit))
+        }
+    }
+
+    override fun userCreateIfNotExists(
+        handle: Long,
+        name: String,
+        custom: Map<String, String>?,
+        locale: String?,
+        photoUrl: String?,
+        role: String?,
+        welcomeMessage: String?,
+        email: List<String>?,
+        phone: List<String>?,
+        pushTokens: Map<String, Boolean>?,
+        callback: (Result<Unit>) -> Unit,
+    ) {
+        val ref = users[handle]
+        if (ref == null) {
+            callback(
+                Result.failure(
+                    FlutterError(
+                        "null-error",
+                        "Invalid user handle $handle",
+                        "",
+                    )
+                )
+            )
+            return
+        }
+
+        scope.launch(start = CoroutineStart.UNDISPATCHED) {
+            ref.createIfNotExists(
+                name = name,
+                custom = custom,
+                locale = locale,
+                photoUrl = photoUrl,
+                role = role,
+                welcomeMessage = welcomeMessage,
+                email = email,
+                phone = phone,
+                pushTokens = pushTokens,
+            )
             callback(Result.success(Unit))
         }
     }
@@ -690,7 +721,14 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSet(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        subject: String?,
+        photoUrl: String?,
+        welcomeMessages: List<String>?,
+        custom: Map<String, String?>?,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = conversations[handle]
         if (ref == null) {
@@ -707,13 +745,27 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(jsonFormat.decodeFromString(dataJson))
+            ref.set(
+                subject = subject,
+                photoUrl = photoUrl,
+                welcomeMessages = welcomeMessages,
+                custom = custom,
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+            )
             callback(Result.success(Unit))
         }
     }
 
     override fun conversationCreateIfNotExists(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        subject: String?,
+        photoUrl: String?,
+        welcomeMessages: List<String>?,
+        custom: Map<String, String>?,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = conversations[handle]
         if (ref == null) {
@@ -730,7 +782,14 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
+            ref.createIfNotExists(
+                subject = subject,
+                photoUrl = photoUrl,
+                welcomeMessages = welcomeMessages,
+                custom = custom,
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+            )
             callback(Result.success(Unit))
         }
     }
@@ -862,44 +921,11 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSend(
-        handle: Long, params: String, callback: (Result<MessageRefBuildData>) -> Unit
-    ) {
-        val conversation = conversations[handle]
-        if (conversation == null) {
-            callback(
-                Result.failure(
-                    FlutterError(
-                        "null-error",
-                        "Invalid conversation handle $handle",
-                        "",
-                    )
-                )
-            )
-            return
-        }
-
-        val messageHandle = nextId
-        nextId += 1
-
-        scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            val ref = conversation.send(params)
-
-            messages[messageHandle] = ref
-
-            callback(
-                Result.success(
-                    MessageRefBuildData(
-                        handle = messageHandle,
-                        id = ref.id,
-                        conversationId = ref.conversationId,
-                    )
-                )
-            )
-        }
-    }
-
-    override fun conversationSendText(
-        handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit
+        handle: Long,
+        text: String,
+        custom: Map<String, String>?,
+        referencedMessage: String?,
+        callback: (Result<MessageRefBuildData>) -> Unit,
     ) {
         val conversation = conversations[handle]
         if (conversation == null) {
@@ -920,7 +946,9 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val ref = conversation.send(
-                jsonFormat.decodeFromString<SendTextMessageParams>(paramsJson)
+                text = text,
+                custom = custom,
+                referencedMessage = referencedMessage,
             )
 
             messages[messageHandle] = ref
@@ -938,7 +966,11 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun conversationSendMessage(
-        handle: Long, paramsJson: String, callback: (Result<MessageRefBuildData>) -> Unit
+        handle: Long,
+        contentJson: String,
+        custom: Map<String, String>?,
+        referencedMessage: String?,
+        callback: (Result<MessageRefBuildData>) -> Unit,
     ) {
         val conversation = conversations[handle]
         if (conversation == null) {
@@ -959,7 +991,9 @@ private class PigeonApiImplementation : CoreHostApi {
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
             val ref = conversation.send(
-                jsonFormat.decodeFromString<SendMessageParams>(paramsJson)
+                content = jsonFormat.decodeFromString(contentJson),
+                custom = custom,
+                referencedMessage = referencedMessage,
             )
 
             messages[messageHandle] = ref
@@ -1341,7 +1375,10 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun participantSet(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1358,13 +1395,19 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.set(jsonFormat.decodeFromString(dataJson))
+            ref.set(
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+            )
             callback(Result.success(Unit))
         }
     }
 
     override fun participantEdit(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1381,13 +1424,19 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(jsonFormat.decodeFromString(dataJson))
+            ref.edit(
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+            )
             callback(Result.success(Unit))
         }
     }
 
     override fun participantCreateIfNotExists(
-        handle: Long, dataJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        accessJson: String?,
+        notifyJson: String?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = participants[handle]
         if (ref == null) {
@@ -1404,7 +1453,10 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.createIfNotExists(jsonFormat.decodeFromString(dataJson))
+            ref.createIfNotExists(
+                access = accessJson?.let { jsonFormat.decodeFromString(it) },
+                notify = notifyJson?.let { jsonFormat.decodeFromString(it) },
+            )
             callback(Result.success(Unit))
         }
     }
@@ -1487,7 +1539,10 @@ private class PigeonApiImplementation : CoreHostApi {
     }
 
     override fun messageEdit(
-        handle: Long, params: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        text: String?,
+        custom: Map<String, String?>?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = messages[handle]
         if (ref == null) {
@@ -1504,36 +1559,19 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(params)
-            callback(Result.success(Unit))
-        }
-    }
-
-    override fun messageEditText(
-        handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit
-    ) {
-        val ref = messages[handle]
-        if (ref == null) {
-            callback(
-                Result.failure(
-                    FlutterError(
-                        "null-error",
-                        "Invalid message handle $handle",
-                        "",
-                    )
-                )
+            ref.edit(
+                text = text,
+                custom = custom,
             )
-            return
-        }
-
-        scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(jsonFormat.decodeFromString<EditTextMessageParams>(paramsJson))
             callback(Result.success(Unit))
         }
     }
 
     override fun messageEditMessage(
-        handle: Long, paramsJson: String, callback: (Result<Unit>) -> Unit
+        handle: Long,
+        contentJson: String,
+        custom: Map<String, String?>?,
+        callback: (Result<Unit>) -> Unit,
     ) {
         val ref = messages[handle]
         if (ref == null) {
@@ -1550,7 +1588,10 @@ private class PigeonApiImplementation : CoreHostApi {
         }
 
         scope.launch(start = CoroutineStart.UNDISPATCHED) {
-            ref.edit(jsonFormat.decodeFromString<EditMessageParams>(paramsJson))
+            ref.edit(
+                content = jsonFormat.decodeFromString(contentJson),
+                custom = custom,
+            )
             callback(Result.success(Unit))
         }
     }

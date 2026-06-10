@@ -10,7 +10,6 @@ import 'conversation_ref.dart';
 export 'core.g.dart'
     show
         ApiUrlOptions,
-        TalkSessionOptions,
         GenericFileMetadata,
         ImageFileMetadata,
         VideoFileMetadata,
@@ -119,6 +118,18 @@ class TalkSession {
   final CoreHostApi _api;
   final int _handle;
 
+  /// The unique TalkJS ID that you passed when calling [getTalkSession]
+  final String appId;
+
+  /// A reference to the user this session is connected as
+  ///
+  /// @remarks
+  /// This is immutable. If you want to connect as a different user,
+  /// call [getTalkSession] again to get a new session.
+  ///
+  /// Equivalent to calling [TalkSession.user] with the current user's ID.
+  ///
+  /// @see [TalkSession.user] which lets you get a reference to any user.
   final UserRef currentUser;
 
   /// Get a reference to a user
@@ -259,6 +270,7 @@ class TalkSession {
   TalkSession._({
     required CoreHostApi api,
     required int handle,
+    required this.appId,
     required String userId,
   }) : _api = api,
        _handle = handle,
@@ -272,22 +284,59 @@ class TalkSession {
 
 /// Returns a TalkSession option for the specified App ID and User ID.
 ///
+/// @param appId - Your app's unique TalkJS ID. Get it from the **Settings** page of the [dashboard](https://talkjs.com/dashboard).
+/// @param userId - The `id` of the user you want to connect and act as. Any messages you send will be sent as this user.
+/// @param token - A token to authenticate the session with. Ignored if a TalkSession object already exists for this appId + userId.
+/// @param forceCreateNew - @suppress
+/// If set to true, then `getTalkSession` will bypass the registry and create a new session
+/// This option is the only way to have two sessions for the same user with different auth tokens.
+///
+/// IE it's an undocumented, secret escape hatch for that specific weird niche use case.
+/// It *is* designed to be used by customers, but it's undocumented so they'd only find out about it
+/// if they contacted live support and we told them about it.
+/// @param signature - @suppress
+/// @param apiUrls - @suppress
+/// @param host - @suppress
+///
+/// note: it makes little sense to have both `host` and `apiUrls`. I intend to
+/// remove `apiUrls` in the future in favour of just `host`.
+/// @param clientBuild - @suppress
+///
 /// @remarks
 /// Backed by a registry, so calling this function twice with the same app and user returns the same session object both times.
 /// A new session will be created if the old one encountered an error or got garbage collected.
 ///
 /// The `token` and `tokenFetcher` properties are ignored if there is already a session for that user in the registry.
-Future<TalkSession> getTalkSession(TalkSessionOptions options) async {
+Future<TalkSession> getTalkSession({
+  required String appId,
+  required String userId,
+  String? token,
+  bool? forceCreateNew,
+  String? signature,
+  ApiUrlOptions? apiUrls,
+  String? host,
+  String? clientBuild,
+}) async {
   if (hostApi == null) {
     hostApi = CoreHostApi();
     CoreFlutterApi.setUp(CoreFlutterApiImplementation());
   }
 
-  final handle = await hostApi!.getTalkSession(options);
+  final handle = await hostApi!.getTalkSession(
+    appId,
+    userId,
+    token,
+    forceCreateNew,
+    signature,
+    apiUrls,
+    host,
+    clientBuild,
+  );
   final session = TalkSession._(
     api: hostApi!,
     handle: handle,
-    userId: options.userId,
+    appId: appId,
+    userId: userId,
   );
 
   _sessionFinalizer.attach(session, handle);

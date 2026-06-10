@@ -6,7 +6,7 @@ import 'package:pigeon/pigeon.dart';
     dartOptions: DartOptions(),
     kotlinOut:
         'android/src/main/kotlin/com/example/talkjs_core_flutter/Core.g.kt',
-    kotlinOptions: KotlinOptions(),
+    kotlinOptions: KotlinOptions(package: 'com.example.talkjs_core_flutter'),
     dartPackageName: 'talkjs_core_flutter',
   ),
 )
@@ -33,55 +33,6 @@ class ApiUrlOptions {
     required this.realtimeWsApiUrl,
     required this.internalHttpApiUrl,
     required this.restApiHttpUrl,
-  });
-}
-
-class TalkSessionOptions {
-  /// Your app's unique TalkJS ID. Get it from the **Settings** page of the [dashboard](https://talkjs.com/dashboard).
-  String appId;
-
-  /// The `id` of the user you want to connect and act as. Any messages you send will be sent as this user.
-  String userId;
-
-  /// A token to authenticate the session with. Ignored if a TalkSession object already exists for this appId + userId.
-  String? token;
-
-  /// A callback that fetches a new token from your backend and returns it. If this callback throws an error, the session will terminate. Your callback should retry failed requests. Ignored if a TalkSession object already exists for this appId + userId.
-  //val tokenFetcher: (suspend () -> String)? = null,
-
-  /// @suppress
-  /// If set to true, then `getTalkSession` will bypass the registry and create a new session
-  /// This option is the only way to have two sessions for the same user with different auth tokens.
-  ///
-  /// IE it's an undocumented, secret escape hatch for that specific weird niche use case.
-  /// It *is* designed to be used by customers, but it's undocumented so they'd only find out about it
-  /// if they contacted live support and we told them about it.
-  bool? forceCreateNew;
-
-  /// @suppress
-  String? signature;
-
-  /// @suppress
-  ApiUrlOptions? apiUrls;
-
-  /// @suppress
-  ///
-  /// note: it makes little sense to have both `host` and `apiUrls`. I intend to
-  /// remove `apiUrls` in the future in favour of just `host`.
-  String? host;
-
-  /// @suppress
-  String? clientBuild;
-
-  TalkSessionOptions({
-    required this.appId,
-    required this.userId,
-    this.token,
-    this.forceCreateNew,
-    this.signature,
-    this.apiUrls,
-    this.host,
-    this.clientBuild,
   });
 }
 
@@ -149,7 +100,16 @@ class VoiceRecordingFileMetadata {
 @HostApi()
 abstract class CoreHostApi {
   // Session
-  int getTalkSession(TalkSessionOptions options);
+  int getTalkSession(
+    String appId,
+    String userId,
+    String? token,
+    bool? forceCreateNew,
+    String? signature,
+    ApiUrlOptions? apiUrls,
+    String? host,
+    String? clientBuild,
+  );
   void sessionDeleteHandle(int handle);
   int sessionUser(int handle, String id);
   int sessionConversation(int handle, String id);
@@ -210,10 +170,32 @@ abstract class CoreHostApi {
   String? userGet(int handle);
 
   @async
-  void userSet(int handle, String dataJson);
+  void userSet(
+    int handle,
+    String? name,
+    Map<String, String?>? custom,
+    String? locale,
+    String? photoUrl,
+    String? role,
+    String? welcomeMessage,
+    List<String>? email,
+    List<String>? phone,
+    Map<String, bool?>? pushTokens,
+  );
 
   @async
-  void userCreateIfNotExists(int handle, String dataJson);
+  void userCreateIfNotExists(
+    int handle,
+    String name,
+    Map<String, String>? custom,
+    String? locale,
+    String? photoUrl,
+    String? role,
+    String? welcomeMessage,
+    List<String>? email,
+    List<String>? phone,
+    Map<String, bool>? pushTokens,
+  );
 
   @async
   void userDeleteFields(int handle, List<String> fields);
@@ -236,10 +218,26 @@ abstract class CoreHostApi {
   String? conversationGet(int handle);
 
   @async
-  void conversationSet(int handle, String dataJson);
+  void conversationSet(
+    int handle,
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String?>? custom,
+    String? accessJson,
+    String? notifyJson,
+  );
 
   @async
-  void conversationCreateIfNotExists(int handle, String dataJson);
+  void conversationCreateIfNotExists(
+    int handle,
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String>? custom,
+    String? accessJson,
+    String? notifyJson,
+  );
 
   @async
   void conversationDeleteFields(int handle, List<String> fields);
@@ -257,13 +255,20 @@ abstract class CoreHostApi {
   int conversationMessage(int handle, String messageId);
 
   @async
-  MessageRefBuildData conversationSend(int handle, String params);
+  MessageRefBuildData conversationSend(
+    int handle,
+    String text,
+    Map<String, String>? custom,
+    String? referencedMessage,
+  );
 
   @async
-  MessageRefBuildData conversationSendText(int handle, String paramsJson);
-
-  @async
-  MessageRefBuildData conversationSendMessage(int handle, String paramsJson);
+  MessageRefBuildData conversationSendMessage(
+    int handle,
+    String contentJson,
+    Map<String, String>? custom,
+    String? referencedMessage,
+  );
 
   int conversationSubscribe(int handle);
   int conversationSubscribeMessages(int handle);
@@ -301,13 +306,17 @@ abstract class CoreHostApi {
   String? participantGet(int handle);
 
   @async
-  void participantSet(int handle, String dataJson);
+  void participantSet(int handle, String? accessJson, String? notifyJson);
 
   @async
-  void participantEdit(int handle, String dataJson);
+  void participantEdit(int handle, String? accessJson, String? notifyJson);
 
   @async
-  void participantCreateIfNotExists(int handle, String dataJson);
+  void participantCreateIfNotExists(
+    int handle,
+    String? accessJson,
+    String? notifyJson,
+  );
 
   @async
   void participantDeleteFields(int handle, List<String> fields);
@@ -322,13 +331,14 @@ abstract class CoreHostApi {
   String? messageGet(int handle);
 
   @async
-  void messageEdit(int handle, String params);
+  void messageEdit(int handle, String? text, Map<String, String?>? custom);
 
   @async
-  void messageEditText(int handle, String paramsJson);
-
-  @async
-  void messageEditMessage(int handle, String paramsJson);
+  void messageEditMessage(
+    int handle,
+    String contentJson,
+    Map<String, String?>? custom,
+  );
 
   @async
   void messageDeleteFields(int handle, List<String> fields);

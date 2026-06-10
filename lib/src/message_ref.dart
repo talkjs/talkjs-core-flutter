@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'core.g.dart';
 import 'api.dart';
+import 'entity_tree.dart';
 import 'snapshots.dart';
-import 'params.dart';
 import 'reaction_ref.dart';
 
 final Finalizer<int> _messageFinalizer = Finalizer((handle) async {
@@ -47,26 +47,47 @@ class MessageRef {
 
   /// Edits this message.
   ///
+  /// @param text - The new text to set as the message body
+  /// @param custom - Custom metadata you have set on the user.
+  /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
+  /// Default = no custom metadata
+  ///
   /// @remarks
+  /// Properties that are `null` will not be changed.
+  /// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
+  ///
   /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
-  Future<void> edit(String params) {
-    return _api.messageEdit(_handle, params);
+  Future<void> edit({String? text, Map<String, String?>? custom}) {
+    return _api.messageEdit(_handle, text, custom);
   }
 
   /// Edits this message.
   ///
-  /// @remarks
-  /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
-  Future<void> editText(EditTextMessageParams params) {
-    return _api.messageEditText(_handle, jsonEncode(params.toJson()));
-  }
-
-  /// Edits this message.
+  /// @param content - The new content for the message.
   ///
   /// @remarks
+  /// Any value provided here will overwrite the existing message content.
+  ///
+  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
+  /// @param custom - Custom metadata you have set on the message.
+  /// This value acts as a patch. Remove specific properties by calling [MessageRef.deleteFields]
+  /// Default = no custom metadata
+  ///
+  /// @remarks
+  /// Properties that are `null` will not be changed.
+  /// To clear / reset a property to the default, call [MessageRef.deleteFields] instead.
+  ///
+  /// This is the more advanced method for editing a message. It gives you full control over the message content.
+  /// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
+  ///
+  /// @public
+  ///
   /// The promise will reject if the request is invalid, the message doesn't exist, or you do not have permission to edit that message.
-  Future<void> editMessage(EditMessageParams params) {
-    return _api.messageEditMessage(_handle, jsonEncode(params.toJson()));
+  Future<void> editMessage({
+    required List<SendContentBlock> content,
+    Map<String, String?>? custom,
+  }) {
+    return _api.messageEditMessage(_handle, serializeContent(content), custom);
   }
 
   /// Deletes properties of this message.

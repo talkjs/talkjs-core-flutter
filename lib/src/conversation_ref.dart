@@ -3,8 +3,8 @@ import 'dart:convert';
 
 import 'core.g.dart';
 import 'api.dart';
+import 'entity_tree.dart';
 import 'snapshots.dart';
-import 'params.dart';
 import 'participant_ref.dart';
 import 'message_ref.dart';
 
@@ -278,28 +278,85 @@ class ConversationRef {
 
   /// Sets properties of this conversation and your participation in it.
   ///
+  /// @param subject - The conversation subject to display in the chat header.
+  /// Default = no subject, list participant names instead.
+  /// @param photoUrl - The URL for the conversation photo to display in the chat header.
+  /// Default = no photo, show a placeholder image.
+  /// @param welcomeMessages - System messages which are sent at the beginning of a conversation.
+  /// Default = no messages.
+  /// @param custom - Custom metadata you have set on the conversation.
+  /// This value acts as a patch. Remove specific properties by calling [ConversationRef.deleteFields]
+  /// Default = no custom metadata
+  /// @param access - Your access to the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - Your notification settings.
+  /// Default = `TRUE`
+  ///
   /// @remarks
+  /// Properties that are `null` will not be changed.
+  /// To clear / reset a property to the default, call [ConversationRef.deleteFields] instead.
+  ///
   /// The conversation is created if a conversation with this ID doesn't already exist.
   /// You are added as a participant if you are not already a participant in the conversation.
   /// When client-side conversation syncing is disabled, you may only set your `notify` property, when you are already a participant.
   /// Everything else requires client-side conversation syncing to be enabled, and will cause the function to throw.
-  ///
-  /// @param params Parameters you pass when updating a conversation
-  Future<void> set(SetConversationParams data) {
-    return _api.conversationSet(_handle, jsonEncode(data.toJson()));
+  Future<void> set({
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String?>? custom,
+    ConversationAccess? access,
+    NotificationSettings? notify,
+  }) {
+    return _api.conversationSet(
+      _handle,
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
+    );
   }
 
   /// Creates this conversation if it does not already exist.
   ///
+  /// @param subject - The conversation subject to display in the chat header.
+  /// Default = no subject, list participant names instead
+  /// @param photoUrl - The URL for the conversation photo to display in the chat header.
+  /// Default = no photo, show a placeholder image.
+  /// @param welcomeMessages - System messages which are sent at the beginning of a conversation.
+  /// Default = no messages.
+  /// @param custom - Custom metadata you have set on the conversation.
+  /// Default = no custom metadata
+  /// @param access - Your access to the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - Your notification settings.
+  /// Default = `TRUE`
+  ///
   /// @remarks
+  /// Properties that are `null` will be set to the default
+  ///
   /// Adds you as a participant in this conversation, if you are not already a participant.
   ///
   /// If the conversation already exists or you are already a participant, this operation is still considered successful.
   /// The promise rejects if you are not already a participant and client-side conversation syncing is disabled.
-  Future<void> createIfNotExists(CreateConversationParams data) {
+  Future<void> createIfNotExists({
+    String? subject,
+    String? photoUrl,
+    List<String>? welcomeMessages,
+    Map<String, String>? custom,
+    ConversationAccess? access,
+    NotificationSettings? notify,
+  }) {
     return _api.conversationCreateIfNotExists(
       _handle,
-      jsonEncode(data.toJson()),
+      subject,
+      photoUrl,
+      welcomeMessages,
+      custom,
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
     );
   }
 
@@ -374,9 +431,24 @@ class ConversationRef {
 
   /// Sends a message in the conversation
   ///
+  /// @param text - The text to send in the message.
+  /// @param custom - Custom metadata you have set on the user.
+  /// Default = no custom metadata
+  /// @param referencedMessage - The message that you are replying to.
+  /// Default = not a reply
+  ///
   /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
-  Future<MessageRef> send(String params) async {
-    final refParams = await _api.conversationSend(_handle, params);
+  Future<MessageRef> send(
+    String text, {
+    Map<String, String>? custom,
+    String? referencedMessage,
+  }) async {
+    final refParams = await _api.conversationSend(
+      _handle,
+      text,
+      custom,
+      referencedMessage,
+    );
 
     return makeMessageRef(
       api: _api,
@@ -388,28 +460,34 @@ class ConversationRef {
 
   /// Sends a message in the conversation
   ///
+  /// @param content - The most important part of the message, either some text, a file attachment, or a location.
+  ///
+  /// @remarks
+  /// By default users do not have permission to send [LinkNode], [ActionLinkNode], or [ActionButtonNode], as they can be used to trick the recipient.
+  /// @param custom - Custom metadata you have set on the user.
+  /// Default = no custom metadata
+  /// @param referencedMessage - The message that you are replying to.
+  /// Default = not a reply
+  ///
   /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
-  Future<MessageRef> sendMessage(SendMessageParams params) async {
+  ///
+  /// @remarks
+  /// Properties that are `null` will be set to the default.
+  ///
+  /// This is the more advanced method for editing a message, giving full control over the message content.
+  /// You can decide exactly how a text message should be formatted, edit an attachment, or even turn a text message into a location.
+  ///
+  /// @public
+  Future<MessageRef> sendMessage(
+    List<SendContentBlock> content, {
+    Map<String, String>? custom,
+    String? referencedMessage,
+  }) async {
     final refParams = await _api.conversationSendMessage(
       _handle,
-      jsonEncode(params.toJson()),
-    );
-
-    return makeMessageRef(
-      api: _api,
-      handle: refParams.handle,
-      id: refParams.id,
-      conversationId: refParams.conversationId,
-    );
-  }
-
-  /// Sends a message in the conversation
-  ///
-  /// @return A reference to the newly created message. The promise rejects if you are not a participant with write access in this conversation.
-  Future<MessageRef> sendText(SendTextMessageParams params) async {
-    final refParams = await _api.conversationSendText(
-      _handle,
-      jsonEncode(params.toJson()),
+      serializeContent(content),
+      custom,
+      referencedMessage,
     );
 
     return makeMessageRef(

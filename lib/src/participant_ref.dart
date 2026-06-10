@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'core.g.dart';
 import 'api.dart';
 import 'snapshots.dart';
-import 'params.dart';
 
 final Finalizer<int> _participantFinalizer = Finalizer((handle) async {
   await hostApi?.participantDeleteHandle(handle);
@@ -49,32 +48,74 @@ class ParticipantRef {
 
   /// Sets properties of this participant. If the user is not already a participant in the conversation, they will be added.
   ///
+  /// @param access - The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  ///
   /// @remarks
+  /// Properties that are `null` will not be changed.
+  /// To clear / reset a property to the default, call [ParticipantRef.deleteFields] instead.
+  ///
   /// When client-side conversation syncing is disabled, you must already be a participant and you cannot set anything except the `notify` property.
   /// Everything else requires client-side conversation syncing to be enabled, and will cause the function to throw.
-  Future<void> set(SetParticipantParams data) {
-    return _api.participantSet(_handle, jsonEncode(data.toJson()));
+  Future<void> set({ConversationAccess? access, NotificationSettings? notify}) {
+    return _api.participantSet(
+      _handle,
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
+    );
   }
 
   /// Edits properties of a pre-existing participant. If the user is not already a participant in the conversation, the function will throw.
   ///
+  /// @param access - The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
+  ///
   /// @remarks
+  /// Properties that are `null` will not be changed.
+  /// To clear / reset a property to the default, call [ParticipantRef.deleteFields] instead.
+  ///
   /// When client-side conversation syncing is disabled, you must already be a participant and you cannot set anything except the `notify` property.
   /// Everything else requires client-side conversation syncing to be enabled, and will cause the function to throw.
-  Future<void> edit(SetParticipantParams data) {
-    return _api.participantEdit(_handle, jsonEncode(data.toJson()));
+  Future<void> edit({
+    ConversationAccess? access,
+    NotificationSettings? notify,
+  }) {
+    return _api.participantEdit(
+      _handle,
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
+    );
   }
 
   /// Adds the user as a participant, or does nothing if they are already a participant.
+  ///
+  /// @param access - The level of access the participant should have in the conversation.
+  /// Default = `READ_WRITE` access.
+  /// @param notify - When the participant should be notified about new messages in this conversation.
+  /// Default = `TRUE`.
+  ///
+  /// `FALSE` means no notifications, `TRUE` means notifications for all messages, and `MENTIONS_ONLY` means that the user will only be notified when they are mentioned with an `@`.
   ///
   /// @remarks
   /// If the participant already exists, this operation is still considered successful.
   ///
   /// The promise will reject if client-side conversation syncing is disabled and the user is not already a participant.
-  Future<void> createIfNotExists(CreateParticipantParams data) {
+  Future<void> createIfNotExists({
+    ConversationAccess? access,
+    NotificationSettings? notify,
+  }) {
     return _api.participantCreateIfNotExists(
       _handle,
-      jsonEncode(data.toJson()),
+      access == null ? null : jsonEncode(access.name),
+      notify == null ? null : jsonEncode(notificationSettingsToJson(notify)),
     );
   }
 

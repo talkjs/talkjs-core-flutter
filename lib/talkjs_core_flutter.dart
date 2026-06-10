@@ -5,7 +5,6 @@ export 'src/participant_ref.dart';
 export 'src/message_ref.dart';
 export 'src/reaction_ref.dart';
 export 'src/snapshots.dart';
-export 'src/params.dart';
 export 'src/entity_tree.dart'
     show
         EntityTreeNode,

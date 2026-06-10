@@ -40,15 +40,12 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _initSession() async {
     final session = await getTalkSession(
-      TalkSessionOptions(
-        appId: 't8Serdim',
-        userId: '654321',
-        apiUrls: ApiUrlOptions(
-          realtimeWsApiUrl: "ws://192.168.122.72:4000/public_api/v1",
-          internalHttpApiUrl: "http://192.168.122.72:4000/api/v0",
-          restApiHttpUrl: "http://192.168.122.72:4000/public_api/v1",
-        ),
-        token: null,
+      appId: 't8Serdim',
+      userId: '654321',
+      apiUrls: ApiUrlOptions(
+        realtimeWsApiUrl: "ws://192.168.122.232:4000/public_api/v1",
+        internalHttpApiUrl: "http://192.168.122.232:4000/api/v0",
+        restApiHttpUrl: "http://192.168.122.232:4000/public_api/v1",
       ),
     );
     setState(() => _session = session);
