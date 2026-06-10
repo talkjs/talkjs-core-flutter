@@ -155,10 +155,10 @@ class TalkSession {
   }
 
   /// Subscribes to the most recently active conversations for the current user
-  ConversationListSubscription subscribeConversations([
-    void Function(List<ConversationSnapshot> snapshot, bool loadedAll)?
+  ConversationListSubscription subscribeConversations(
+    void Function(List<ConversationSnapshot> snapshot, bool loadedAll)
     onSnapshot,
-  ]) {
+  ) {
     final subscriptionHandle = nextId;
     nextId += 1;
 

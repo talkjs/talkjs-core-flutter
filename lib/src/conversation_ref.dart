@@ -505,9 +505,9 @@ class ConversationRef {
   /// This includes changes to nested data. As an extreme example, `onSnapshot` would be called if `snapshot.lastMessage.referencedMessage.sender.name` changes.
   ///
   /// The snapshot is null if you are not a participant in the conversation (including when the conversation doesn't exist)
-  ConversationSubscription subscribe([
-    void Function(ConversationSnapshot? snapshot)? onSnapshot,
-  ]) {
+  ConversationSubscription subscribe(
+    void Function(ConversationSnapshot? snapshot) onSnapshot,
+  ) {
     final subscriptionHandle = nextId;
     nextId += 1;
 
@@ -547,9 +547,9 @@ class ConversationRef {
   ///
   /// @param onSnapshot function called when the list of messages is updated
   /// @return A subscription to messages.
-  MessageSubscription subscribeMessages([
-    void Function(List<MessageSnapshot>? snapshot, bool loadedAll)? onSnapshot,
-  ]) {
+  MessageSubscription subscribeMessages(
+    void Function(List<MessageSnapshot>? snapshot, bool loadedAll) onSnapshot,
+  ) {
     final subscriptionHandle = nextId;
     nextId += 1;
 
@@ -593,10 +593,10 @@ class ConversationRef {
   /// Call `loadMore` to load additional older participants. This will trigger `onSnapshot`.
   ///
   /// Remember to call `.unsubscribe` on the subscription once you are done with it.
-  ParticipantSubscription subscribeParticipants([
-    void Function(List<ParticipantSnapshot>? snapshot, bool loadedAll)?
+  ParticipantSubscription subscribeParticipants(
+    void Function(List<ParticipantSnapshot>? snapshot, bool loadedAll)
     onSnapshot,
-  ]) {
+  ) {
     final subscriptionHandle = nextId;
     nextId += 1;
 
@@ -633,9 +633,9 @@ class ConversationRef {
   ///
   /// Note that if there are "many" people typing and another person starts to type, `onSnapshot` will not be called.
   /// This is because your existing [ManyTypingSnapshot] is still valid and did not change when the new person started to type.
-  TypingSubscription subscribeTyping([
-    void Function(TypingSnapshot? snapshot)? onSnapshot,
-  ]) {
+  TypingSubscription subscribeTyping(
+    void Function(TypingSnapshot? snapshot) onSnapshot,
+  ) {
     final subscriptionHandle = nextId;
     nextId += 1;
 

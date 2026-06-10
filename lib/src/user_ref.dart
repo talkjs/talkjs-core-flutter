@@ -273,9 +273,7 @@ class UserRef {
   /// Remember to call `.unsubscribe` on the subscription once you are done with it.
   ///
   /// @return A subscription to the user
-  UserSubscription subscribe([
-    void Function(UserSnapshot? snapshot)? onSnapshot,
-  ]) {
+  UserSubscription subscribe(void Function(UserSnapshot? snapshot) onSnapshot) {
     final subscriptionHandle = nextId;
     nextId += 1;
 
@@ -310,9 +308,9 @@ class UserRef {
   /// Remember to call `.unsubscribe` on the subscription once you are done with it.
   ///
   /// @return A subscription to the user's online status
-  UserOnlineSubscription subscribeOnline([
-    void Function(UserOnlineSnapshot? snapshot)? onSnapshot,
-  ]) {
+  UserOnlineSubscription subscribeOnline(
+    void Function(UserOnlineSnapshot? snapshot) onSnapshot,
+  ) {
     final subscriptionHandle = nextId;
     nextId += 1;
 
