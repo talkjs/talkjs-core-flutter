@@ -30,18 +30,14 @@ class _ChatBoxPageState extends State<ChatBoxPage> {
     _session = widget.session;
     _session?.conversation(widget.conversationId).then((ref) {
       _ref = ref;
-      ref
-          .subscribeMessages((messages, _) {
-            setState(() => _messages = messages ?? []);
-          })
-          .then((sub) {
-            _subscription = sub;
-            sub.connected.then((_) {
-              if (mounted) {
-                setState(() => _isConnected = true);
-              }
-            }, onError: (_) {});
-          });
+      _subscription = ref.subscribeMessages((messages, _) {
+        setState(() => _messages = messages ?? []);
+      });
+      _subscription?.connected.then((_) {
+        if (mounted) {
+          setState(() => _isConnected = true);
+        }
+      }, onError: (_) {});
     });
   }
 

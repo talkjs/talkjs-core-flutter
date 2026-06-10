@@ -22,18 +22,14 @@ class _ConversationListPageState extends State<ConversationListPage> {
   void initState() {
     super.initState();
     _session = widget.session;
-    _session
-        ?.subscribeConversations((snapshots, loadedAll) {
-          setState(() => _conversations = snapshots);
-        })
-        .then((sub) {
-          _subscription = sub;
-          sub.connected.then((_) {
-            if (mounted) {
-              setState(() => _isConnected = true);
-            }
-          }, onError: (_) {});
-        });
+    _subscription = _session?.subscribeConversations((snapshots, loadedAll) {
+      setState(() => _conversations = snapshots);
+    });
+    _subscription?.connected.then((_) {
+      if (mounted) {
+        setState(() => _isConnected = true);
+      }
+    }, onError: (_) {});
   }
 
   @override

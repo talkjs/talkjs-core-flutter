@@ -273,26 +273,29 @@ class UserRef {
   /// Remember to call `.unsubscribe` on the subscription once you are done with it.
   ///
   /// @return A subscription to the user
-  Future<UserSubscription> subscribe([
-    void Function(UserSnapshot? snapshot)? onSnapshot,
-  ]) async {
-    final handle = await _api.userSubscribe(_handle);
+  UserSubscription subscribe(void Function(UserSnapshot? snapshot) onSnapshot) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    userSubscriptionOnSnapshots[handle] = onSnapshot;
+    _api.userSubscribe(_handle, subscriptionHandle);
+
+    userSubscriptionOnSnapshots[subscriptionHandle] = onSnapshot;
 
     final connectedCompleter = Completer<void>();
     final terminatedCompleter = Completer<void>();
-    userSubscriptionConnectedCompleters[handle] = connectedCompleter;
-    userSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+    userSubscriptionConnectedCompleters[subscriptionHandle] =
+        connectedCompleter;
+    userSubscriptionTerminatedCompleters[subscriptionHandle] =
+        terminatedCompleter;
 
     final subscription = UserSubscription._(
       api: _api,
-      handle: handle,
+      handle: subscriptionHandle,
       connected: connectedCompleter.future,
       terminated: terminatedCompleter.future,
     );
 
-    _userSubscriptionFinalizer.attach(subscription, handle);
+    _userSubscriptionFinalizer.attach(subscription, subscriptionHandle);
 
     return subscription;
   }
@@ -305,26 +308,31 @@ class UserRef {
   /// Remember to call `.unsubscribe` on the subscription once you are done with it.
   ///
   /// @return A subscription to the user's online status
-  Future<UserOnlineSubscription> subscribeOnline([
-    void Function(UserOnlineSnapshot? snapshot)? onSnapshot,
-  ]) async {
-    final handle = await _api.userSubscribeOnline(_handle);
+  UserOnlineSubscription subscribeOnline(
+    void Function(UserOnlineSnapshot? snapshot) onSnapshot,
+  ) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    userOnlineSubscriptionOnSnapshots[handle] = onSnapshot;
+    _api.userSubscribeOnline(_handle, subscriptionHandle);
+
+    userOnlineSubscriptionOnSnapshots[subscriptionHandle] = onSnapshot;
 
     final connectedCompleter = Completer<void>();
     final terminatedCompleter = Completer<void>();
-    userOnlineSubscriptionConnectedCompleters[handle] = connectedCompleter;
-    userOnlineSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+    userOnlineSubscriptionConnectedCompleters[subscriptionHandle] =
+        connectedCompleter;
+    userOnlineSubscriptionTerminatedCompleters[subscriptionHandle] =
+        terminatedCompleter;
 
     final subscription = UserOnlineSubscription._(
       api: _api,
-      handle: handle,
+      handle: subscriptionHandle,
       connected: connectedCompleter.future,
       terminated: terminatedCompleter.future,
     );
 
-    _userOnlineSubscriptionFinalizer.attach(subscription, handle);
+    _userOnlineSubscriptionFinalizer.attach(subscription, subscriptionHandle);
 
     return subscription;
   }

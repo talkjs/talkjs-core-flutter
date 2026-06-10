@@ -155,29 +155,35 @@ class TalkSession {
   }
 
   /// Subscribes to the most recently active conversations for the current user
-  Future<ConversationListSubscription> subscribeConversations([
-    void Function(List<ConversationSnapshot> snapshot, bool loadedAll)?
+  ConversationListSubscription subscribeConversations(
+    void Function(List<ConversationSnapshot> snapshot, bool loadedAll)
     onSnapshot,
-  ]) async {
-    final handle = await _api.sessionSubscribeConversations(_handle);
+  ) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    conversationListSubscriptionOnSnapshots[handle] = onSnapshot;
+    _api.sessionSubscribeConversations(_handle, subscriptionHandle);
+
+    conversationListSubscriptionOnSnapshots[subscriptionHandle] = onSnapshot;
 
     final connectedCompleter = Completer<void>();
     final terminatedCompleter = Completer<void>();
-    conversationListSubscriptionConnectedCompleters[handle] =
+    conversationListSubscriptionConnectedCompleters[subscriptionHandle] =
         connectedCompleter;
-    conversationListSubscriptionTerminatedCompleters[handle] =
+    conversationListSubscriptionTerminatedCompleters[subscriptionHandle] =
         terminatedCompleter;
 
     final subscription = ConversationListSubscription._(
       api: _api,
-      handle: handle,
+      handle: subscriptionHandle,
       connected: connectedCompleter.future,
       terminated: terminatedCompleter.future,
     );
 
-    _conversationListSubscriptionFinalizer.attach(subscription, handle);
+    _conversationListSubscriptionFinalizer.attach(
+      subscription,
+      subscriptionHandle,
+    );
 
     return subscription;
   }
@@ -185,16 +191,20 @@ class TalkSession {
   /// Attaches a handler that will be called when the session encounters an error
   ///
   /// Returns a callback which detaches your handler
-  Future<ErrorSubscription> onError(
-    void Function(Exception error) handler,
-  ) async {
-    final handle = await _api.sessionOnError(_handle);
+  ErrorSubscription onError(void Function(Exception error) handler) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    sessionOnErrorExceptions[handle] = handler;
+    _api.sessionOnError(_handle, subscriptionHandle);
 
-    final subscription = ErrorSubscription._(api: _api, handle: handle);
+    sessionOnErrorExceptions[subscriptionHandle] = handler;
 
-    _sessionOnErrorFinalizer.attach(subscription, handle);
+    final subscription = ErrorSubscription._(
+      api: _api,
+      handle: subscriptionHandle,
+    );
+
+    _sessionOnErrorFinalizer.attach(subscription, subscriptionHandle);
 
     return subscription;
   }

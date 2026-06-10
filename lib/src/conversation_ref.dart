@@ -505,26 +505,31 @@ class ConversationRef {
   /// This includes changes to nested data. As an extreme example, `onSnapshot` would be called if `snapshot.lastMessage.referencedMessage.sender.name` changes.
   ///
   /// The snapshot is null if you are not a participant in the conversation (including when the conversation doesn't exist)
-  Future<ConversationSubscription> subscribe([
-    void Function(ConversationSnapshot? snapshot)? onSnapshot,
-  ]) async {
-    final handle = await _api.conversationSubscribe(_handle);
+  ConversationSubscription subscribe(
+    void Function(ConversationSnapshot? snapshot) onSnapshot,
+  ) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    conversationSubscriptionOnSnapshots[handle] = onSnapshot;
+    _api.conversationSubscribe(_handle, subscriptionHandle);
+
+    conversationSubscriptionOnSnapshots[subscriptionHandle] = onSnapshot;
 
     final connectedCompleter = Completer<void>();
     final terminatedCompleter = Completer<void>();
-    conversationSubscriptionConnectedCompleters[handle] = connectedCompleter;
-    conversationSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+    conversationSubscriptionConnectedCompleters[subscriptionHandle] =
+        connectedCompleter;
+    conversationSubscriptionTerminatedCompleters[subscriptionHandle] =
+        terminatedCompleter;
 
     final subscription = ConversationSubscription._(
       api: _api,
-      handle: handle,
+      handle: subscriptionHandle,
       connected: connectedCompleter.future,
       terminated: terminatedCompleter.future,
     );
 
-    _conversationSubscriptionFinalizer.attach(subscription, handle);
+    _conversationSubscriptionFinalizer.attach(subscription, subscriptionHandle);
 
     return subscription;
   }
@@ -542,26 +547,31 @@ class ConversationRef {
   ///
   /// @param onSnapshot function called when the list of messages is updated
   /// @return A subscription to messages.
-  Future<MessageSubscription> subscribeMessages([
-    void Function(List<MessageSnapshot>? snapshot, bool loadedAll)? onSnapshot,
-  ]) async {
-    final handle = await _api.conversationSubscribeMessages(_handle);
+  MessageSubscription subscribeMessages(
+    void Function(List<MessageSnapshot>? snapshot, bool loadedAll) onSnapshot,
+  ) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    messageSubscriptionOnSnapshots[handle] = onSnapshot;
+    _api.conversationSubscribeMessages(_handle, subscriptionHandle);
+
+    messageSubscriptionOnSnapshots[subscriptionHandle] = onSnapshot;
 
     final connectedCompleter = Completer<void>();
     final terminatedCompleter = Completer<void>();
-    messageSubscriptionConnectedCompleters[handle] = connectedCompleter;
-    messageSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+    messageSubscriptionConnectedCompleters[subscriptionHandle] =
+        connectedCompleter;
+    messageSubscriptionTerminatedCompleters[subscriptionHandle] =
+        terminatedCompleter;
 
     final subscription = MessageSubscription._(
       api: _api,
-      handle: handle,
+      handle: subscriptionHandle,
       connected: connectedCompleter.future,
       terminated: terminatedCompleter.future,
     );
 
-    _messageSubscriptionFinalizer.attach(subscription, handle);
+    _messageSubscriptionFinalizer.attach(subscription, subscriptionHandle);
 
     return subscription;
   }
@@ -583,27 +593,32 @@ class ConversationRef {
   /// Call `loadMore` to load additional older participants. This will trigger `onSnapshot`.
   ///
   /// Remember to call `.unsubscribe` on the subscription once you are done with it.
-  Future<ParticipantSubscription> subscribeParticipants([
-    void Function(List<ParticipantSnapshot>? snapshot, bool loadedAll)?
+  ParticipantSubscription subscribeParticipants(
+    void Function(List<ParticipantSnapshot>? snapshot, bool loadedAll)
     onSnapshot,
-  ]) async {
-    final handle = await _api.conversationSubscribeParticipants(_handle);
+  ) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    participantSubscriptionOnSnapshots[handle] = onSnapshot;
+    _api.conversationSubscribeParticipants(_handle, subscriptionHandle);
+
+    participantSubscriptionOnSnapshots[subscriptionHandle] = onSnapshot;
 
     final connectedCompleter = Completer<void>();
     final terminatedCompleter = Completer<void>();
-    participantSubscriptionConnectedCompleters[handle] = connectedCompleter;
-    participantSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+    participantSubscriptionConnectedCompleters[subscriptionHandle] =
+        connectedCompleter;
+    participantSubscriptionTerminatedCompleters[subscriptionHandle] =
+        terminatedCompleter;
 
     final subscription = ParticipantSubscription._(
       api: _api,
-      handle: handle,
+      handle: subscriptionHandle,
       connected: connectedCompleter.future,
       terminated: terminatedCompleter.future,
     );
 
-    _participantSubscriptionFinalizer.attach(subscription, handle);
+    _participantSubscriptionFinalizer.attach(subscription, subscriptionHandle);
 
     return subscription;
   }
@@ -618,26 +633,31 @@ class ConversationRef {
   ///
   /// Note that if there are "many" people typing and another person starts to type, `onSnapshot` will not be called.
   /// This is because your existing [ManyTypingSnapshot] is still valid and did not change when the new person started to type.
-  Future<TypingSubscription> subscribeTyping([
-    void Function(TypingSnapshot? snapshot)? onSnapshot,
-  ]) async {
-    final handle = await _api.conversationSubscribeTyping(_handle);
+  TypingSubscription subscribeTyping(
+    void Function(TypingSnapshot? snapshot) onSnapshot,
+  ) {
+    final subscriptionHandle = nextId;
+    nextId += 1;
 
-    typingSubscriptionOnSnapshots[handle] = onSnapshot;
+    _api.conversationSubscribeTyping(_handle, subscriptionHandle);
+
+    typingSubscriptionOnSnapshots[subscriptionHandle] = onSnapshot;
 
     final connectedCompleter = Completer<void>();
     final terminatedCompleter = Completer<void>();
-    typingSubscriptionConnectedCompleters[handle] = connectedCompleter;
-    typingSubscriptionTerminatedCompleters[handle] = terminatedCompleter;
+    typingSubscriptionConnectedCompleters[subscriptionHandle] =
+        connectedCompleter;
+    typingSubscriptionTerminatedCompleters[subscriptionHandle] =
+        terminatedCompleter;
 
     final subscription = TypingSubscription._(
       api: _api,
-      handle: handle,
+      handle: subscriptionHandle,
       connected: connectedCompleter.future,
       terminated: terminatedCompleter.future,
     );
 
-    _typingSubscriptionFinalizer.attach(subscription, handle);
+    _typingSubscriptionFinalizer.attach(subscription, subscriptionHandle);
 
     return subscription;
   }
