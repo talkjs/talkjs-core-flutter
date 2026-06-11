@@ -1,3 +1,3 @@
-## 0.0.1
+## 0.1.0
 
-* TODO: Describe initial release.
+* First release, Android-only, based on TalkJS Core Kotlin version 0.2.0

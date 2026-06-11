@@ -40,13 +40,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _initSession() async {
     final session = await getTalkSession(
-      appId: 't8Serdim',
-      userId: '654321',
-      apiUrls: ApiUrlOptions(
-        realtimeWsApiUrl: "ws://192.168.122.232:4000/public_api/v1",
-        internalHttpApiUrl: "http://192.168.122.232:4000/api/v0",
-        restApiHttpUrl: "http://192.168.122.232:4000/public_api/v1",
-      ),
+      appId: 'YOUR_APP_ID',
+      userId: 'YOUR_USER_ID',
     );
     setState(() => _session = session);
   }
@@ -69,7 +64,7 @@ class _HomePageState extends State<HomePage> {
                   MaterialPageRoute(
                     builder: (_) => ChatBoxPage(
                       session: _session,
-                      conversationId: 'conv_9',
+                      conversationId: 'YOUR_CONVERSATION_ID',
                     ),
                   ),
                 );

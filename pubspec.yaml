@@ -1,7 +1,7 @@
 name: talkjs_core_flutter
-description: "A new Flutter plugin project."
-version: 0.0.1
-homepage:
+description: "TalkJS Core"
+version: 0.1.0
+homepage: https://talkjs.com/
 
 environment:
   sdk: ^3.11.0
@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  meta: ^1.18.0
   plugin_platform_interface: ^2.0.2
 
 dev_dependencies:
@@ -43,8 +44,8 @@ flutter:
       android:
         package: com.example.talkjs_core_flutter
         pluginClass: TalkjsCoreFlutterPlugin
-      ios:
-        pluginClass: TalkjsCoreFlutterPlugin
+      #ios:
+      #  pluginClass: TalkjsCoreFlutterPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
