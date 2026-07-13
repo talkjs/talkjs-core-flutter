@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
 
 import 'entity_tree.dart';
@@ -452,7 +453,7 @@ class ReferencedMessageSnapshot {
         referencedMessageId == other.referencedMessageId &&
         origin == other.origin &&
         plaintext == other.plaintext &&
-        _unorderedIterableEquality.equals(content, other.content) &&
+        listEquals(content, other.content) &&
         _unorderedIterableEquality.equals(reactions, other.reactions);
   }
 
@@ -467,7 +468,7 @@ class ReferencedMessageSnapshot {
     referencedMessageId,
     origin,
     plaintext,
-    _unorderedIterableEquality.hash(content),
+    Object.hashAll(content),
     _unorderedIterableEquality.hash(reactions),
   );
 }
@@ -590,7 +591,7 @@ class MessageSnapshot {
         referencedMessage == other.referencedMessage &&
         origin == other.origin &&
         plaintext == other.plaintext &&
-        _unorderedIterableEquality.equals(content, other.content) &&
+        listEquals(content, other.content) &&
         _unorderedIterableEquality.equals(reactions, other.reactions);
   }
 
@@ -605,7 +606,7 @@ class MessageSnapshot {
     referencedMessage,
     origin,
     plaintext,
-    _unorderedIterableEquality.hash(content),
+    Object.hashAll(content),
     _unorderedIterableEquality.hash(reactions),
   );
 }

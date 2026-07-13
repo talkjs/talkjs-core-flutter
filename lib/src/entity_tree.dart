@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
 
 const _mapEquality = MapEquality<String, String?>();
-const _unorderedIterableEquality = UnorderedIterableEquality<dynamic>();
 
 // TODO: String | Entity
 typedef EntityTreeNode = Object;
@@ -58,12 +58,11 @@ final class Markup extends EntityWithChildren {
 
     return other is Markup &&
         type == other.type &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, _unorderedIterableEquality.hash(children));
+  int get hashCode => Object.hash(type, Object.hashAll(children));
 }
 
 final class Blockquote extends EntityWithChildren {
@@ -83,12 +82,11 @@ final class Blockquote extends EntityWithChildren {
 
     return other is Blockquote &&
         type == other.type &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, _unorderedIterableEquality.hash(children));
+  int get hashCode => Object.hash(type, Object.hashAll(children));
 }
 
 /// A node in a [TextBlock] that adds indentation for a bullet-point list around its children (HTML `<ul>`).
@@ -114,12 +112,11 @@ final class BulletList extends EntityWithChildren {
 
     return other is BulletList &&
         type == other.type &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, _unorderedIterableEquality.hash(children));
+  int get hashCode => Object.hash(type, Object.hashAll(children));
 }
 
 /// A node in a [TextBlock] that renders its children with a bullet-point (HTML `<li>`).
@@ -145,12 +142,11 @@ final class BulletPoint extends EntityWithChildren {
 
     return other is BulletPoint &&
         type == other.type &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, _unorderedIterableEquality.hash(children));
+  int get hashCode => Object.hash(type, Object.hashAll(children));
 }
 
 sealed class Clickable extends EntityWithChildren {
@@ -191,12 +187,11 @@ final class Link extends Clickable {
     return other is Link &&
         type == other.type &&
         url == other.url &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, url, _unorderedIterableEquality.hash(children));
+  int get hashCode => Object.hash(type, url, Object.hashAll(children));
 }
 
 /// A node in a [TextBlock] that renders its children as a clickable [action link](https://talkjs.com/docs/Guides/JavaScript/Classic/Action_Buttons_Links/) which triggers a custom action.
@@ -243,7 +238,7 @@ final class ActionLink extends Clickable {
         type == other.type &&
         action == other.action &&
         _mapEquality.equals(params, other.params) &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
@@ -251,7 +246,7 @@ final class ActionLink extends Clickable {
     type,
     action,
     _mapEquality.hash(params),
-    _unorderedIterableEquality.hash(children),
+    Object.hashAll(children),
   );
 }
 
@@ -299,7 +294,7 @@ final class ActionButton extends Clickable {
         type == other.type &&
         action == other.action &&
         _mapEquality.equals(params, other.params) &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
@@ -307,7 +302,7 @@ final class ActionButton extends Clickable {
     type,
     action,
     _mapEquality.hash(params),
-    _unorderedIterableEquality.hash(children),
+    Object.hashAll(children),
   );
 }
 
@@ -656,12 +651,11 @@ final class TextBlock extends ContentBlock {
 
     return other is TextBlock &&
         type == other.type &&
-        _unorderedIterableEquality.equals(children, other.children);
+        listEquals(children, other.children);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(type, _unorderedIterableEquality.hash(children));
+  int get hashCode => Object.hash(type, Object.hashAll(children));
 }
 
 /// The version of [FileBlock] that is used when sending or editing messages.
