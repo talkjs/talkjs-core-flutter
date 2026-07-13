@@ -1,6 +1,9 @@
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
 
 import 'entity_tree.dart';
+
+const _mapEquality = MapEquality<String, String?>();
+const _unorderedIterableEquality = UnorderedIterableEquality<dynamic>();
 
 // ignore: constant_identifier_names
 enum ConversationAccess { Read, ReadWrite }
@@ -66,47 +69,21 @@ class UserSnapshot {
       return true;
     }
 
-    if (other is! UserSnapshot) {
-      return false;
-    }
-
-    if (id != other.id) {
-      return false;
-    }
-
-    if (name != other.name) {
-      return false;
-    }
-
-    if (!mapEquals(custom, other.custom)) {
-      return false;
-    }
-
-    if (role != other.role) {
-      return false;
-    }
-
-    if (locale != other.locale) {
-      return false;
-    }
-
-    if (photoUrl != other.photoUrl) {
-      return false;
-    }
-
-    if (welcomeMessage != other.welcomeMessage) {
-      return false;
-    }
-
-    return true;
+    return other is UserSnapshot &&
+        id == other.id &&
+        name == other.name &&
+        _mapEquality.equals(custom, other.custom) &&
+        role == other.role &&
+        locale == other.locale &&
+        photoUrl == other.photoUrl &&
+        welcomeMessage == other.welcomeMessage;
   }
 
   @override
   int get hashCode => Object.hash(
     id,
     name,
-    Object.hashAll(custom.keys),
-    Object.hashAll(custom.values),
+    _mapEquality.hash(custom),
     role,
     locale,
     photoUrl,
@@ -180,23 +157,10 @@ class ReactionSnapshot {
       return true;
     }
 
-    if (other is! ReactionSnapshot) {
-      return false;
-    }
-
-    if (emoji != other.emoji) {
-      return false;
-    }
-
-    if (count != other.count) {
-      return false;
-    }
-
-    if (currentUserReacted != other.currentUserReacted) {
-      return false;
-    }
-
-    return true;
+    return other is ReactionSnapshot &&
+        emoji == other.emoji &&
+        count == other.count &&
+        currentUserReacted == other.currentUserReacted;
   }
 
   @override
@@ -269,24 +233,14 @@ class TypingSnapshot {
       return true;
     }
 
-    if (other is! TypingSnapshot) {
-      return false;
-    }
-
-    if (many != other.many) {
-      return false;
-    }
-
-    if (!listEquals(users, other.users)) {
-      return false;
-    }
-
-    return true;
+    return other is TypingSnapshot &&
+        many == other.many &&
+        _unorderedIterableEquality.equals(users, other.users);
   }
 
   @override
   int get hashCode =>
-      Object.hash(many, users == null ? null : Object.hashAll(users!));
+      Object.hash(many, _unorderedIterableEquality.hash(users!));
 }
 
 /// A snapshot of a participant's attributes at a given moment in time.
@@ -324,27 +278,11 @@ class ParticipantSnapshot {
       return true;
     }
 
-    if (other is! ParticipantSnapshot) {
-      return false;
-    }
-
-    if (user != other.user) {
-      return false;
-    }
-
-    if (access != other.access) {
-      return false;
-    }
-
-    if (notify != other.notify) {
-      return false;
-    }
-
-    if (joinedAt != other.joinedAt) {
-      return false;
-    }
-
-    return true;
+    return other is ParticipantSnapshot &&
+        user == other.user &&
+        access == other.access &&
+        notify == other.notify &&
+        joinedAt == other.joinedAt;
   }
 
   @override
@@ -390,19 +328,9 @@ class UserOnlineSnapshot {
       return true;
     }
 
-    if (other is! UserOnlineSnapshot) {
-      return false;
-    }
-
-    if (user != other.user) {
-      return false;
-    }
-
-    if (isConnected != other.isConnected) {
-      return false;
-    }
-
-    return true;
+    return other is UserOnlineSnapshot &&
+        user == other.user &&
+        isConnected == other.isConnected;
   }
 
   @override
@@ -514,55 +442,18 @@ class ReferencedMessageSnapshot {
       return true;
     }
 
-    if (other is! ReferencedMessageSnapshot) {
-      return false;
-    }
-
-    if (id != other.id) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (sender != other.sender) {
-      return false;
-    }
-
-    if (!mapEquals(custom, other.custom)) {
-      return false;
-    }
-
-    if (createdAt != other.createdAt) {
-      return false;
-    }
-
-    if (editedAt != other.editedAt) {
-      return false;
-    }
-
-    if (referencedMessageId != other.referencedMessageId) {
-      return false;
-    }
-
-    if (origin != other.origin) {
-      return false;
-    }
-
-    if (plaintext != other.plaintext) {
-      return false;
-    }
-
-    if (!listEquals(content, other.content)) {
-      return false;
-    }
-
-    if (!listEquals(reactions, other.reactions)) {
-      return false;
-    }
-
-    return true;
+    return other is ReferencedMessageSnapshot &&
+        id == other.id &&
+        type == other.type &&
+        sender == other.sender &&
+        _mapEquality.equals(custom, other.custom) &&
+        createdAt == other.createdAt &&
+        editedAt == other.editedAt &&
+        referencedMessageId == other.referencedMessageId &&
+        origin == other.origin &&
+        plaintext == other.plaintext &&
+        _unorderedIterableEquality.equals(content, other.content) &&
+        _unorderedIterableEquality.equals(reactions, other.reactions);
   }
 
   @override
@@ -570,15 +461,14 @@ class ReferencedMessageSnapshot {
     id,
     type,
     sender,
-    Object.hashAll(custom.keys),
-    Object.hashAll(custom.values),
+    _mapEquality.hash(custom),
     createdAt,
     editedAt,
     referencedMessageId,
     origin,
     plaintext,
-    Object.hashAll(content),
-    Object.hashAll(reactions),
+    _unorderedIterableEquality.hash(content),
+    _unorderedIterableEquality.hash(reactions),
   );
 }
 
@@ -690,55 +580,18 @@ class MessageSnapshot {
       return true;
     }
 
-    if (other is! MessageSnapshot) {
-      return false;
-    }
-
-    if (id != other.id) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (sender != other.sender) {
-      return false;
-    }
-
-    if (!mapEquals(custom, other.custom)) {
-      return false;
-    }
-
-    if (createdAt != other.createdAt) {
-      return false;
-    }
-
-    if (editedAt != other.editedAt) {
-      return false;
-    }
-
-    if (referencedMessage != other.referencedMessage) {
-      return false;
-    }
-
-    if (origin != other.origin) {
-      return false;
-    }
-
-    if (plaintext != other.plaintext) {
-      return false;
-    }
-
-    if (!listEquals(content, other.content)) {
-      return false;
-    }
-
-    if (!listEquals(reactions, other.reactions)) {
-      return false;
-    }
-
-    return true;
+    return other is MessageSnapshot &&
+        id == other.id &&
+        type == other.type &&
+        sender == other.sender &&
+        _mapEquality.equals(custom, other.custom) &&
+        createdAt == other.createdAt &&
+        editedAt == other.editedAt &&
+        referencedMessage == other.referencedMessage &&
+        origin == other.origin &&
+        plaintext == other.plaintext &&
+        _unorderedIterableEquality.equals(content, other.content) &&
+        _unorderedIterableEquality.equals(reactions, other.reactions);
   }
 
   @override
@@ -746,15 +599,14 @@ class MessageSnapshot {
     id,
     type,
     sender,
-    Object.hashAll(custom.keys),
-    Object.hashAll(custom.values),
+    _mapEquality.hash(custom),
     createdAt,
     editedAt,
     referencedMessage,
     origin,
     plaintext,
-    Object.hashAll(content),
-    Object.hashAll(reactions),
+    _unorderedIterableEquality.hash(content),
+    _unorderedIterableEquality.hash(reactions),
   );
 }
 
@@ -879,71 +731,25 @@ class ConversationSnapshot {
       return true;
     }
 
-    if (other is! ConversationSnapshot) {
-      return false;
-    }
-
-    if (id != other.id) {
-      return false;
-    }
-
-    if (subject != other.subject) {
-      return false;
-    }
-
-    if (photoUrl != other.photoUrl) {
-      return false;
-    }
-
-    if (!listEquals(welcomeMessages, other.welcomeMessages)) {
-      return false;
-    }
-
-    if (!mapEquals(custom, other.custom)) {
-      return false;
-    }
-
-    if (createdAt != other.createdAt) {
-      return false;
-    }
-
-    if (joinedAt != other.joinedAt) {
-      return false;
-    }
-
-    if (lastMessage != other.lastMessage) {
-      return false;
-    }
-
-    if (unreadMessageCount != other.unreadMessageCount) {
-      return false;
-    }
-
-    if (readUntil != other.readUntil) {
-      return false;
-    }
-
-    if (everyoneReadUntil != other.everyoneReadUntil) {
-      return false;
-    }
-
-    if (isUnread != other.isUnread) {
-      return false;
-    }
-
-    if (access != other.access) {
-      return false;
-    }
-
-    if (notify != other.notify) {
-      return false;
-    }
-
-    if (lastMessageAt != other.lastMessageAt) {
-      return false;
-    }
-
-    return true;
+    return other is ConversationSnapshot &&
+        id == other.id &&
+        subject == other.subject &&
+        photoUrl == other.photoUrl &&
+        _unorderedIterableEquality.equals(
+          welcomeMessages,
+          other.welcomeMessages,
+        ) &&
+        _mapEquality.equals(custom, other.custom) &&
+        createdAt == other.createdAt &&
+        joinedAt == other.joinedAt &&
+        lastMessage == other.lastMessage &&
+        unreadMessageCount == other.unreadMessageCount &&
+        readUntil == other.readUntil &&
+        everyoneReadUntil == other.everyoneReadUntil &&
+        isUnread == other.isUnread &&
+        access == other.access &&
+        notify == other.notify &&
+        lastMessageAt == other.lastMessageAt;
   }
 
   @override
@@ -951,9 +757,8 @@ class ConversationSnapshot {
     id,
     subject,
     photoUrl,
-    Object.hashAll(welcomeMessages),
-    Object.hashAll(custom.keys),
-    Object.hashAll(custom.values),
+    _unorderedIterableEquality.hash(welcomeMessages),
+    _mapEquality.hash(custom),
     createdAt,
     joinedAt,
     lastMessage,
