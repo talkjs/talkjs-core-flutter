@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:collection/collection.dart';
 
 import 'entity_tree.dart';
 
 const _mapEquality = MapEquality<String, String?>();
+const _listEquality = ListEquality<dynamic>();
 const _unorderedIterableEquality = UnorderedIterableEquality<dynamic>();
 
 // ignore: constant_identifier_names
@@ -453,7 +453,7 @@ class ReferencedMessageSnapshot {
         referencedMessageId == other.referencedMessageId &&
         origin == other.origin &&
         plaintext == other.plaintext &&
-        listEquals(content, other.content) &&
+        _listEquality.equals(content, other.content) &&
         _unorderedIterableEquality.equals(reactions, other.reactions);
   }
 
@@ -468,7 +468,7 @@ class ReferencedMessageSnapshot {
     referencedMessageId,
     origin,
     plaintext,
-    Object.hashAll(content),
+    _listEquality.hash(content),
     _unorderedIterableEquality.hash(reactions),
   );
 }
@@ -591,7 +591,7 @@ class MessageSnapshot {
         referencedMessage == other.referencedMessage &&
         origin == other.origin &&
         plaintext == other.plaintext &&
-        listEquals(content, other.content) &&
+        _listEquality.equals(content, other.content) &&
         _unorderedIterableEquality.equals(reactions, other.reactions);
   }
 
@@ -606,7 +606,7 @@ class MessageSnapshot {
     referencedMessage,
     origin,
     plaintext,
-    Object.hashAll(content),
+    _listEquality.hash(content),
     _unorderedIterableEquality.hash(reactions),
   );
 }
@@ -736,10 +736,7 @@ class ConversationSnapshot {
         id == other.id &&
         subject == other.subject &&
         photoUrl == other.photoUrl &&
-        _unorderedIterableEquality.equals(
-          welcomeMessages,
-          other.welcomeMessages,
-        ) &&
+        _listEquality.equals(welcomeMessages, other.welcomeMessages) &&
         _mapEquality.equals(custom, other.custom) &&
         createdAt == other.createdAt &&
         joinedAt == other.joinedAt &&
@@ -758,7 +755,7 @@ class ConversationSnapshot {
     id,
     subject,
     photoUrl,
-    _unorderedIterableEquality.hash(welcomeMessages),
+    _listEquality.hash(welcomeMessages),
     _mapEquality.hash(custom),
     createdAt,
     joinedAt,
