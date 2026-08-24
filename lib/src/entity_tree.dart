@@ -1,5 +1,8 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:collection/collection.dart';
+
+const _mapEquality = MapEquality<String, String?>();
+const _listEquality = ListEquality<dynamic>();
 
 // TODO: String | Entity
 typedef EntityTreeNode = Object;
@@ -53,23 +56,13 @@ final class Markup extends EntityWithChildren {
       return true;
     }
 
-    if (other is! Markup) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is Markup &&
+        type == other.type &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
-  int get hashCode => Object.hash(type, Object.hashAll(children));
+  int get hashCode => Object.hash(type, _listEquality.hash(children));
 }
 
 final class Blockquote extends EntityWithChildren {
@@ -87,23 +80,13 @@ final class Blockquote extends EntityWithChildren {
       return true;
     }
 
-    if (other is! Blockquote) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is Blockquote &&
+        type == other.type &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
-  int get hashCode => Object.hash(type, Object.hashAll(children));
+  int get hashCode => Object.hash(type, _listEquality.hash(children));
 }
 
 /// A node in a [TextBlock] that adds indentation for a bullet-point list around its children (HTML `<ul>`).
@@ -127,23 +110,13 @@ final class BulletList extends EntityWithChildren {
       return true;
     }
 
-    if (other is! BulletList) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is BulletList &&
+        type == other.type &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
-  int get hashCode => Object.hash(type, Object.hashAll(children));
+  int get hashCode => Object.hash(type, _listEquality.hash(children));
 }
 
 /// A node in a [TextBlock] that renders its children with a bullet-point (HTML `<li>`).
@@ -167,23 +140,13 @@ final class BulletPoint extends EntityWithChildren {
       return true;
     }
 
-    if (other is! BulletPoint) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is BulletPoint &&
+        type == other.type &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
-  int get hashCode => Object.hash(type, Object.hashAll(children));
+  int get hashCode => Object.hash(type, _listEquality.hash(children));
 }
 
 sealed class Clickable extends EntityWithChildren {
@@ -221,27 +184,14 @@ final class Link extends Clickable {
       return true;
     }
 
-    if (other is! Link) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (url != other.url) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is Link &&
+        type == other.type &&
+        url == other.url &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
-  int get hashCode => Object.hash(type, url, Object.hashAll(children));
+  int get hashCode => Object.hash(type, url, _listEquality.hash(children));
 }
 
 /// A node in a [TextBlock] that renders its children as a clickable [action link](https://talkjs.com/docs/Guides/JavaScript/Classic/Action_Buttons_Links/) which triggers a custom action.
@@ -284,36 +234,19 @@ final class ActionLink extends Clickable {
       return true;
     }
 
-    if (other is! ActionLink) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (action != other.action) {
-      return false;
-    }
-
-    if (!mapEquals(params, other.params)) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is ActionLink &&
+        type == other.type &&
+        action == other.action &&
+        _mapEquality.equals(params, other.params) &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
   int get hashCode => Object.hash(
     type,
     action,
-    Object.hashAll(params.keys),
-    Object.hashAll(params.values),
-    Object.hashAll(children),
+    _mapEquality.hash(params),
+    _listEquality.hash(children),
   );
 }
 
@@ -357,36 +290,19 @@ final class ActionButton extends Clickable {
       return true;
     }
 
-    if (other is! ActionButton) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (action != other.action) {
-      return false;
-    }
-
-    if (!mapEquals(params, other.params)) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is ActionButton &&
+        type == other.type &&
+        action == other.action &&
+        _mapEquality.equals(params, other.params) &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
   int get hashCode => Object.hash(
     type,
     action,
-    Object.hashAll(params.keys),
-    Object.hashAll(params.values),
-    Object.hashAll(children),
+    _mapEquality.hash(params),
+    _listEquality.hash(children),
   );
 }
 
@@ -422,23 +338,10 @@ final class CodeBlock extends Leaf {
       return true;
     }
 
-    if (other is! CodeBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (text != other.text) {
-      return false;
-    }
-
-    if (language != other.language) {
-      return false;
-    }
-
-    return true;
+    return other is CodeBlock &&
+        type == other.type &&
+        text == other.text &&
+        language == other.language;
   }
 
   @override
@@ -466,19 +369,7 @@ final class CodeSpan extends Leaf {
       return true;
     }
 
-    if (other is! CodeSpan) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (text != other.text) {
-      return false;
-    }
-
-    return true;
+    return other is CodeSpan && type == other.type && text == other.text;
   }
 
   @override
@@ -538,23 +429,10 @@ final class AutoLink extends Leaf {
       return true;
     }
 
-    if (other is! AutoLink) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (url != other.url) {
-      return false;
-    }
-
-    if (text != other.text) {
-      return false;
-    }
-
-    return true;
+    return other is AutoLink &&
+        type == other.type &&
+        url == other.url &&
+        text == other.text;
   }
 
   @override
@@ -576,19 +454,7 @@ final class Suppressed extends Leaf {
       return true;
     }
 
-    if (other is! Suppressed) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (text != other.text) {
-      return false;
-    }
-
-    return true;
+    return other is Suppressed && type == other.type && text == other.text;
   }
 
   @override
@@ -610,19 +476,7 @@ final class Emoji extends Leaf {
       return true;
     }
 
-    if (other is! Emoji) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (text != other.text) {
-      return false;
-    }
-
-    return true;
+    return other is Emoji && type == other.type && text == other.text;
   }
 
   @override
@@ -648,19 +502,7 @@ final class CustomEmoji extends Leaf {
       return true;
     }
 
-    if (other is! CustomEmoji) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (text != other.text) {
-      return false;
-    }
-
-    return true;
+    return other is CustomEmoji && type == other.type && text == other.text;
   }
 
   @override
@@ -703,27 +545,11 @@ final class Mention extends Leaf {
       return true;
     }
 
-    if (other is! Mention) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (id != other.id) {
-      return false;
-    }
-
-    if (text != other.text) {
-      return false;
-    }
-
-    if (internalId != other.internalId) {
-      return false;
-    }
-
-    return true;
+    return other is Mention &&
+        type == other.type &&
+        id == other.id &&
+        text == other.text &&
+        internalId == other.internalId;
   }
 
   @override
@@ -823,23 +649,13 @@ final class TextBlock extends ContentBlock {
       return true;
     }
 
-    if (other is! TextBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (!listEquals(children, other.children)) {
-      return false;
-    }
-
-    return true;
+    return other is TextBlock &&
+        type == other.type &&
+        _listEquality.equals(children, other.children);
   }
 
   @override
-  int get hashCode => Object.hash(type, Object.hashAll(children));
+  int get hashCode => Object.hash(type, _listEquality.hash(children));
 }
 
 /// The version of [FileBlock] that is used when sending or editing messages.
@@ -879,19 +695,9 @@ final class SendFileBlock extends ContentBlock {
       return true;
     }
 
-    if (other is! SendFileBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (fileToken != other.fileToken) {
-      return false;
-    }
-
-    return true;
+    return other is SendFileBlock &&
+        type == other.type &&
+        fileToken == other.fileToken;
   }
 
   @override
@@ -940,23 +746,10 @@ final class LocationBlock extends ContentBlock {
       return true;
     }
 
-    if (other is! LocationBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (latitude != other.latitude) {
-      return false;
-    }
-
-    if (longitude != other.longitude) {
-      return false;
-    }
-
-    return true;
+    return other is LocationBlock &&
+        type == other.type &&
+        latitude == other.latitude &&
+        longitude == other.longitude;
   }
 
   @override
@@ -1055,47 +848,16 @@ final class VideoBlock extends FileBlock {
       return true;
     }
 
-    if (other is! VideoBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (subtype != other.subtype) {
-      return false;
-    }
-
-    if (fileToken != other.fileToken) {
-      return false;
-    }
-
-    if (url != other.url) {
-      return false;
-    }
-
-    if (size != other.size) {
-      return false;
-    }
-
-    if (filename != other.filename) {
-      return false;
-    }
-
-    if (width != other.width) {
-      return false;
-    }
-
-    if (height != other.height) {
-      return false;
-    }
-
-    if (duration != other.duration) {
-      return false;
-    }
-
-    return true;
+    return other is VideoBlock &&
+        type == other.type &&
+        subtype == other.subtype &&
+        fileToken == other.fileToken &&
+        url == other.url &&
+        size == other.size &&
+        filename == other.filename &&
+        width == other.width &&
+        height == other.height &&
+        duration == other.duration;
   }
 
   @override
@@ -1180,43 +942,15 @@ final class ImageBlock extends FileBlock {
       return true;
     }
 
-    if (other is! ImageBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (subtype != other.subtype) {
-      return false;
-    }
-
-    if (fileToken != other.fileToken) {
-      return false;
-    }
-
-    if (url != other.url) {
-      return false;
-    }
-
-    if (size != other.size) {
-      return false;
-    }
-
-    if (filename != other.filename) {
-      return false;
-    }
-
-    if (width != other.width) {
-      return false;
-    }
-
-    if (height != other.height) {
-      return false;
-    }
-
-    return true;
+    return other is ImageBlock &&
+        type == other.type &&
+        subtype == other.subtype &&
+        fileToken == other.fileToken &&
+        url == other.url &&
+        size == other.size &&
+        filename == other.filename &&
+        width == other.width &&
+        height == other.height;
   }
 
   @override
@@ -1290,39 +1024,14 @@ final class AudioBlock extends FileBlock {
       return true;
     }
 
-    if (other is! AudioBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (subtype != other.subtype) {
-      return false;
-    }
-
-    if (fileToken != other.fileToken) {
-      return false;
-    }
-
-    if (url != other.url) {
-      return false;
-    }
-
-    if (size != other.size) {
-      return false;
-    }
-
-    if (filename != other.filename) {
-      return false;
-    }
-
-    if (duration != other.duration) {
-      return false;
-    }
-
-    return true;
+    return other is AudioBlock &&
+        type == other.type &&
+        subtype == other.subtype &&
+        fileToken == other.fileToken &&
+        url == other.url &&
+        size == other.size &&
+        filename == other.filename &&
+        duration == other.duration;
   }
 
   @override
@@ -1398,39 +1107,14 @@ final class VoiceBlock extends FileBlock {
       return true;
     }
 
-    if (other is! VoiceBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (subtype != other.subtype) {
-      return false;
-    }
-
-    if (fileToken != other.fileToken) {
-      return false;
-    }
-
-    if (url != other.url) {
-      return false;
-    }
-
-    if (size != other.size) {
-      return false;
-    }
-
-    if (filename != other.filename) {
-      return false;
-    }
-
-    if (duration != other.duration) {
-      return false;
-    }
-
-    return true;
+    return other is VoiceBlock &&
+        type == other.type &&
+        subtype == other.subtype &&
+        fileToken == other.fileToken &&
+        url == other.url &&
+        size == other.size &&
+        filename == other.filename &&
+        duration == other.duration;
   }
 
   @override
@@ -1498,35 +1182,13 @@ final class GenericFileBlock extends FileBlock {
       return true;
     }
 
-    if (other is! GenericFileBlock) {
-      return false;
-    }
-
-    if (type != other.type) {
-      return false;
-    }
-
-    if (subtype != other.subtype) {
-      return false;
-    }
-
-    if (fileToken != other.fileToken) {
-      return false;
-    }
-
-    if (url != other.url) {
-      return false;
-    }
-
-    if (size != other.size) {
-      return false;
-    }
-
-    if (filename != other.filename) {
-      return false;
-    }
-
-    return true;
+    return other is GenericFileBlock &&
+        type == other.type &&
+        subtype == other.subtype &&
+        fileToken == other.fileToken &&
+        url == other.url &&
+        size == other.size &&
+        filename == other.filename;
   }
 
   @override
